@@ -32,11 +32,7 @@ export const HospitalMatchList: React.FC = () => {
     setTimeout(() => {
       bookHospitalBed(hospital.id);
       setIsBooking(null);
-
-      // Fast scroll to patient info (ABHA ID) section
-      setTimeout(() => {
-        fastScrollTo('patient-info-abha-section', 85);
-      }, 60);
+      setIsModalOpen(true);
     }, 280);
   };
 
@@ -341,10 +337,14 @@ export const HospitalMatchList: React.FC = () => {
 
               {/* Footer Action */}
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200/80">
-                <div className="flex items-center gap-2 text-xs text-slate-600 font-mono">
-                  <PhoneCall className="w-3.5 h-3.5 text-slate-400" />
-                  <span>ER Direct Line: <strong className="text-slate-800">{hospital.phone}</strong></span>
-                </div>
+                <a
+                  href={`tel:${hospital.phone.replace(/[^0-9+]/g, '')}`}
+                  className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-rose-600 font-mono transition cursor-pointer p-1 rounded-lg hover:bg-rose-50"
+                  title="Call ER Hotline"
+                >
+                  <PhoneCall className="w-3.5 h-3.5 text-rose-600" />
+                  <span>ER Hotline: <strong className="text-slate-800 underline">{hospital.phone}</strong></span>
+                </a>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   {isCurrentlyBooked ? (
@@ -392,6 +392,26 @@ export const HospitalMatchList: React.FC = () => {
             </div>
           );
         })}
+
+        {displayedHospitals.length === 0 && (
+          <div className="bg-white/80 border border-slate-200 rounded-3xl p-10 text-center space-y-3 shadow-sm">
+            <Building2 className="w-10 h-10 text-slate-400 mx-auto" />
+            <h3 className="font-bold text-slate-800 text-base">No Matching Hospitals Found</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              No trauma center matches your active filter or search keywords. Click below to show all ready emergency hubs.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setFilterType('all');
+                setSearchQuery('');
+              }}
+              className="px-4 py-2 rounded-xl liquid-btn-red text-white font-bold text-xs shadow-sm cursor-pointer"
+            >
+              Reset Filters & Show All Hospitals
+            </button>
+          </div>
+        )}
       </div>
 
       {isModalOpen && (

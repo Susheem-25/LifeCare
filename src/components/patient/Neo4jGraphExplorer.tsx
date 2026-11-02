@@ -13,7 +13,9 @@ import {
   Sparkles, 
   Cpu, 
   Database,
-  Filter
+  Filter,
+  Copy,
+  Check
 } from 'lucide-react';
 
 export const Neo4jGraphExplorer: React.FC = () => {
@@ -23,6 +25,13 @@ export const Neo4jGraphExplorer: React.FC = () => {
   const [queryExecuted, setQueryExecuted] = useState<boolean>(true);
   const [latencyMs, setLatencyMs] = useState<number>(8.4);
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL');
+  const [copiedCypher, setCopiedCypher] = useState<boolean>(false);
+
+  const copyCypherQuery = () => {
+    navigator.clipboard.writeText(SAMPLE_CYPHER_QUERIES[activeQueryIndex].cypher);
+    setCopiedCypher(true);
+    setTimeout(() => setCopiedCypher(false), 2000);
+  };
 
   const handleRunQuery = () => {
     setIsExecuting(true);
@@ -262,6 +271,16 @@ export const Neo4jGraphExplorer: React.FC = () => {
                   <option key={idx} value={idx}>{q.name}</option>
                 ))}
               </select>
+
+              <button
+                type="button"
+                onClick={copyCypherQuery}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer transition border border-slate-700"
+                title="Copy Cypher Query to clipboard"
+              >
+                {copiedCypher ? <Check className="w-2.5 h-2.5 text-emerald-400" /> : <Copy className="w-2.5 h-2.5" />}
+                <span>{copiedCypher ? 'Copied' : 'Copy'}</span>
+              </button>
 
               <button
                 type="button"

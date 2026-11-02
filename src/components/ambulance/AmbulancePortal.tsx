@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
 import { SAMPLE_ABHA_PROFILES } from '../../data/mockData';
 import type { PatientVitals } from '../../types';
@@ -30,6 +30,7 @@ import {
 export const AmbulancePortal: React.FC = () => {
   const {
     activeBooking,
+    allBookings,
     getBookingByCode,
     updateAmbulanceStatus,
     updatePatientVitals,
@@ -62,6 +63,32 @@ export const AmbulancePortal: React.FC = () => {
   const [digitalConsent, setDigitalConsent] = useState<boolean>(true);
   const [paperworkSaved, setPaperworkSaved] = useState<boolean>(selectedBooking.inTransitPaperwork?.isSubmitted ?? true);
   const [paperworkSuccessMsg, setPaperworkSuccessMsg] = useState<string>('');
+  const [statusFeedbackMsg, setStatusFeedbackMsg] = useState<string>('');
+
+  // Keep Ambulance Portal in sync whenever a new emergency booking is made
+  useEffect(() => {
+    if (activeBooking && activeBooking.bookingCode) {
+      // oxlint-disable-next-line react/set-state-in-effect
+      setSelectedBooking(activeBooking);
+      setCodeInput(activeBooking.bookingCode);
+      setTripStatus(activeBooking.status);
+      const v = activeBooking.inTransitPaperwork?.initialVitals;
+      if (v) {
+        setHeartRate(v.heartRate);
+        setSpO2(v.spO2);
+        setBpSys(v.bloodPressureSys);
+        setBpDia(v.bloodPressureDia);
+        setRespiratoryRate(v.respiratoryRate);
+        setGcsScore(v.gcsScore);
+      }
+      const ab = activeBooking.inTransitPaperwork?.abhaDetails;
+      if (ab) {
+        setAmbAbhaProfile(ab);
+        setAmbAbhaInput(ab.abhaId);
+      }
+      setHasSearched(true);
+    }
+  }, [activeBooking]);
 
   const handleLookup = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -77,20 +104,36 @@ export const AmbulancePortal: React.FC = () => {
         setSpO2(found.inTransitPaperwork.initialVitals.spO2);
         setBpSys(found.inTransitPaperwork.initialVitals.bloodPressureSys);
         setBpDia(found.inTransitPaperwork.initialVitals.bloodPressureDia);
+        setRespiratoryRate(found.inTransitPaperwork.initialVitals.respiratoryRate);
+        setGcsScore(found.inTransitPaperwork.initialVitals.gcsScore);
       }
       if (found.inTransitPaperwork?.abhaDetails) {
         setAmbAbhaProfile(found.inTransitPaperwork.abhaDetails);
+        setAmbAbhaInput(found.inTransitPaperwork.abhaDetails.abhaId);
       }
       setHasSearched(true);
+      setStatusFeedbackMsg(`Loaded ticket ${clean} (${found.hospitalName.split(' ')[0]})`);
+      setTimeout(() => setStatusFeedbackMsg(''), 3000);
     } else {
       setSelectedBooking(activeBooking);
       setHasSearched(true);
+      setStatusFeedbackMsg(`Ticket "${clean}" not found. Showing active booking ${activeBooking.bookingCode}.`);
+      setTimeout(() => setStatusFeedbackMsg(''), 3500);
     }
   };
 
   const handleStatusChange = (status: 'AMBULANCE_EN_ROUTE_PICKUP' | 'PATIENT_PICKED_UP' | 'IN_TRANSIT_TO_HOSPITAL' | 'ARRIVED_ER') => {
     setTripStatus(status);
     updateAmbulanceStatus(selectedBooking.bookingCode, status);
+
+    const labels: Record<string, string> = {
+      AMBULANCE_EN_ROUTE_PICKUP: 'En Route Pickup',
+      PATIENT_PICKED_UP: 'Patient Picked Up & Onboard',
+      IN_TRANSIT_TO_HOSPITAL: 'En Route to ER Bay',
+      ARRIVED_ER: 'Arrived at Hospital Bay'
+    };
+    setStatusFeedbackMsg(`Mission status: ${labels[status]} • Hospital ER notified!`);
+    setTimeout(() => setStatusFeedbackMsg(''), 3500);
   };
 
   // Real-time live vital auto-sync to Hospital ER
@@ -189,6 +232,14 @@ export const AmbulancePortal: React.FC = () => {
         </div>
       </div>
 
+      {/* Toast Notification */}
+      {statusFeedbackMsg && (
+        <div className="fixed top-20 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce border border-emerald-400">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>{statusFeedbackMsg}</span>
+        </div>
+      )}
+
       {/* Ambulance Booking Code Input */}
       <div className="liquid-glass-card rounded-3xl p-6 border border-white/90 shadow-md bg-white/75 backdrop-blur-xl space-y-3">
         <label className="block text-xs font-mono uppercase tracking-wider text-slate-600 font-bold">
@@ -216,19 +267,29 @@ export const AmbulancePortal: React.FC = () => {
           </button>
         </form>
 
-        <div className="flex items-center space-x-2 pt-1 text-xs font-mono">
-          <span className="text-slate-500 text-[11px] font-medium">Quick Load:</span>
-          <button
-            type="button"
-            onClick={() => {
-              setCodeInput(activeBooking.bookingCode);
-              setSelectedBooking(activeBooking);
-              setHasSearched(true);
-            }}
-            className="text-[11px] text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg cursor-pointer transition shadow-2xs font-semibold"
-          >
-            Active Code: <strong className="text-rose-600">{activeBooking.bookingCode}</strong> ({activeBooking.hospitalName.split(' ')[0]})
-          </button>
+        <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs font-mono">
+          <span className="text-slate-500 text-[11px] font-medium mr-1">Quick Load:</span>
+          {allBookings.map((b) => (
+            <button
+              key={b.bookingCode}
+              type="button"
+              onClick={() => {
+                setCodeInput(b.bookingCode);
+                setSelectedBooking(b);
+                setTripStatus(b.status);
+                setHasSearched(true);
+                setStatusFeedbackMsg(`Loaded ticket ${b.bookingCode} (${b.hospitalName.split(' ')[0]})`);
+                setTimeout(() => setStatusFeedbackMsg(''), 3000);
+              }}
+              className={`text-[11px] border px-2.5 py-1 rounded-xl cursor-pointer transition shadow-2xs font-semibold ${
+                selectedBooking.bookingCode === b.bookingCode
+                  ? 'bg-rose-50 border-rose-300 text-rose-700 font-bold'
+                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+              }`}
+            >
+              <span className="text-slate-500">Ticket:</span> <strong className="text-rose-600">{b.bookingCode}</strong> ({b.hospitalName.split(' ')[0]})
+            </button>
+          ))}
         </div>
       </div>
 

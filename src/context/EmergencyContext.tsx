@@ -214,14 +214,24 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentView('patient');
   };
 
-  // Look up patient records by ABHA ID
-  const fetchPatientByAbha = (abhaId: string): ABHAMedicalRecord | undefined => {
-    const clean = abhaId.trim().toLowerCase();
-    const found = SAMPLE_ABHA_PROFILES.find(
-      (p) => p.abhaId.toLowerCase().includes(clean) || clean.includes(p.abhaId.toLowerCase())
-    );
+  // Look up patient records by ABHA ID or Patient Name
+  const fetchPatientByAbha = (abhaIdOrName: string): ABHAMedicalRecord | undefined => {
+    const raw = abhaIdOrName.trim().toLowerCase();
+    const digitsOnly = raw.replace(/[^0-9]/g, '');
+    const found = SAMPLE_ABHA_PROFILES.find((p) => {
+      const pDigits = p.abhaId.replace(/[^0-9]/g, '');
+      const pName = p.fullName.toLowerCase();
+      return (
+        p.abhaId.toLowerCase().includes(raw) ||
+        raw.includes(p.abhaId.toLowerCase()) ||
+        (digitsOnly.length >= 4 && pDigits.includes(digitsOnly)) ||
+        pName.includes(raw) ||
+        raw.includes(pName)
+      );
+    });
     if (found) {
       setSelectedAbhaProfile(found);
+      soundEffects.playHeartbeat();
       return found;
     }
     return undefined;

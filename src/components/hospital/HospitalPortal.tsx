@@ -39,7 +39,8 @@ export const HospitalPortal: React.FC = () => {
     removeEquipment,
     updateHospitalDetails,
     assignTraumaBay,
-    admitPatient
+    admitPatient,
+    bookHospitalBed
   } = useEmergency();
 
   // Authentication State
@@ -804,12 +805,24 @@ export const HospitalPortal: React.FC = () => {
               );
             })
           ) : (
-            <div className="bg-white/80 border border-slate-200 rounded-3xl p-12 text-center max-w-md mx-auto space-y-2 shadow-sm">
-              <Clock className="w-8 h-8 text-slate-400 mx-auto" />
-              <h4 className="text-base font-bold text-slate-800">No Active Incoming Dispatches</h4>
-              <p className="text-xs text-slate-500">
-                When a patient reserves an emergency bed, live patient telemetry and ETA will display here automatically.
-              </p>
+            <div className="bg-white/85 border border-slate-200 rounded-3xl p-10 text-center max-w-lg mx-auto space-y-4 shadow-sm">
+              <Clock className="w-10 h-10 text-slate-400 mx-auto" />
+              <div className="space-y-1">
+                <h4 className="text-base font-bold text-slate-900">No Active Incoming Dispatches for {loggedHospital.name.split(' ')[0]}</h4>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto">
+                  When a patient reserves an emergency bed, live patient telemetry and ETA will display here automatically.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  bookHospitalBed(loggedHospital.id, 'Arjun Rampal', '+91-98111-22334');
+                  showFeedback(`Simulated Code Red Emergency dispatched to ${loggedHospital.name.split(' ')[0]}!`);
+                }}
+                className="liquid-btn-red px-5 py-2.5 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer shadow-md active:scale-95 flex items-center justify-center gap-2 mx-auto"
+              >
+                <span>⚡ Dispatch Simulated Emergency Patient to this Hospital</span>
+              </button>
             </div>
           )}
         </div>

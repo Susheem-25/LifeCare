@@ -58,9 +58,7 @@ export const EmergencySearch: React.FC = () => {
 
   const handleSearch = (textToAnalyze?: string) => {
     const text = (textToAnalyze !== undefined ? textToAnalyze : brief).trim() || currentLang.samplePrompt;
-    if (!brief.trim()) {
-      setBrief(text);
-    }
+    setBrief(text);
 
     setIsAnalyzing(true);
     setTimeout(() => {

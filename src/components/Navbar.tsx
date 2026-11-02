@@ -54,10 +54,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             </button>
           )}
 
-          <div className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full border border-red-200/80 bg-white/80 backdrop-blur-sm text-[10px] font-mono text-red-700 font-bold shadow-xs">
+          <a
+            href="tel:112"
+            className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full border border-red-200/80 bg-white/80 hover:bg-red-50 backdrop-blur-sm text-[10px] font-mono text-red-700 font-bold shadow-xs transition cursor-pointer"
+            title="Emergency National Helpline (112 / 108)"
+          >
             <PhoneCall className="w-2.5 h-2.5 text-red-600" />
             <span>ER: 112 / 108</span>
-          </div>
+          </a>
 
           <button
             onClick={resetEmergencyState}
@@ -171,10 +175,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
               </button>
             </div>
           ) : (
-            <div className="bg-red-500/10 border border-red-200/80 px-2.5 py-1 rounded-xl text-[11px] text-red-800 flex items-center space-x-1.5 shadow-xs backdrop-blur-sm">
+            <button
+              type="button"
+              onClick={() => setCurrentView('ambulance')}
+              className="bg-red-500/10 hover:bg-red-500/20 border border-red-200/80 px-2.5 py-1 rounded-xl text-[11px] text-red-800 flex items-center space-x-1.5 shadow-xs backdrop-blur-sm transition cursor-pointer"
+              title="Click to open Active Ambulance Mission"
+            >
               <span className="w-2 h-2 rounded-full bg-red-600 dot-pulse"></span>
               <span>Active Code: <strong className="text-red-700 font-bold">{activeBooking.bookingCode}</strong></span>
-            </div>
+            </button>
           )}
         </div>
       </div>
