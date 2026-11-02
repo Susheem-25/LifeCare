@@ -56,7 +56,7 @@ export const HospitalPortal: React.FC = () => {
   // Add Doctor Form State
   const [showAddDoctor, setShowAddDoctor] = useState<boolean>(false);
   const [newDocName, setNewDocName] = useState<string>('');
-  const [newDocSpec, setNewDocSpec] = useState<string>('Interventional Cardiology & Cath Lab');
+  const [newDocSpec, setNewDocSpec] = useState<string>('Interventional Cardiology & Electrophysiology');
   const [newDocBay, setNewDocBay] = useState<string>('Cath Lab 1');
   const [newDocStatus, setNewDocStatus] = useState<Doctor['status']>('AVAILABLE_AND_FREE');
 
@@ -89,22 +89,22 @@ export const HospitalPortal: React.FC = () => {
   if (!loggedHospital) {
     return (
       <div className="max-w-md mx-auto my-8 space-y-6 animate-fadeIn">
-        <div className="liquid-glass-card border border-white/90 rounded-3xl p-6 sm:p-8 oled-glow-emerald space-y-6 bg-white/80 backdrop-blur-xl shadow-xl">
+        <div className="liquid-glass-card border border-white/90 rounded-3xl p-6 sm:p-8 oled-glow-emerald space-y-6 bg-white/85 backdrop-blur-2xl shadow-xl">
           <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-white/[0.05] border border-slate-200 flex items-center justify-center mx-auto text-emerald-400">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600 shadow-xs">
               <Building2 className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
               Hospital Staff Portal
             </h2>
-            <p className="text-xs text-slate-500 max-w-xs mx-auto">
-              Secure authentication for ER doctors and hospital administrators to manage incoming traumas, bed inventory, and staff rosters.
+            <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed">
+              Secure authentication for ER doctors and hospital administrators to manage incoming traumas, live bed inventory, and doctor shift rosters.
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4 text-xs font-mono">
             <div>
-              <label className="block uppercase text-slate-500 font-bold mb-1.5 text-[10px]">
+              <label className="block uppercase text-slate-600 font-bold mb-1.5 text-[10px]">
                 Unique Hospital ID Code
               </label>
               <div className="relative">
@@ -114,14 +114,14 @@ export const HospitalPortal: React.FC = () => {
                   value={hospCodeInput}
                   onChange={(e) => setHospCodeInput(e.target.value.toUpperCase())}
                   placeholder="e.g. AIIMS-DELHI"
-                  className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 focus:border-rose-400 focus:outline-none uppercase shadow-2xs font-bold"
+                  className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-rose-500 focus:outline-none uppercase shadow-2xs font-bold"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block uppercase text-slate-500 font-bold mb-1.5 text-[10px]">
+              <label className="block uppercase text-slate-600 font-bold mb-1.5 text-[10px]">
                 Hospital Staff Password
               </label>
               <div className="relative">
@@ -131,30 +131,30 @@ export const HospitalPortal: React.FC = () => {
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 focus:border-rose-400 focus:outline-none shadow-2xs"
+                  className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-rose-500 focus:outline-none shadow-2xs"
                   required
                 />
               </div>
             </div>
 
             {loginError && (
-              <div className="text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl">
+              <div className="text-[11px] text-rose-700 bg-rose-50 border border-rose-200 p-2.5 rounded-xl font-bold">
                 {loginError}
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+              className="liquid-btn-red w-full py-3 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center justify-center gap-2 shadow-md active:scale-95"
             >
               <span>Login as Hospital Staff</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 text-white" />
             </button>
           </form>
 
           {/* Quick Demo Logins */}
-          <div className="pt-2 border-t border-slate-200 space-y-2">
-            <div className="text-[10px] font-mono uppercase text-slate-400 text-center font-bold">
+          <div className="pt-3 border-t border-slate-200 space-y-2">
+            <div className="text-[10px] font-mono uppercase text-slate-500 text-center font-bold">
               1-Click Demo Hospital Credentials:
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
@@ -167,10 +167,10 @@ export const HospitalPortal: React.FC = () => {
                     setPasswordInput(h.password);
                     loginHospital(h.hospitalCode, h.password);
                   }}
-                  className="p-2 rounded-xl bg-black border border-slate-200 hover:border-white/[0.18] text-left transition cursor-pointer"
+                  className="p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-left transition cursor-pointer shadow-2xs"
                 >
-                  <div className="font-bold text-white text-[11px] truncate">{h.name.split(' ')[0]}</div>
-                  <div className="text-[9px] text-slate-500">{h.hospitalCode}</div>
+                  <div className="font-bold text-slate-900 text-[11px] truncate">{h.name.split(' ')[0]}</div>
+                  <div className="text-[9px] text-slate-500 font-bold">{h.hospitalCode}</div>
                 </button>
               ))}
             </div>
@@ -239,40 +239,40 @@ export const HospitalPortal: React.FC = () => {
     <div className="max-w-6xl mx-auto space-y-6 animate-fadeIn pb-12">
       {/* Toast Feedback */}
       {feedbackMsg && (
-        <div className="fixed top-20 right-6 z-50 bg-emerald-500 text-black font-bold font-mono text-xs px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce">
+        <div className="fixed top-20 right-6 z-50 bg-emerald-600 text-white font-bold font-mono text-xs px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce border border-emerald-400">
           <CheckCircle2 className="w-4 h-4" />
           <span>{feedbackMsg}</span>
         </div>
       )}
 
       {/* Authenticated Hospital Header */}
-      <div className="liquid-glass-card rounded-3xl p-6 border border-white/90 shadow-xl bg-white/80 backdrop-blur-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 oled-glow-emerald">
+      <div className="liquid-glass-card rounded-3xl p-6 border border-white/90 shadow-xl bg-white/85 backdrop-blur-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 oled-glow-emerald">
         <div className="flex items-start sm:items-center space-x-3.5">
-          <div className="p-3 rounded-2xl bg-white/[0.05] border border-slate-200 text-emerald-400 shrink-0 mt-1 sm:mt-0">
+          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 shrink-0 mt-1 sm:mt-0 shadow-xs">
             <Building2 className="w-6 h-6" />
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
                 Hospital ER Command Console
               </span>
-              <span className="text-[9px] font-mono bg-white/[0.04] text-slate-700 border border-slate-200 px-2 py-0.2 rounded font-bold">
+              <span className="text-[9px] font-mono bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded font-bold">
                 ID: {loggedHospital.hospitalCode}
               </span>
-              <span className="text-[9px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded flex items-center gap-1 font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dot-pulse"></span>
                 <span>ONLINE & LIVE</span>
               </span>
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               {loggedHospital.name}
             </h1>
 
-            <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 font-mono">
+            <div className="text-xs text-slate-600 flex flex-wrap items-center gap-2 font-mono">
               <span>{loggedHospital.address}</span>
               <span>•</span>
-              <span className="text-slate-700">Hotline: {loggedHospital.phone}</span>
+              <span className="text-slate-800 font-semibold">Hotline: {loggedHospital.phone}</span>
               <button
                 type="button"
                 onClick={() => {
@@ -280,7 +280,7 @@ export const HospitalPortal: React.FC = () => {
                   setEditAddress(loggedHospital.address);
                   setIsEditingInfo(!isEditingInfo);
                 }}
-                className="text-[10px] text-slate-500 hover:text-white underline cursor-pointer ml-1"
+                className="text-[10px] text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer ml-1"
               >
                 {isEditingInfo ? 'Cancel Edit' : 'Edit Info'}
               </button>
@@ -291,18 +291,18 @@ export const HospitalPortal: React.FC = () => {
         {/* Live Quick Counters & Logout */}
         <div className="flex items-center space-x-3 self-end md:self-center">
           <div className="bg-white border border-slate-200 px-3.5 py-2 rounded-2xl text-center text-xs font-mono shadow-2xs">
-            <div className="text-[9px] text-slate-400 uppercase font-bold">Free ICU Beds</div>
-            <div className="text-base font-bold text-emerald-400">{loggedHospital.beds.icuFree} / {loggedHospital.beds.icuTotal}</div>
+            <div className="text-[9px] text-slate-500 uppercase font-bold">Free ICU Beds</div>
+            <div className="text-base font-bold text-emerald-700">{loggedHospital.beds.icuFree} / {loggedHospital.beds.icuTotal}</div>
           </div>
 
           <div className="bg-white border border-slate-200 px-3.5 py-2 rounded-2xl text-center text-xs font-mono shadow-2xs">
-            <div className="text-[9px] text-slate-400 uppercase font-bold">Free ER Bays</div>
-            <div className="text-base font-bold text-blue-400">{loggedHospital.beds.emergencyFree} / {loggedHospital.beds.emergencyTotal}</div>
+            <div className="text-[9px] text-slate-500 uppercase font-bold">Free ER Bays</div>
+            <div className="text-base font-bold text-blue-700">{loggedHospital.beds.emergencyFree} / {loggedHospital.beds.emergencyTotal}</div>
           </div>
 
           <button
             onClick={logoutHospital}
-            className="flex items-center space-x-1.5 px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-rose-500/20 text-slate-500 hover:text-rose-300 border border-slate-200 hover:border-rose-500/30 text-xs font-mono transition cursor-pointer"
+            className="flex items-center space-x-1.5 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 text-xs font-mono transition cursor-pointer shadow-2xs font-bold"
             title="Logout of Hospital Console"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -313,41 +313,41 @@ export const HospitalPortal: React.FC = () => {
 
       {/* Inline Hospital Info Editor */}
       {isEditingInfo && (
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-3 animate-fadeIn text-xs font-mono shadow-sm">
-          <div className="font-bold text-white uppercase text-[11px] flex items-center gap-1.5">
-            <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="bg-white border border-slate-300 p-5 rounded-3xl space-y-3 animate-fadeIn text-xs font-mono shadow-md">
+          <div className="font-bold text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
+            <Edit3 className="w-3.5 h-3.5 text-emerald-600" />
             <span>Edit Hospital Contact & ER Dispatch Details</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-slate-500 uppercase">Emergency Hotline Phone</label>
+              <label className="text-[10px] text-slate-600 uppercase font-bold">Emergency Hotline Phone</label>
               <input
                 type="text"
                 value={editPhone}
                 onChange={(e) => setEditPhone(e.target.value)}
-                className="w-full bg-slate-50 text-slate-900 p-2 rounded-xl border border-slate-200 mt-1 focus:outline-none"
+                className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-500 uppercase">Address & Trauma Center Wing</label>
+              <label className="text-[10px] text-slate-600 uppercase font-bold">Address & Trauma Center Wing</label>
               <input
                 type="text"
                 value={editAddress}
                 onChange={(e) => setEditAddress(e.target.value)}
-                className="w-full bg-slate-50 text-slate-900 p-2 rounded-xl border border-slate-200 mt-1 focus:outline-none"
+                className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
               />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <button
               onClick={() => setIsEditingInfo(false)}
-              className="px-3 py-1.5 rounded-lg bg-neutral-900 text-slate-500 hover:text-white"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold border border-slate-200 cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleSaveHospitalInfo}
-              className="px-4 py-1.5 rounded-lg bg-emerald-500 text-black font-bold hover:bg-emerald-400"
+              className="px-4 py-1.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 cursor-pointer shadow-xs"
             >
               Save Changes
             </button>
@@ -356,24 +356,31 @@ export const HospitalPortal: React.FC = () => {
       )}
 
       {/* Internal Navigation Tabs (Liquid Glass Dock) */}
-      <div className="flex items-center space-x-1.5 bg-slate-100/70 backdrop-blur-xl p-1.5 rounded-2xl border border-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] text-xs font-mono overflow-x-auto">
+      <div className="flex items-center space-x-1.5 bg-slate-100/80 backdrop-blur-xl p-1.5 rounded-2xl border border-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] text-xs font-mono overflow-x-auto">
         <button
           onClick={() => setActiveTab('incoming')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
             activeTab === 'incoming'
-              ? 'liquid-btn-red text-white font-bold shadow-sm'
+              ? 'liquid-btn-red text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
           }`}
         >
           <Clock className={`w-3.5 h-3.5 ${activeTab === 'incoming' ? 'text-white' : 'text-red-600'}`} />
-          <span>Incoming Patients ({hospitalBookings.length})</span>
+          <span>Active Incoming Dispatches</span>
+          {hospitalBookings.length > 0 && (
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+              activeTab === 'incoming' ? 'bg-white/30 text-white' : 'bg-red-100 text-red-700'
+            }`}>
+              {hospitalBookings.length}
+            </span>
+          )}
         </button>
 
         <button
           onClick={() => setActiveTab('resources')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
             activeTab === 'resources'
-              ? 'liquid-btn-red text-white font-bold shadow-sm'
+              ? 'liquid-btn-red text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
           }`}
         >
@@ -383,33 +390,33 @@ export const HospitalPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('doctors')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
             activeTab === 'doctors'
-              ? 'liquid-btn-red text-white font-bold shadow-sm'
+              ? 'liquid-btn-red text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
           }`}
         >
           <Stethoscope className={`w-3.5 h-3.5 ${activeTab === 'doctors' ? 'text-white' : 'text-blue-600'}`} />
-          <span>Doctor Specialists Roster ({loggedHospital.doctors.length})</span>
+          <span>Specialists & Duty Roster</span>
         </button>
 
         <button
           onClick={() => setActiveTab('equipment')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
             activeTab === 'equipment'
-              ? 'liquid-btn-red text-white font-bold shadow-sm'
+              ? 'liquid-btn-red text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
           }`}
         >
           <Activity className={`w-3.5 h-3.5 ${activeTab === 'equipment' ? 'text-white' : 'text-amber-600'}`} />
-          <span>Machinery & OT Suites ({loggedHospital.equipments.length})</span>
+          <span>Machinery & OT Suites</span>
         </button>
 
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
             activeTab === 'history'
-              ? 'liquid-btn-red text-white font-bold shadow-sm'
+              ? 'liquid-btn-red text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
           }`}
         >
@@ -438,33 +445,33 @@ export const HospitalPortal: React.FC = () => {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 pb-4">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold ${
+                        <span className={`text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full font-extrabold ${
                           isArrived 
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-rose-500/15 text-rose-400 border border-rose-500/30 animate-pulse'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-rose-100 text-rose-800 border border-rose-300 animate-pulse'
                         }`}>
                           {isArrived ? 'PATIENT ADMITTED IN BAY' : 'CODE RED INCOMING AMBULANCE'}
                         </span>
-                        <span className="text-xs font-mono text-slate-700">
-                          Patient ID: <strong className="text-white font-mono">{booking.patientUniqueId}</strong>
+                        <span className="text-xs font-mono text-slate-600">
+                          Patient ID: <strong className="text-slate-900 font-mono font-bold">{booking.patientUniqueId}</strong>
                         </span>
-                        <span className="text-xs font-mono text-slate-700">
-                          Driver Code: <strong className="text-emerald-400 font-mono">{booking.bookingCode}</strong>
+                        <span className="text-xs font-mono text-slate-600">
+                          Driver Code: <strong className="text-rose-600 font-mono font-extrabold">{booking.bookingCode}</strong>
                         </span>
                         {booking.inTransitPaperwork?.isSubmitted && (
-                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded flex items-center gap-1">
+                          <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1 font-bold">
                             <Check className="w-2.5 h-2.5" />
                             <span>ABHA PRE-ADMITTED</span>
                           </span>
                         )}
                       </div>
 
-                      <h3 className="text-xl font-bold text-white tracking-tight mt-1">
+                      <h3 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
                         {booking.patientName} ({abha?.age || '54'}y/{abha?.gender || 'M'}) — {booking.aiAnalysis.detectedCondition}
                       </h3>
 
-                      <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 font-mono">
-                        <span>Ambulance: <strong className="text-white">{booking.ambulanceDetails.vehicleNumber}</strong></span>
+                      <div className="text-xs text-slate-600 flex flex-wrap items-center gap-2 font-mono">
+                        <span>Ambulance: <strong className="text-slate-900">{booking.ambulanceDetails.vehicleNumber}</strong></span>
                         <span>•</span>
                         <span>Driver: {booking.ambulanceDetails.driverName} ({booking.ambulanceDetails.driverPhone})</span>
                         <span>•</span>
@@ -473,22 +480,22 @@ export const HospitalPortal: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
-                      <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center min-w-[110px] shadow-2xs">
-                        <div className="text-[9px] font-mono uppercase text-slate-400">TRAFFIC ETA</div>
-                        <div className="text-2xl font-mono font-black text-rose-400 mt-0.5">
+                      <div className="bg-rose-50 border border-rose-200 p-3 rounded-2xl text-center min-w-[110px] shadow-2xs">
+                        <div className="text-[9px] font-mono uppercase text-slate-500 font-bold">TRAFFIC ETA</div>
+                        <div className="text-2xl font-mono font-black text-rose-700 mt-0.5">
                           {isArrived ? 'ARRIVED' : `${booking.ambulanceDetails.currentEtaMins} Mins`}
                         </div>
-                        <div className="text-[10px] font-mono text-slate-400">
+                        <div className="text-[10px] font-mono text-slate-500">
                           {isArrived ? 'In Trauma Bay' : `${booking.ambulanceDetails.distanceRemainingKm} km away`}
                         </div>
                       </div>
 
                       <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-center min-w-[130px] shadow-2xs">
-                        <div className="text-[9px] font-mono uppercase text-emerald-400 font-bold">RESERVED BAY</div>
-                        <div className="text-xs font-mono font-bold text-white mt-1">
+                        <div className="text-[9px] font-mono uppercase text-emerald-800 font-bold">RESERVED BAY</div>
+                        <div className="text-xs font-mono font-extrabold text-slate-900 mt-1">
                           {booking.reservedBay}
                         </div>
-                        <div className="text-[9px] font-mono text-emerald-400">STATUS: READY</div>
+                        <div className="text-[9px] font-mono text-emerald-700 font-bold">STATUS: READY</div>
                       </div>
                     </div>
                   </div>
@@ -496,23 +503,23 @@ export const HospitalPortal: React.FC = () => {
                   {/* Vitals Streamed from Ambulance + ABHA Records */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
                     {/* Live Streamed In-Ambulance Vitals — FULLY EDITABLE TELEMETRY */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-                      <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase font-bold border-b border-slate-200 pb-2">
-                        <span className="flex items-center gap-1.5 text-rose-500">
+                    <div className="bg-white/90 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-2xs">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase font-bold border-b border-slate-100 pb-2">
+                        <span className="flex items-center gap-1.5 text-rose-600">
                           <Activity className="w-3.5 h-3.5 animate-pulse" />
-                          Live Streamed Vitals (Directly Editable)
+                          Live Streamed Vitals (2-Way Sync)
                         </span>
-                        <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-bold">
-                          EDITABLE • 2-WAY SYNC
+                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">
+                          EDITABLE • REAL-TIME
                         </span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2.5 text-center">
                         {/* 1. SpO2 */}
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col justify-between">
                           <div className="flex items-center justify-between text-[9px] text-slate-500 uppercase font-bold">
                             <span>SpO2 %</span>
-                            <span className="text-blue-400">Oxygen</span>
+                            <span className="text-blue-600">Oxygen</span>
                           </div>
 
                           <div className="flex items-center justify-center gap-1 my-1">
@@ -523,7 +530,7 @@ export const HospitalPortal: React.FC = () => {
                                 updatePatientVitals(booking.bookingCode, { spO2: newSpO2 });
                                 showFeedback(`SpO2 updated to ${newSpO2}%`);
                               }}
-                              className="w-6 h-6 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-xs font-bold cursor-pointer"
+                              className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer transition"
                               title="Decrease SpO2"
                             >
                               -
@@ -538,7 +545,7 @@ export const HospitalPortal: React.FC = () => {
                                 const val = Math.min(100, Math.max(60, Number(e.target.value)));
                                 updatePatientVitals(booking.bookingCode, { spO2: val });
                               }}
-                              className="w-12 text-center text-lg font-bold text-blue-400 bg-transparent border-b border-blue-500/40 focus:border-blue-400 focus:outline-none"
+                              className="w-12 text-center text-lg font-bold text-blue-700 bg-transparent border-b border-blue-400 focus:border-blue-600 focus:outline-none"
                             />
 
                             <button
@@ -548,7 +555,7 @@ export const HospitalPortal: React.FC = () => {
                                 updatePatientVitals(booking.bookingCode, { spO2: newSpO2 });
                                 showFeedback(`SpO2 updated to ${newSpO2}%`);
                               }}
-                              className="w-6 h-6 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-xs font-bold cursor-pointer"
+                              className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer transition"
                               title="Increase SpO2"
                             >
                               +
@@ -556,17 +563,17 @@ export const HospitalPortal: React.FC = () => {
                           </div>
 
                           <div className={`text-[9px] text-center font-bold ${
-                            (vitals?.spO2 || 92) < 90 ? 'text-rose-400' : 'text-emerald-400'
+                            (vitals?.spO2 || 92) < 90 ? 'text-rose-600' : 'text-emerald-700'
                           }`}>
                             {(vitals?.spO2 || 92) < 90 ? '⚠️ Hypoxic' : '✓ Stable'}
                           </div>
                         </div>
 
                         {/* 2. Heart Rate */}
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col justify-between">
                           <div className="flex items-center justify-between text-[9px] text-slate-500 uppercase font-bold">
                             <span>Heart Rate</span>
-                            <span className="text-rose-400">BPM</span>
+                            <span className="text-rose-600">BPM</span>
                           </div>
 
                           <div className="flex items-center justify-center gap-1 my-1">
@@ -577,7 +584,7 @@ export const HospitalPortal: React.FC = () => {
                                 updatePatientVitals(booking.bookingCode, { heartRate: newHR });
                                 showFeedback(`Heart rate updated to ${newHR} BPM`);
                               }}
-                              className="w-6 h-6 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-xs font-bold cursor-pointer"
+                              className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer transition"
                               title="Decrease HR"
                             >
                               -
@@ -592,7 +599,7 @@ export const HospitalPortal: React.FC = () => {
                                 const val = Math.min(220, Math.max(40, Number(e.target.value)));
                                 updatePatientVitals(booking.bookingCode, { heartRate: val });
                               }}
-                              className="w-14 text-center text-lg font-bold text-rose-400 bg-transparent border-b border-rose-500/40 focus:border-rose-400 focus:outline-none"
+                              className="w-14 text-center text-lg font-bold text-rose-600 bg-transparent border-b border-rose-400 focus:border-rose-600 focus:outline-none"
                             />
 
                             <button
@@ -602,7 +609,7 @@ export const HospitalPortal: React.FC = () => {
                                 updatePatientVitals(booking.bookingCode, { heartRate: newHR });
                                 showFeedback(`Heart rate updated to ${newHR} BPM`);
                               }}
-                              className="w-6 h-6 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-xs font-bold cursor-pointer"
+                              className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer transition"
                               title="Increase HR"
                             >
                               +
@@ -610,14 +617,14 @@ export const HospitalPortal: React.FC = () => {
                           </div>
 
                           <div className={`text-[9px] text-center font-bold ${
-                            (vitals?.heartRate || 112) > 100 ? 'text-amber-400' : 'text-emerald-400'
+                            (vitals?.heartRate || 112) > 100 ? 'text-amber-600' : 'text-emerald-700'
                           }`}>
                             {(vitals?.heartRate || 112) > 100 ? '⚡ Tachycardia' : '✓ Normal Sinus'}
                           </div>
                         </div>
 
                         {/* 3. Blood Pressure */}
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col justify-between">
                           <div className="flex items-center justify-between text-[9px] text-slate-500 uppercase font-bold">
                             <span>BP (Sys/Dia)</span>
                             <span className="text-slate-500">mmHg</span>
@@ -633,7 +640,7 @@ export const HospitalPortal: React.FC = () => {
                                 const val = Number(e.target.value);
                                 updatePatientVitals(booking.bookingCode, { bloodPressureSys: val });
                               }}
-                              className="w-11 text-center text-base font-bold text-white bg-transparent border-b border-white/30 focus:border-white focus:outline-none"
+                              className="w-11 text-center text-base font-bold text-slate-900 bg-transparent border-b border-slate-300 focus:border-slate-600 focus:outline-none"
                               title="Systolic"
                             />
                             <span className="text-slate-400 font-bold">/</span>
@@ -646,39 +653,39 @@ export const HospitalPortal: React.FC = () => {
                                 const val = Number(e.target.value);
                                 updatePatientVitals(booking.bookingCode, { bloodPressureDia: val });
                               }}
-                              className="w-11 text-center text-base font-bold text-white bg-transparent border-b border-white/30 focus:border-white focus:outline-none"
+                              className="w-11 text-center text-base font-bold text-slate-900 bg-transparent border-b border-slate-300 focus:border-slate-600 focus:outline-none"
                               title="Diastolic"
                             />
                           </div>
 
-                          <div className="text-[9px] text-center text-slate-500">
+                          <div className="text-[9px] text-center text-slate-500 font-semibold">
                             {(vitals?.bloodPressureSys || 154) > 140 ? '⚠️ Stage 2 HTN' : '✓ Normotensive'}
                           </div>
                         </div>
                       </div>
 
                       {/* Respiratory Rate & GCS Steppers */}
-                      <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-700 pt-2 border-t border-slate-200 gap-2">
+                      <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-700 pt-2 border-t border-slate-100 gap-2">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-slate-500 text-[10px]">Resp:</span>
+                          <span className="text-slate-500 text-[10px] font-bold">Resp:</span>
                           <button
                             type="button"
                             onClick={() => {
                               const newResp = Math.max(8, (vitals?.respiratoryRate || 24) - 1);
                               updatePatientVitals(booking.bookingCode, { respiratoryRate: newResp });
                             }}
-                            className="w-5 h-5 rounded bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-white/10 text-xs cursor-pointer"
+                            className="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer"
                           >
                             -
                           </button>
-                          <strong className="text-white font-mono">{vitals?.respiratoryRate || 24}</strong>
+                          <strong className="text-slate-900 font-mono">{vitals?.respiratoryRate || 24}</strong>
                           <button
                             type="button"
                             onClick={() => {
                               const newResp = Math.min(45, (vitals?.respiratoryRate || 24) + 1);
                               updatePatientVitals(booking.bookingCode, { respiratoryRate: newResp });
                             }}
-                            className="w-5 h-5 rounded bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-white/10 text-xs cursor-pointer"
+                            className="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer"
                           >
                             +
                           </button>
@@ -686,25 +693,25 @@ export const HospitalPortal: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          <span className="text-slate-500 text-[10px]">GCS:</span>
+                          <span className="text-slate-500 text-[10px] font-bold">GCS:</span>
                           <button
                             type="button"
                             onClick={() => {
                               const newGcs = Math.max(3, (vitals?.gcsScore || 15) - 1);
                               updatePatientVitals(booking.bookingCode, { gcsScore: newGcs });
                             }}
-                            className="w-5 h-5 rounded bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-white/10 text-xs cursor-pointer"
+                            className="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer"
                           >
                             -
                           </button>
-                          <strong className="text-white font-mono">{vitals?.gcsScore || 15}/15</strong>
+                          <strong className="text-slate-900 font-mono">{vitals?.gcsScore || 15}/15</strong>
                           <button
                             type="button"
                             onClick={() => {
                               const newGcs = Math.min(15, (vitals?.gcsScore || 15) + 1);
                               updatePatientVitals(booking.bookingCode, { gcsScore: newGcs });
                             }}
-                            className="w-5 h-5 rounded bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-white/10 text-xs cursor-pointer"
+                            className="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer"
                           >
                             +
                           </button>
@@ -717,43 +724,43 @@ export const HospitalPortal: React.FC = () => {
                     </div>
 
                     {/* Pre-Arrival ABHA Health Passport */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-                      <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase font-bold border-b border-slate-200 pb-2">
-                        <span className="flex items-center gap-1.5 text-blue-400">
+                    <div className="bg-white/90 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-2xs">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase font-bold border-b border-slate-100 pb-2">
+                        <span className="flex items-center gap-1.5 text-blue-600">
                           <ShieldCheck className="w-3.5 h-3.5" />
                           Pre-Arrival ABHA Dossier
                         </span>
-                        <span className="text-slate-500">ABDM VERIFIED</span>
+                        <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-bold">ABDM VERIFIED</span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
-                          <div className="text-[9px] text-slate-400 uppercase">Verified Blood Group</div>
-                          <div className="text-base font-bold text-white mt-0.5 flex items-center gap-1">
-                            <Droplet className="w-3.5 h-3.5 text-rose-500" />
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                          <div className="text-[9px] text-slate-500 uppercase font-bold">Verified Blood Group</div>
+                          <div className="text-base font-bold text-slate-900 mt-0.5 flex items-center gap-1">
+                            <Droplet className="w-3.5 h-3.5 text-rose-600" />
                             <span>{abha?.bloodGroup || 'B+ (Positive)'}</span>
                           </div>
                         </div>
 
-                        <div className="bg-neutral-950 p-2.5 rounded-xl border border-rose-500/30">
-                          <div className="text-[9px] text-rose-400 uppercase font-bold">Critical Drug Allergy</div>
-                          <div className="text-xs font-bold text-rose-300 mt-0.5 truncate">
+                        <div className="bg-rose-50 p-2.5 rounded-xl border border-rose-200">
+                          <div className="text-[9px] text-rose-700 uppercase font-bold">Critical Drug Allergy</div>
+                          <div className="text-xs font-bold text-rose-800 mt-0.5 truncate">
                             ⚠️ {abha?.knownAllergies[0] || 'Penicillin (Anaphylaxis)'}
                           </div>
                         </div>
                       </div>
 
-                      <div className="bg-neutral-950 p-2.5 rounded-xl border border-emerald-500/20 flex items-center justify-between text-[11px]">
-                        <span className="text-slate-700">Scheme: {abha?.insuranceProvider || 'PM-JAY Scheme'}</span>
-                        <span className="font-bold text-emerald-400">₹5,00,000 Cashless Pre-Approved</span>
+                      <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-700 font-semibold">Scheme: {abha?.insuranceProvider || 'PM-JAY Scheme'}</span>
+                        <span className="font-extrabold text-emerald-800">₹5,00,000 Cashless Approved</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Interactive Hospital Action Controls */}
-                  <div className="bg-black/60 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs font-mono">
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs font-mono">
                     <div className="flex items-center gap-2">
-                      <label className="text-[10px] uppercase text-slate-500 font-bold shrink-0">
+                      <label className="text-[10px] uppercase text-slate-600 font-bold shrink-0">
                         Assign / Change Bay:
                       </label>
                       <select
@@ -762,7 +769,7 @@ export const HospitalPortal: React.FC = () => {
                           assignTraumaBay(booking.bookingCode, e.target.value);
                           showFeedback(`Bay updated to ${e.target.value}!`);
                         }}
-                        className="bg-neutral-950 text-white text-xs px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none"
+                        className="bg-white text-slate-900 text-xs px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none shadow-2xs font-semibold"
                       >
                         <option value="Trauma Resuscitation Bay #01">Trauma Resuscitation Bay #01</option>
                         <option value="Trauma Bay #03 (Cath Lab 2)">Trauma Bay #03 (Cath Lab 2)</option>
@@ -780,14 +787,14 @@ export const HospitalPortal: React.FC = () => {
                             admitPatient(booking.bookingCode);
                             showFeedback(`Patient ${booking.patientName} marked as ARRIVED & ADMITTED to ${booking.reservedBay}!`);
                           }}
-                          className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5"
+                          className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shadow-xs"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                           <span>Mark Patient Arrived & Admitted to Bay</span>
                         </button>
                       ) : (
-                        <span className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span className="px-4 py-2 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 font-bold flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                           <span>Patient Admitted in Bay</span>
                         </span>
                       )}
@@ -797,10 +804,10 @@ export const HospitalPortal: React.FC = () => {
               );
             })
           ) : (
-            <div className="bg-neutral-950 border border-slate-200 rounded-3xl p-12 text-center max-w-md mx-auto space-y-2">
-              <Clock className="w-8 h-8 text-neutral-600 mx-auto" />
-              <h4 className="text-base font-bold text-white">No Active Incoming Dispatches</h4>
-              <p className="text-xs text-slate-400">
+            <div className="bg-white/80 border border-slate-200 rounded-3xl p-12 text-center max-w-md mx-auto space-y-2 shadow-sm">
+              <Clock className="w-8 h-8 text-slate-400 mx-auto" />
+              <h4 className="text-base font-bold text-slate-800">No Active Incoming Dispatches</h4>
+              <p className="text-xs text-slate-500">
                 When a patient reserves an emergency bed, live patient telemetry and ETA will display here automatically.
               </p>
             </div>
@@ -813,32 +820,32 @@ export const HospitalPortal: React.FC = () => {
       ======================================================== */}
       {activeTab === 'resources' && (
         <div className="space-y-6 animate-fadeIn">
-          <div className="bg-neutral-950 border border-slate-200 p-5 rounded-3xl text-xs space-y-1">
-            <h3 className="text-base font-bold text-white">Live Hospital Bed Capacity Controller</h3>
-            <p className="text-slate-500">
+          <div className="bg-white/85 border border-slate-200 p-5 rounded-3xl text-xs space-y-1 shadow-sm">
+            <h3 className="text-base font-extrabold text-slate-900">Live Hospital Bed Capacity Controller</h3>
+            <p className="text-slate-600">
               Type numbers directly into the inputs OR use the + / - buttons. Changes immediately update the public emergency patient search and lock algorithm!
             </p>
           </div>
 
           {/* Future Hardware Track: Piezoelectric Automatic Bed Availability Updating Sensor Grid */}
-          <div className="bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-transparent border border-purple-500/25 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+          <div className="bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-transparent border border-purple-300 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono bg-white/70">
             <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-600 flex items-center justify-center font-bold">
-                <Gauge className="w-4 h-4 text-purple-600" />
+              <div className="w-8 h-8 rounded-xl bg-purple-100 border border-purple-200 text-purple-700 flex items-center justify-center font-bold shrink-0">
+                <Gauge className="w-4 h-4 text-purple-700" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
-                    Future Hardware Track
+                  <span className="text-[10px] uppercase font-bold text-purple-800 bg-purple-100 px-2 py-0.5 rounded border border-purple-200">
+                    Future Hardware Track (Roadmap)
                   </span>
                   <strong className="text-slate-900">Piezoelectric Auto-Bed Updating Sensor Grid</strong>
                 </div>
-                <p className="text-slate-600 text-[11px]">
+                <p className="text-slate-600 text-[11px] mt-0.5">
                   Under-mattress pressure transducers automatically detect patient weight (&gt;15 kg = Occupied, &lt;5 kg = Vacant) with instant &lt;250ms zero-touch auto-updates.
                 </p>
               </div>
             </div>
-            <span className="text-emerald-700 bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-xl text-[10px] font-bold shrink-0 flex items-center gap-1">
+            <span className="text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-xl text-[10px] font-bold shrink-0 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dot-pulse"></span>
               <span>Sensors Connected: 12 Bays</span>
             </span>
@@ -846,18 +853,18 @@ export const HospitalPortal: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 font-mono text-xs">
             {/* 1. ICU Beds Controller */}
-            <div className="bg-black border border-slate-200 rounded-3xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                <span className="text-xs uppercase text-emerald-400 font-bold flex items-center gap-1.5">
-                  <Bed className="w-4 h-4 text-emerald-400" />
+            <div className="bg-white/90 border border-slate-200 rounded-3xl p-5 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs uppercase text-emerald-700 font-bold flex items-center gap-1.5">
+                  <Bed className="w-4 h-4 text-emerald-600" />
                   ICU Beds
                 </span>
-                <span className="text-[10px] text-slate-400 font-bold">CRITICAL CARE</span>
+                <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded">CRITICAL CARE</span>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-[10px] uppercase text-slate-500 font-bold">Free Available ICU Beds</label>
+                  <label className="text-[10px] uppercase text-slate-600 font-bold">Free Available ICU Beds</label>
                   <div className="flex items-center gap-2 mt-1">
                     <button
                       type="button"
@@ -866,7 +873,7 @@ export const HospitalPortal: React.FC = () => {
                         updateHospitalBeds(loggedHospital.id, { icuFree: newVal });
                         showFeedback(`ICU free beds updated to ${newVal}`);
                       }}
-                      className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-lg font-bold cursor-pointer"
+                      className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center border border-slate-300 text-lg font-bold cursor-pointer transition shadow-2xs"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
@@ -880,7 +887,7 @@ export const HospitalPortal: React.FC = () => {
                         const val = Math.max(0, Number(e.target.value));
                         updateHospitalBeds(loggedHospital.id, { icuFree: val });
                       }}
-                      className="flex-1 bg-neutral-950 text-white font-bold text-2xl text-center py-1.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-none"
+                      className="flex-1 bg-slate-50 text-slate-900 font-bold text-2xl text-center py-1.5 rounded-xl border border-slate-300 focus:border-emerald-500 focus:outline-none"
                     />
 
                     <button
@@ -890,7 +897,7 @@ export const HospitalPortal: React.FC = () => {
                         updateHospitalBeds(loggedHospital.id, { icuFree: newVal });
                         showFeedback(`ICU free beds updated to ${newVal}`);
                       }}
-                      className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-lg font-bold cursor-pointer"
+                      className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center border border-slate-300 text-lg font-bold cursor-pointer transition shadow-2xs"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -898,19 +905,19 @@ export const HospitalPortal: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] uppercase text-slate-400">Total ICU Bed Capacity</label>
+                  <label className="text-[10px] uppercase text-slate-600 font-semibold">Total ICU Bed Capacity</label>
                   <input
                     type="number"
                     min="1"
                     value={loggedHospital.beds.icuTotal}
                     onChange={(e) => updateHospitalBeds(loggedHospital.id, { icuTotal: Math.max(1, Number(e.target.value)) })}
-                    className="w-full bg-neutral-950 text-slate-700 text-xs py-1.5 px-3 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-800 text-xs py-1.5 px-3 rounded-xl border border-slate-300 mt-1"
                   />
                 </div>
 
-                <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs text-[11px] text-slate-500 flex justify-between">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-600 flex justify-between">
                   <span>Occupancy:</span>
-                  <span className="text-white font-bold">
+                  <span className="text-slate-900 font-bold">
                     {Math.round(((loggedHospital.beds.icuTotal - loggedHospital.beds.icuFree) / loggedHospital.beds.icuTotal) * 100)}% Occupied
                   </span>
                 </div>
@@ -918,18 +925,18 @@ export const HospitalPortal: React.FC = () => {
             </div>
 
             {/* 2. Emergency Trauma Bays Controller */}
-            <div className="bg-black border border-slate-200 rounded-3xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                <span className="text-xs uppercase text-blue-400 font-bold flex items-center gap-1.5">
-                  <Activity className="w-4 h-4 text-blue-400" />
+            <div className="bg-white/90 border border-slate-200 rounded-3xl p-5 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs uppercase text-blue-700 font-bold flex items-center gap-1.5">
+                  <Activity className="w-4 h-4 text-blue-600" />
                   Trauma Bays
                 </span>
-                <span className="text-[10px] text-slate-400 font-bold">RESUSCITATION</span>
+                <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded">RESUSCITATION</span>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-[10px] uppercase text-slate-500 font-bold">Free Emergency Bays</label>
+                  <label className="text-[10px] uppercase text-slate-600 font-bold">Free Emergency Bays</label>
                   <div className="flex items-center gap-2 mt-1">
                     <button
                       type="button"
@@ -938,7 +945,7 @@ export const HospitalPortal: React.FC = () => {
                         updateHospitalBeds(loggedHospital.id, { emergencyFree: newVal });
                         showFeedback(`Emergency bays updated to ${newVal}`);
                       }}
-                      className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-lg font-bold cursor-pointer"
+                      className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center border border-slate-300 text-lg font-bold cursor-pointer transition shadow-2xs"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
@@ -952,7 +959,7 @@ export const HospitalPortal: React.FC = () => {
                         const val = Math.max(0, Number(e.target.value));
                         updateHospitalBeds(loggedHospital.id, { emergencyFree: val });
                       }}
-                      className="flex-1 bg-neutral-950 text-white font-bold text-2xl text-center py-1.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none"
+                      className="flex-1 bg-slate-50 text-slate-900 font-bold text-2xl text-center py-1.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:outline-none"
                     />
 
                     <button
@@ -962,7 +969,7 @@ export const HospitalPortal: React.FC = () => {
                         updateHospitalBeds(loggedHospital.id, { emergencyFree: newVal });
                         showFeedback(`Emergency bays updated to ${newVal}`);
                       }}
-                      className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-lg font-bold cursor-pointer"
+                      className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center border border-slate-300 text-lg font-bold cursor-pointer transition shadow-2xs"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -970,19 +977,19 @@ export const HospitalPortal: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] uppercase text-slate-400">Total Emergency Bays</label>
+                  <label className="text-[10px] uppercase text-slate-600 font-semibold">Total Emergency Bay Capacity</label>
                   <input
                     type="number"
                     min="1"
                     value={loggedHospital.beds.emergencyTotal}
                     onChange={(e) => updateHospitalBeds(loggedHospital.id, { emergencyTotal: Math.max(1, Number(e.target.value)) })}
-                    className="w-full bg-neutral-950 text-slate-700 text-xs py-1.5 px-3 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-800 text-xs py-1.5 px-3 rounded-xl border border-slate-300 mt-1"
                   />
                 </div>
 
-                <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs text-[11px] text-slate-500 flex justify-between">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-600 flex justify-between">
                   <span>Occupancy:</span>
-                  <span className="text-white font-bold">
+                  <span className="text-slate-900 font-bold">
                     {Math.round(((loggedHospital.beds.emergencyTotal - loggedHospital.beds.emergencyFree) / loggedHospital.beds.emergencyTotal) * 100)}% Occupied
                   </span>
                 </div>
@@ -990,18 +997,18 @@ export const HospitalPortal: React.FC = () => {
             </div>
 
             {/* 3. Ventilators Controller */}
-            <div className="bg-black border border-slate-200 rounded-3xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                <span className="text-xs uppercase text-amber-400 font-bold flex items-center gap-1.5">
-                  <Activity className="w-4 h-4 text-amber-400" />
-                  Ventilators
+            <div className="bg-white/90 border border-slate-200 rounded-3xl p-5 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs uppercase text-amber-700 font-bold flex items-center gap-1.5">
+                  <Activity className="w-4 h-4 text-amber-600" />
+                  ICU Ventilators
                 </span>
-                <span className="text-[10px] text-slate-400 font-bold">LIFE SUPPORT</span>
+                <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded">LIFE SUPPORT</span>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-[10px] uppercase text-slate-500 font-bold">Free Ventilators</label>
+                  <label className="text-[10px] uppercase text-slate-600 font-bold">Free Ventilators</label>
                   <div className="flex items-center gap-2 mt-1">
                     <button
                       type="button"
@@ -1010,7 +1017,7 @@ export const HospitalPortal: React.FC = () => {
                         updateHospitalBeds(loggedHospital.id, { ventilatorFree: newVal });
                         showFeedback(`Ventilators updated to ${newVal}`);
                       }}
-                      className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-lg font-bold cursor-pointer"
+                      className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center border border-slate-300 text-lg font-bold cursor-pointer transition shadow-2xs"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
@@ -1024,7 +1031,7 @@ export const HospitalPortal: React.FC = () => {
                         const val = Math.max(0, Number(e.target.value));
                         updateHospitalBeds(loggedHospital.id, { ventilatorFree: val });
                       }}
-                      className="flex-1 bg-neutral-950 text-white font-bold text-2xl text-center py-1.5 rounded-xl border border-slate-200 focus:border-amber-500 focus:outline-none"
+                      className="flex-1 bg-slate-50 text-slate-900 font-bold text-2xl text-center py-1.5 rounded-xl border border-slate-300 focus:border-amber-500 focus:outline-none"
                     />
 
                     <button
@@ -1034,7 +1041,7 @@ export const HospitalPortal: React.FC = () => {
                         updateHospitalBeds(loggedHospital.id, { ventilatorFree: newVal });
                         showFeedback(`Ventilators updated to ${newVal}`);
                       }}
-                      className="w-10 h-10 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center justify-center border border-slate-200 text-lg font-bold cursor-pointer"
+                      className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center border border-slate-300 text-lg font-bold cursor-pointer transition shadow-2xs"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -1042,19 +1049,19 @@ export const HospitalPortal: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] uppercase text-slate-400">Total Ventilator Capacity</label>
+                  <label className="text-[10px] uppercase text-slate-600 font-semibold">Total Ventilators</label>
                   <input
                     type="number"
                     min="1"
                     value={loggedHospital.beds.ventilatorTotal}
                     onChange={(e) => updateHospitalBeds(loggedHospital.id, { ventilatorTotal: Math.max(1, Number(e.target.value)) })}
-                    className="w-full bg-neutral-950 text-slate-700 text-xs py-1.5 px-3 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-800 text-xs py-1.5 px-3 rounded-xl border border-slate-300 mt-1"
                   />
                 </div>
 
-                <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs text-[11px] text-slate-500 flex justify-between">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-600 flex justify-between">
                   <span>Occupancy:</span>
-                  <span className="text-white font-bold">
+                  <span className="text-slate-900 font-bold">
                     {Math.round(((loggedHospital.beds.ventilatorTotal - loggedHospital.beds.ventilatorFree) / loggedHospital.beds.ventilatorTotal) * 100)}% Occupied
                   </span>
                 </div>
@@ -1065,14 +1072,14 @@ export const HospitalPortal: React.FC = () => {
       )}
 
       {/* ========================================================
-          TAB 3: FULLY EDITABLE DOCTORS & SPECIALISTS ROSTER
+          TAB 3: DOCTORS & SPECIALISTS SHIFT ROSTER
       ======================================================== */}
       {activeTab === 'doctors' && (
         <div className="space-y-5 animate-fadeIn">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-950 border border-slate-200 p-5 rounded-3xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/85 border border-slate-200 p-5 rounded-3xl shadow-sm">
             <div>
-              <h3 className="text-base font-bold text-white">Emergency Specialists & Doctors Shift Roster</h3>
-              <p className="text-xs text-slate-500 font-mono">
+              <h3 className="text-base font-extrabold text-slate-900">Emergency Specialists & Doctors Shift Roster</h3>
+              <p className="text-xs text-slate-600 font-mono mt-0.5">
                 Toggle duty status between Available & Free, In Surgery, and Off Duty. You can also add or remove specialists.
               </p>
             </div>
@@ -1080,7 +1087,7 @@ export const HospitalPortal: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowAddDoctor(!showAddDoctor)}
-              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+              className="liquid-btn-red px-4 py-2 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <Plus className="w-4 h-4" />
               <span>{showAddDoctor ? 'Close Form' : 'Add On-Duty Specialist'}</span>
@@ -1088,24 +1095,24 @@ export const HospitalPortal: React.FC = () => {
           </div>
 
           {/* Future Hardware Track: Biometric & BLE Turnstile Doctor Availability System */}
-          <div className="bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-transparent border border-rose-500/25 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+          <div className="bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-transparent border border-rose-300 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono bg-white/70">
             <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-600 flex items-center justify-center font-bold">
-                <Fingerprint className="w-4 h-4 text-rose-600" />
+              <div className="w-8 h-8 rounded-xl bg-rose-100 border border-rose-200 text-rose-700 flex items-center justify-center font-bold shrink-0">
+                <Fingerprint className="w-4 h-4 text-rose-700" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded">
-                    Future Hardware Track
+                  <span className="text-[10px] uppercase font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded border border-rose-200">
+                    Future Hardware Track (Roadmap)
                   </span>
                   <strong className="text-slate-900">Biometric & BLE Turnstile Doctor Availability System</strong>
                 </div>
-                <p className="text-slate-600 text-[11px]">
+                <p className="text-slate-600 text-[11px] mt-0.5">
                   Optical biometric fingerprint & BLE proximity turnstiles at OT scrub rooms automatically verify physical on-duty presence, auto-marking doctors 'In Surgery' or 'Available & Free' in real time.
                 </p>
               </div>
             </div>
-            <span className="text-emerald-700 bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-xl text-[10px] font-bold shrink-0 flex items-center gap-1">
+            <span className="text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-xl text-[10px] font-bold shrink-0 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dot-pulse"></span>
               <span>Turnstiles Online</span>
             </span>
@@ -1113,31 +1120,31 @@ export const HospitalPortal: React.FC = () => {
 
           {/* Add Doctor Form */}
           {showAddDoctor && (
-            <form onSubmit={handleAddDoctorSubmit} className="bg-black border border-slate-200 p-5 rounded-3xl space-y-3 animate-fadeIn text-xs font-mono">
-              <div className="font-bold text-white uppercase text-[11px] flex items-center gap-1.5">
-                <Stethoscope className="w-4 h-4 text-emerald-400" />
+            <form onSubmit={handleAddDoctorSubmit} className="bg-white border border-slate-300 p-5 rounded-3xl space-y-3 animate-fadeIn text-xs font-mono shadow-md">
+              <div className="font-bold text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
+                <Stethoscope className="w-4 h-4 text-emerald-600" />
                 <span>Register New On-Duty Doctor / Specialist</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Doctor Full Name</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold">Doctor Full Name</label>
                   <input
                     type="text"
                     value={newDocName}
                     onChange={(e) => setNewDocName(e.target.value)}
                     placeholder="e.g. Dr. Sunita Rao, MD"
-                    className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Specialization</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold">Specialization</label>
                   <select
                     value={newDocSpec}
                     onChange={(e) => setNewDocSpec(e.target.value)}
-                    className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                   >
                     <option value="Interventional Cardiology & Electrophysiology">Interventional Cardiology</option>
                     <option value="Emergency Medicine & Trauma Specialist">Emergency Medicine / Trauma</option>
@@ -1149,22 +1156,22 @@ export const HospitalPortal: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Assigned Room / Bay</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold">Assigned Room / Bay</label>
                   <input
                     type="text"
                     value={newDocBay}
                     onChange={(e) => setNewDocBay(e.target.value)}
                     placeholder="e.g. Cath Lab 1, ER Bay 2"
-                    className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Duty Status</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold">Duty Status</label>
                   <select
                     value={newDocStatus}
                     onChange={(e) => setNewDocStatus(e.target.value as Doctor['status'])}
-                    className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                   >
                     <option value="AVAILABLE_AND_FREE">AVAILABLE_AND_FREE (On Duty Free)</option>
                     <option value="IN_SURGERY">IN_SURGERY (Operating)</option>
@@ -1177,13 +1184,13 @@ export const HospitalPortal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddDoctor(false)}
-                  className="px-3 py-1.5 rounded-lg bg-neutral-900 text-slate-500"
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-1.5 rounded-lg bg-emerald-500 text-black font-bold hover:bg-emerald-400 cursor-pointer"
+                  className="px-5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 cursor-pointer shadow-xs"
                 >
                   Add Doctor to Shift Roster
                 </button>
@@ -1196,27 +1203,27 @@ export const HospitalPortal: React.FC = () => {
             {loggedHospital.doctors.map((doc) => (
               <div
                 key={doc.id}
-                className="bg-black p-4 rounded-2xl border border-slate-200 hover:border-slate-200 transition flex items-center justify-between gap-3 font-mono"
+                className="bg-white/95 p-4 rounded-2xl border border-slate-200 hover:border-slate-300 transition flex items-center justify-between gap-3 font-mono shadow-2xs"
               >
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <span className="font-bold text-white text-sm font-sans">{doc.name}</span>
-                    <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${
+                    <span className="font-bold text-slate-900 text-sm font-sans">{doc.name}</span>
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
                       doc.status === 'AVAILABLE_AND_FREE'
-                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                         : doc.status === 'IN_SURGERY'
-                        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                        : 'bg-neutral-800 text-slate-500'
+                        ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                        : 'bg-slate-100 text-slate-600 border border-slate-200'
                     }`}>
                       {doc.status === 'AVAILABLE_AND_FREE' ? 'FREE & ON DUTY' : doc.status === 'IN_SURGERY' ? 'IN SURGERY' : 'OFF DUTY'}
                     </span>
                   </div>
 
-                  <div className="text-[11px] text-slate-700">
+                  <div className="text-[11px] text-slate-700 font-medium">
                     {doc.specialization}
                   </div>
 
-                  <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                  <div className="text-[10px] text-slate-500 flex items-center gap-2">
                     <span>Bay: {doc.currentBay}</span>
                     <span>•</span>
                     <span>{doc.phone}</span>
@@ -1230,10 +1237,10 @@ export const HospitalPortal: React.FC = () => {
                       updateDoctorStatus(loggedHospital.id, doc.id, 'AVAILABLE_AND_FREE');
                       showFeedback(`${doc.name} marked as FREE & AVAILABLE`);
                     }}
-                    className={`px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg border transition cursor-pointer font-bold ${
                       doc.status === 'AVAILABLE_AND_FREE'
-                        ? 'bg-emerald-500 text-black border-emerald-500 font-bold'
-                        : 'bg-neutral-950 text-slate-500 border-slate-200 hover:text-white'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     Set Free
@@ -1245,23 +1252,23 @@ export const HospitalPortal: React.FC = () => {
                       updateDoctorStatus(loggedHospital.id, doc.id, 'IN_SURGERY');
                       showFeedback(`${doc.name} marked as IN SURGERY`);
                     }}
-                    className={`px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg border transition cursor-pointer font-bold ${
                       doc.status === 'IN_SURGERY'
-                        ? 'bg-amber-500 text-black border-amber-500 font-bold'
-                        : 'bg-neutral-950 text-slate-500 border-slate-200 hover:text-white'
+                        ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
-                    Set In Surgery
+                    In Surgery
                   </button>
 
                   <button
                     type="button"
                     onClick={() => {
                       removeDoctor(loggedHospital.id, doc.id);
-                      showFeedback(`${doc.name} removed from roster`);
+                      showFeedback(`${doc.name} removed from shift roster`);
                     }}
-                    className="p-1 rounded text-neutral-600 hover:text-rose-400 text-center transition cursor-pointer"
-                    title="Remove from roster"
+                    className="p-1 rounded text-slate-400 hover:text-rose-600 text-center transition cursor-pointer"
+                    title="Remove doctor"
                   >
                     <Trash2 className="w-3 h-3 mx-auto" />
                   </button>
@@ -1273,14 +1280,14 @@ export const HospitalPortal: React.FC = () => {
       )}
 
       {/* ========================================================
-          TAB 4: FULLY EDITABLE MACHINERY & EQUIPMENT INVENTORY
+          TAB 4: EMERGENCY MACHINERY & SURGICAL SUITES
       ======================================================== */}
       {activeTab === 'equipment' && (
         <div className="space-y-5 animate-fadeIn">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-950 border border-slate-200 p-5 rounded-3xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/85 border border-slate-200 p-5 rounded-3xl shadow-sm">
             <div>
-              <h3 className="text-base font-bold text-white">Emergency Machinery & Surgical Suites</h3>
-              <p className="text-xs text-slate-500 font-mono">
+              <h3 className="text-base font-extrabold text-slate-900">Emergency Machinery & Surgical Suites</h3>
+              <p className="text-xs text-slate-600 font-mono mt-0.5">
                 Update sterilization status, available units, or register new critical machines.
               </p>
             </div>
@@ -1288,7 +1295,7 @@ export const HospitalPortal: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowAddEq(!showAddEq)}
-              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+              className="liquid-btn-red px-4 py-2 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <Plus className="w-4 h-4" />
               <span>{showAddEq ? 'Close Form' : 'Register New Machine'}</span>
@@ -1297,31 +1304,31 @@ export const HospitalPortal: React.FC = () => {
 
           {/* Add Equipment Form */}
           {showAddEq && (
-            <form onSubmit={handleAddEquipmentSubmit} className="bg-black border border-slate-200 p-5 rounded-3xl space-y-3 animate-fadeIn text-xs font-mono">
-              <div className="font-bold text-white uppercase text-[11px] flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-emerald-400" />
+            <form onSubmit={handleAddEquipmentSubmit} className="bg-white border border-slate-300 p-5 rounded-3xl space-y-3 animate-fadeIn text-xs font-mono shadow-md">
+              <div className="font-bold text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-emerald-600" />
                 <span>Add Emergency Machinery / Operating Suite</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Machine Name</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold">Machine Name</label>
                   <input
                     type="text"
                     value={newEqName}
                     onChange={(e) => setNewEqName(e.target.value)}
                     placeholder="e.g. Philips Azurion Cath Lab"
-                    className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Category</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold">Category</label>
                   <select
                     value={newEqCategory}
                     onChange={(e) => setNewEqCategory(e.target.value as Equipment['category'])}
-                    className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                   >
                     <option value="SURGICAL">SURGICAL (Cath Lab / Operating Suite)</option>
                     <option value="IMAGING">IMAGING (CT / MRI / Ultrasound)</option>
@@ -1331,35 +1338,35 @@ export const HospitalPortal: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-500 uppercase">Location</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold">Location</label>
                   <input
                     type="text"
                     value={newEqLoc}
                     onChange={(e) => setNewEqLoc(e.target.value)}
                     placeholder="e.g. Ground Floor Trauma Wing"
-                    className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                    className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                   />
                 </div>
 
                 <div className="flex gap-2">
                   <div className="w-1/2">
-                    <label className="text-[10px] text-slate-500 uppercase">Available</label>
+                    <label className="text-[10px] text-slate-600 uppercase font-bold">Available</label>
                     <input
                       type="number"
                       min="0"
                       value={newEqQty}
                       onChange={(e) => setNewEqQty(Number(e.target.value))}
-                      className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                      className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                     />
                   </div>
                   <div className="w-1/2">
-                    <label className="text-[10px] text-slate-500 uppercase">Total</label>
+                    <label className="text-[10px] text-slate-600 uppercase font-bold">Total</label>
                     <input
                       type="number"
                       min="1"
                       value={newEqTotal}
                       onChange={(e) => setNewEqTotal(Number(e.target.value))}
-                      className="w-full bg-neutral-950 text-white p-2 rounded-xl border border-slate-200 mt-1"
+                      className="w-full bg-slate-50 text-slate-900 p-2.5 rounded-xl border border-slate-300 mt-1 focus:border-rose-400 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1369,13 +1376,13 @@ export const HospitalPortal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddEq(false)}
-                  className="px-3 py-1.5 rounded-lg bg-neutral-900 text-slate-500"
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-1.5 rounded-lg bg-emerald-500 text-black font-bold hover:bg-emerald-400 cursor-pointer"
+                  className="px-5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 cursor-pointer shadow-xs"
                 >
                   Register Machine
                 </button>
@@ -1388,35 +1395,35 @@ export const HospitalPortal: React.FC = () => {
             {loggedHospital.equipments.map((eq) => (
               <div
                 key={eq.id}
-                className="bg-black p-4 rounded-2xl border border-slate-200 hover:border-slate-200 transition flex items-center justify-between gap-3 font-mono"
+                className="bg-white/95 p-4 rounded-2xl border border-slate-200 hover:border-slate-300 transition flex items-center justify-between gap-3 font-mono shadow-2xs"
               >
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <span className="font-bold text-white text-sm font-sans">{eq.name}</span>
-                    <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${
+                    <span className="font-bold text-slate-900 text-sm font-sans">{eq.name}</span>
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
                       eq.status === 'READY_AND_STERILIZED'
-                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                         : eq.status === 'IN_USE'
-                        ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                        : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                        ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                        : 'bg-amber-100 text-amber-800 border border-amber-300'
                     }`}>
                       {eq.status === 'READY_AND_STERILIZED' ? 'READY & STERILIZED' : eq.status === 'IN_USE' ? 'IN USE' : 'MAINTENANCE'}
                     </span>
                   </div>
 
-                  <div className="text-[11px] text-slate-500">
+                  <div className="text-[11px] text-slate-600 font-medium">
                     Location: {eq.location} • Category: {eq.category}
                   </div>
 
-                  <div className="text-[10px] text-emerald-400 flex items-center gap-2">
-                    <span>Available: <strong>{eq.quantityAvailable}</strong> of {eq.totalQuantity}</span>
+                  <div className="text-[10px] text-slate-700 flex items-center gap-2">
+                    <span>Available: <strong className="text-emerald-700">{eq.quantityAvailable}</strong> of {eq.totalQuantity}</span>
                     <button
                       type="button"
                       onClick={() => {
                         const newQty = Math.max(0, eq.quantityAvailable - 1);
                         updateEquipmentStatus(loggedHospital.id, eq.id, eq.status, newQty);
                       }}
-                      className="px-1.5 py-0.2 rounded bg-neutral-900 hover:bg-neutral-800 text-white"
+                      className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold"
                       title="Decrement"
                     >
                       -
@@ -1427,7 +1434,7 @@ export const HospitalPortal: React.FC = () => {
                         const newQty = Math.min(eq.totalQuantity, eq.quantityAvailable + 1);
                         updateEquipmentStatus(loggedHospital.id, eq.id, eq.status, newQty);
                       }}
-                      className="px-1.5 py-0.2 rounded bg-neutral-900 hover:bg-neutral-800 text-white"
+                      className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold"
                       title="Increment"
                     >
                       +
@@ -1442,10 +1449,10 @@ export const HospitalPortal: React.FC = () => {
                       updateEquipmentStatus(loggedHospital.id, eq.id, 'READY_AND_STERILIZED');
                       showFeedback(`${eq.name} marked as READY & STERILIZED`);
                     }}
-                    className={`px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg border transition cursor-pointer font-bold ${
                       eq.status === 'READY_AND_STERILIZED'
-                        ? 'bg-emerald-500 text-black border-emerald-500 font-bold'
-                        : 'bg-neutral-950 text-slate-500 border-slate-200 hover:text-white'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     Ready
@@ -1457,10 +1464,10 @@ export const HospitalPortal: React.FC = () => {
                       updateEquipmentStatus(loggedHospital.id, eq.id, 'IN_USE');
                       showFeedback(`${eq.name} marked as IN USE`);
                     }}
-                    className={`px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg border transition cursor-pointer font-bold ${
                       eq.status === 'IN_USE'
-                        ? 'bg-rose-500 text-white border-rose-500 font-bold'
-                        : 'bg-neutral-950 text-slate-500 border-slate-200 hover:text-white'
+                        ? 'bg-rose-600 text-white border-rose-600 shadow-2xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     In Use
@@ -1472,7 +1479,7 @@ export const HospitalPortal: React.FC = () => {
                       removeEquipment(loggedHospital.id, eq.id);
                       showFeedback(`${eq.name} removed from equipment inventory`);
                     }}
-                    className="p-1 rounded text-neutral-600 hover:text-rose-400 text-center transition cursor-pointer"
+                    className="p-1 rounded text-slate-400 hover:text-rose-600 text-center transition cursor-pointer"
                     title="Remove equipment"
                   >
                     <Trash2 className="w-3 h-3 mx-auto" />
@@ -1488,46 +1495,46 @@ export const HospitalPortal: React.FC = () => {
           TAB 5: PAST ADMISSIONS ARCHIVE
       ======================================================== */}
       {activeTab === 'history' && (
-        <div className="bg-neutral-950 border border-slate-200 rounded-3xl p-6 space-y-4 animate-fadeIn">
+        <div className="bg-white/85 border border-slate-200 rounded-3xl p-6 space-y-4 animate-fadeIn shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 pb-3">
             <div>
-              <h3 className="text-base font-bold text-white">Emergency Patient Admissions & Discharges Archive</h3>
-              <p className="text-xs text-slate-500 font-mono">
+              <h3 className="text-base font-extrabold text-slate-900">Emergency Patient Admissions & Discharges Archive</h3>
+              <p className="text-xs text-slate-600 font-mono mt-0.5">
                 Log of successfully received trauma cases and Golden Hour interventions.
               </p>
             </div>
-            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 font-bold">
               AUDITED RECORDS
             </span>
           </div>
 
           <div className="space-y-2.5 text-xs font-mono">
-            <div className="bg-black p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
               <div className="space-y-0.5">
-                <div className="font-bold text-white">Priya Mehra (29F) • Acute Bronchospasm</div>
-                <div className="text-slate-400 text-[11px]">ID: PAT-2026-4412 • Resuscitation Bay #01 • SpO2 98% Restored</div>
+                <div className="font-bold text-slate-900">Priya Mehra (29F) • Acute Bronchospasm</div>
+                <div className="text-slate-500 text-[11px]">ID: PAT-2026-4412 • Resuscitation Bay #01 • SpO2 98% Restored</div>
               </div>
-              <span className="text-emerald-400 text-[10px] font-bold bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+              <span className="text-emerald-800 text-[10px] font-bold bg-emerald-100 px-2.5 py-1 rounded-xl border border-emerald-300">
                 DISCHARGED STABILIZED
               </span>
             </div>
 
-            <div className="bg-black p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
               <div className="space-y-0.5">
-                <div className="font-bold text-white">Harpreet Singh (62M) • Traumatic Subdural Hematoma</div>
-                <div className="text-slate-400 text-[11px]">ID: PAT-2026-3190 • ICU Bed #04 • Craniotomy Successful</div>
+                <div className="font-bold text-slate-900">Harpreet Singh (62M) • Traumatic Subdural Hematoma</div>
+                <div className="text-slate-500 text-[11px]">ID: PAT-2026-3190 • ICU Bed #04 • Craniotomy Successful</div>
               </div>
-              <span className="text-blue-400 text-[10px] font-bold bg-blue-500/10 px-2.5 py-1 rounded-xl border border-blue-500/20">
+              <span className="text-blue-800 text-[10px] font-bold bg-blue-100 px-2.5 py-1 rounded-xl border border-blue-300">
                 IN RECOVERY ICU
               </span>
             </div>
 
-            <div className="bg-black p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
               <div className="space-y-0.5">
-                <div className="font-bold text-white">Sunita Verma (48F) • Multiple Rib Fractures & Flail Chest</div>
-                <div className="text-slate-400 text-[11px]">ID: PAT-2026-1048 • Bay #02 • Chest Tube Placed</div>
+                <div className="font-bold text-slate-900">Sunita Verma (48F) • Multiple Rib Fractures & Flail Chest</div>
+                <div className="text-slate-500 text-[11px]">ID: PAT-2026-1048 • Bay #02 • Chest Tube Placed</div>
               </div>
-              <span className="text-emerald-400 text-[10px] font-bold bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+              <span className="text-emerald-800 text-[10px] font-bold bg-emerald-100 px-2.5 py-1 rounded-xl border border-emerald-300">
                 TRANSFERRED TO SURGICAL WARD
               </span>
             </div>

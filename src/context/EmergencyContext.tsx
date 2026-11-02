@@ -43,15 +43,10 @@ interface EmergencyContextType {
   resetEmergencyState: () => void;
 }
 
-const STORAGE_KEY_HOSPITALS = 'pulse_er_hospitals_data_clean';
-const STORAGE_KEY_BOOKINGS = 'pulse_er_bookings_clean';
-const STORAGE_KEY_ACTIVE = 'pulse_er_active_booking_clean';
-const STORAGE_KEY_LOGGED_HOSP_ID = 'pulse_er_logged_hosp_id_clean';
-
-// Automatically reset all stale dummy data on module load
-try {
-  localStorage.clear();
-} catch { }
+const STORAGE_KEY_HOSPITALS = 'lifecare_hospitals_data_v1';
+const STORAGE_KEY_BOOKINGS = 'lifecare_bookings_v1';
+const STORAGE_KEY_ACTIVE = 'lifecare_active_booking_v1';
+const STORAGE_KEY_LOGGED_HOSP_ID = 'lifecare_logged_hosp_id_v1';
 
 const EmergencyContext = createContext<EmergencyContextType | undefined>(undefined);
 
@@ -123,7 +118,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Cross-tab broadcast synchronization
   useEffect(() => {
-    const channel = new BroadcastChannel('pulse_er_sync_channel');
+    const channel = new BroadcastChannel('lifecare_sync_channel');
 
     channel.onmessage = (event) => {
       if (event.data?.type === 'SYNC_STATE') {
@@ -146,7 +141,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const broadcastState = (newActive: EmergencyBooking, newBookings: EmergencyBooking[], newHosp?: Hospital[]) => {
     try {
-      const channel = new BroadcastChannel('pulse_er_sync_channel');
+      const channel = new BroadcastChannel('lifecare_sync_channel');
       channel.postMessage({
         type: 'SYNC_STATE',
         activeBooking: newActive,

@@ -169,11 +169,11 @@ export const ArduinoUnoQMonitor: React.FC<Props> = ({
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full font-extrabold">
-                ARDUINO TRACK: UNOQ IoT HARDWARE TELEMETRY
+              <span className="text-[10px] font-mono uppercase tracking-wider text-blue-800 bg-blue-100 border border-blue-300 px-2.5 py-0.5 rounded-full font-extrabold flex items-center gap-1">
+                <span>FUTURE HARDWARE TRACK • ARDUINO UNOQ IoT</span>
               </span>
-              <span className="text-[9px] font-mono text-slate-500 bg-white/70 border border-slate-200 px-1.5 py-0.2 rounded font-bold">
-                Board: Arduino UnoQ Rev 2.0 (Dual-Core IoT)
+              <span className="text-[9px] font-mono text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded font-bold">
+                Board: Arduino UnoQ Rev 2.0 (Dual-Core IoT Roadmap)
               </span>
             </div>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
