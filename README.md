@@ -1,5 +1,6 @@
 # LifeCare — AI Emergency Triage & Zero-Wait Hospital Orchestration Platform
 
+[![Live Prototype](https://img.shields.io/badge/Live%20Prototype-lifecare--prototype.netlify.app-00C7B7?style=for-the-badge&logo=netlify)](https://lifecare-prototype.netlify.app)
 [![HackFront India 2026](https://img.shields.io/badge/HackFront%20India-2026%20by%20whereuelevate.com-DC2626?style=for-the-badge)](https://whereuelevate.com)
 [![Team](https://img.shields.io/badge/Team-Builder%20Beings-10B981?style=for-the-badge)](#-hackathon-attribution--team)
 [![React 19](https://img.shields.io/badge/React-19.3-blue?style=for-the-badge&logo=react)](https://react.dev)
@@ -8,6 +9,8 @@
 [![Build Speed](https://img.shields.io/badge/Vite%208-478ms%20Build-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev)
 [![Linter](https://img.shields.io/badge/Oxlint-0%20Warnings-green?style=for-the-badge)](https://oxc.rs)
 
+> 🌐 **Live Deployed Prototype:** [https://lifecare-prototype.netlify.app](https://lifecare-prototype.netlify.app)
+>
 > **LifeCare** is a synchronized emergency healthcare operating system connecting **Distress Callers**, **Ambulance Cockpits**, and **Hospital Emergency Departments** in real time. By uniting **Sarvam Indic Voice AI**, a **Neo4j Cypher Knowledge Graph Engine**, and an **ABDM-Compliant Zero-Wait Emergency Highway** (complemented by an **Arduino UnoQ & Autonomous Sensor Hardware Roadmap**), LifeCare replaces chaotic, fragmented hospital intake with guaranteed **Zero-Wait Golden Hour Admissions**.
 
 ### 👥 Team: Builder Beings
@@ -152,7 +155,7 @@ To ensure complete clarity for HackFront evaluators, the prototype clearly delin
 Follow this 5-minute interactive test script to verify all features:
 
 ### Step 1: Pristine Initial State & Voice SOS Intake (Citizen View)
-1. Launch the application. Notice that the top navigation reads **"Ready for SOS"** and there are no pre-existing bookings.
+1. Launch the interactive prototype: Open [https://lifecare-prototype.netlify.app](https://lifecare-prototype.netlify.app) (or your local build). Notice that the top navigation reads **"Ready for SOS"** and starts with zero pre-existing bookings.
 2. Under **"Sarvam Indic Voice AI SOS"**, select any language (e.g. **Hindi**, **Tamil**, or **Telugu**).
 3. Click the voice microphone or sample prompt: *"सीने में बहुत तेज दर्द है और सांस लेने में तकलीफ हो रही है"*.
 4. Notice:
@@ -341,5 +344,6 @@ Found 0 warnings and 0 errors.
   - **Stuti Jain**
   - **Saksham Kaushik**
 - **Repository Name:** LifeCare-Prototype
+- **Live Deployed Prototype:** [https://lifecare-prototype.netlify.app](https://lifecare-prototype.netlify.app)
 - **Project Name:** LifeCare-Prototype — AI Emergency Triage & Zero-Wait Hospital Orchestration
 - **Status:** Complete, tested, fully functional prototype ready for jury evaluation.
