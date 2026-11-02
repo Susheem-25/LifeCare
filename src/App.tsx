@@ -104,7 +104,7 @@ const MainAppContent: React.FC = () => {
               Engineered for <strong>HackFront by whereuelevate.com</strong>
             </p>
             <p className="text-[10.5px] text-slate-600 font-semibold">
-              Team: Susheem Kumar Maurya • Stuti Jain • Saksham Kaushik
+              Team: Builder Beings (Susheem Kumar Maurya • Stuti Jain • Saksham Kaushik)
             </p>
             <p className="text-[10.5px] text-slate-400">
               Real-time Bed, Doctor & Machinery Locking • Ambulance Google Maps Routing • ABHA Pre-Admission.
