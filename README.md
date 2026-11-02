@@ -237,7 +237,7 @@ sequenceDiagram
 ## 📁 Repository Organization & File Structure
 
 ```
-LifeCare/
+LifeCare-Prototype/
 ├── public/                               # Favicon and static assets
 │   └── favicon.svg                       # LifeCare heartbeat pulse icon
 ├── src/
@@ -297,7 +297,7 @@ LifeCare is styled with an **Apple OS Liquid Glass (White & Red Healthcare)** ae
 
 ### 1. Install Dependencies
 ```bash
-cd LifeCare
+cd LifeCare-Prototype
 npm install
 ```
 
@@ -340,5 +340,6 @@ Found 0 warnings and 0 errors.
   - **Susheem Kumar Maurya**
   - **Stuti Jain**
   - **Saksham Kaushik**
-- **Project Name:** LifeCare — AI Emergency Triage & Zero-Wait Hospital Orchestration
+- **Repository Name:** LifeCare-Prototype
+- **Project Name:** LifeCare-Prototype — AI Emergency Triage & Zero-Wait Hospital Orchestration
 - **Status:** Complete, tested, fully functional prototype ready for jury evaluation.
