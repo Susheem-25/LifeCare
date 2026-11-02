@@ -26,7 +26,8 @@ export const ArduinoUnoQMonitor: React.FC<Props> = ({
   currentHeartRate,
   onSyncVitalsFromArduino 
 }) => {
-  const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [autoSyncToCabin, setAutoSyncToCabin] = useState<boolean>(false);
   const [showSketchModal, setShowSketchModal] = useState<boolean>(false);
   const [copiedSketch, setCopiedSketch] = useState<boolean>(false);
   const [packets, setPackets] = useState<ArduinoUnoQPacket[]>(SIMULATED_ARDUINO_PACKETS);
@@ -147,11 +148,13 @@ export const ArduinoUnoQMonitor: React.FC<Props> = ({
       };
 
       setPackets((prev) => [newPacket, ...prev.slice(0, 3)]);
-      onSyncVitalsFromArduino(newSpO2, newHr);
+      if (autoSyncToCabin) {
+        onSyncVitalsFromArduino(newSpO2, newHr);
+      }
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isConnected, currentSpO2, currentHeartRate, onSyncVitalsFromArduino]);
+  }, [isConnected, autoSyncToCabin, currentSpO2, currentHeartRate, onSyncVitalsFromArduino]);
 
   const copySketch = () => {
     navigator.clipboard.writeText(ARDUINO_UNOQ_SKETCH_CODE);
@@ -198,13 +201,36 @@ export const ArduinoUnoQMonitor: React.FC<Props> = ({
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
               isConnected
                 ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-slate-200 text-slate-600'
+                : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
             }`}
           >
             <Radio className="w-3.5 h-3.5" />
-            <span>{isConnected ? 'USB UART Online' : 'Connect COM3'}</span>
+            <span>{isConnected ? 'USB UART Online' : 'Connect COM3 (Simulator)'}</span>
           </button>
         </div>
+      </div>
+
+      {/* Future Track Architecture Callout */}
+      <div className="bg-blue-50/80 border border-blue-200/90 rounded-2xl p-3 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-blue-900 font-mono">
+        <div className="flex items-start sm:items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-blue-600 mt-1 sm:mt-0 shrink-0"></span>
+          <span>
+            <strong>Future Hardware Track:</strong> In the current prototype phase, paramedics manually enter and transmit vitals. Click &quot;Connect COM3&quot; to test the upcoming automated Arduino UnoQ hardware streaming pipeline.
+          </span>
+        </div>
+        {isConnected && (
+          <button
+            type="button"
+            onClick={() => setAutoSyncToCabin(!autoSyncToCabin)}
+            className={`px-3 py-1 rounded-xl text-[10px] font-bold border transition cursor-pointer shrink-0 ${
+              autoSyncToCabin
+                ? 'bg-emerald-600 text-white border-emerald-500'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            {autoSyncToCabin ? '✓ Syncing to Cabin' : 'Apply to Cabin Vitals'}
+          </button>
+        )}
       </div>
 
       {/* Hardware Connection Details */}

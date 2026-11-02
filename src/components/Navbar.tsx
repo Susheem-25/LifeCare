@@ -122,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             <Ambulance className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Login as</span>
             <span>Ambulance</span>
-            {activeBooking.bookingCode && (
+            {activeBooking?.bookingCode && (
               <span
                 className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold ${currentView === 'ambulance'
                     ? 'bg-white/30 text-white'
@@ -174,7 +174,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
                 <LogOut className="w-3 h-3" />
               </button>
             </div>
-          ) : (
+          ) : activeBooking ? (
             <button
               type="button"
               onClick={() => setCurrentView('ambulance')}
@@ -184,6 +184,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
               <span className="w-2 h-2 rounded-full bg-red-600 dot-pulse"></span>
               <span>Active Code: <strong className="text-red-700 font-bold">{activeBooking.bookingCode}</strong></span>
             </button>
+          ) : (
+            <div className="bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-xl text-[11px] text-emerald-800 flex items-center space-x-1.5 shadow-xs backdrop-blur-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span className="font-semibold">Ready for SOS</span>
+            </div>
           )}
         </div>
       </div>

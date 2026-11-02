@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment } from '../types';
-import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, DEFAULT_ACTIVE_BOOKING } from '../data/mockData';
+import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
 import { soundEffects } from '../utils/audio';
 import confetti from 'canvas-confetti';
@@ -11,7 +11,7 @@ export type AppView = 'patient' | 'ambulance' | 'hospital';
 interface EmergencyContextType {
   hospitals: Hospital[];
   currentTriage: AITriageAnalysis | null;
-  activeBooking: EmergencyBooking;
+  activeBooking: EmergencyBooking | null;
   allBookings: EmergencyBooking[];
   currentView: AppView;
   loggedHospital: Hospital | null;
@@ -43,10 +43,10 @@ interface EmergencyContextType {
   resetEmergencyState: () => void;
 }
 
-const STORAGE_KEY_HOSPITALS = 'lifecare_hospitals_data_v1';
-const STORAGE_KEY_BOOKINGS = 'lifecare_bookings_v1';
-const STORAGE_KEY_ACTIVE = 'lifecare_active_booking_v1';
-const STORAGE_KEY_LOGGED_HOSP_ID = 'lifecare_logged_hosp_id_v1';
+const STORAGE_KEY_HOSPITALS = 'lifecare_hospitals_data_v2';
+const STORAGE_KEY_BOOKINGS = 'lifecare_bookings_v2';
+const STORAGE_KEY_ACTIVE = 'lifecare_active_booking_v2';
+const STORAGE_KEY_LOGGED_HOSP_ID = 'lifecare_logged_hosp_id_v2';
 
 const EmergencyContext = createContext<EmergencyContextType | undefined>(undefined);
 
@@ -97,22 +97,22 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Derived dynamically from current hospitals array so any edit is 100% reactive
   const loggedHospital = hospitals.find((h) => h.id === loggedHospitalId) || hospitals[0] || null;
 
-  // Active booking from localStorage or default
-  const [activeBooking, setActiveBooking] = useState<EmergencyBooking>(() => {
+  // Active booking from localStorage or pristine null (zero-booking start)
+  const [activeBooking, setActiveBooking] = useState<EmergencyBooking | null>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_ACTIVE);
-      return saved ? JSON.parse(saved) : DEFAULT_ACTIVE_BOOKING;
+      return saved ? JSON.parse(saved) : null;
     } catch {
-      return DEFAULT_ACTIVE_BOOKING;
+      return null;
     }
   });
 
   const [allBookings, setAllBookings] = useState<EmergencyBooking[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_BOOKINGS);
-      return saved ? JSON.parse(saved) : [DEFAULT_ACTIVE_BOOKING];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return [DEFAULT_ACTIVE_BOOKING];
+      return [];
     }
   });
 
@@ -139,7 +139,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, []);
 
-  const broadcastState = (newActive: EmergencyBooking, newBookings: EmergencyBooking[], newHosp?: Hospital[]) => {
+  const broadcastState = (newActive: EmergencyBooking | null, newBookings: EmergencyBooking[], newHosp?: Hospital[]) => {
     try {
       const channel = new BroadcastChannel('lifecare_sync_channel');
       channel.postMessage({
@@ -163,10 +163,14 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const saveActive = (booking: EmergencyBooking) => {
+  const saveActive = (booking: EmergencyBooking | null) => {
     setActiveBooking(booking);
     try {
-      localStorage.setItem(STORAGE_KEY_ACTIVE, JSON.stringify(booking));
+      if (booking) {
+        localStorage.setItem(STORAGE_KEY_ACTIVE, JSON.stringify(booking));
+      } else {
+        localStorage.removeItem(STORAGE_KEY_ACTIVE);
+      }
     } catch {
       // ignore
     }
@@ -381,7 +385,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     speed?: number
   ) => {
     let updatedActive = activeBooking;
-    if (activeBooking.bookingCode === bookingCode) {
+    if (activeBooking && activeBooking.bookingCode === bookingCode) {
       updatedActive = {
         ...activeBooking,
         status,
@@ -422,7 +426,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const regNo = 'ABDM-ER-' + Math.floor(100000 + Math.random() * 900000);
 
     let updatedActive = activeBooking;
-    if (activeBooking.bookingCode === bookingCode) {
+    if (activeBooking && activeBooking.bookingCode === bookingCode) {
       updatedActive = {
         ...activeBooking,
         patientName: abha.fullName,
@@ -476,7 +480,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     let updatedActive = activeBooking;
-    if (activeBooking.bookingCode.toUpperCase() === codeClean) {
+    if (activeBooking && activeBooking.bookingCode.toUpperCase() === codeClean) {
       const currentV = activeBooking.inTransitPaperwork?.initialVitals || defaultVitals;
       updatedActive = {
         ...activeBooking,
@@ -651,7 +655,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const assignTraumaBay = (bookingCode: string, bayName: string) => {
     let updatedActive = activeBooking;
-    if (activeBooking.bookingCode === bookingCode) {
+    if (activeBooking && activeBooking.bookingCode === bookingCode) {
       updatedActive = { ...activeBooking, reservedBay: bayName };
       saveActive(updatedActive);
     }
@@ -662,7 +666,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const admitPatient = (bookingCode: string) => {
     let updatedActive = activeBooking;
-    if (activeBooking.bookingCode === bookingCode) {
+    if (activeBooking && activeBooking.bookingCode === bookingCode) {
       updatedActive = {
         ...activeBooking,
         status: 'ARRIVED_ER',
@@ -681,18 +685,17 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } catch { }
 
     const freshHospitals: Hospital[] = JSON.parse(JSON.stringify(INITIAL_HOSPITALS));
-    const freshActiveBooking: EmergencyBooking = JSON.parse(JSON.stringify(DEFAULT_ACTIVE_BOOKING));
 
     setHospitals(freshHospitals);
     setCurrentTriage(null);
     setCurrentView('patient');
     setSelectedAbhaProfile(SAMPLE_ABHA_PROFILES[0]);
     setSearchTriageMode('standard');
-    setActiveBooking(freshActiveBooking);
-    setAllBookings([freshActiveBooking]);
+    setActiveBooking(null);
+    setAllBookings([]);
     setLoggedHospitalId('hosp-aiims-delhi');
 
-    broadcastState(freshActiveBooking, [freshActiveBooking], freshHospitals);
+    broadcastState(null, [], freshHospitals);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     soundEffects.playSuccessChime();
   };

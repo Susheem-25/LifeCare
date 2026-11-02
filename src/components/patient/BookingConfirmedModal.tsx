@@ -34,20 +34,26 @@ export const BookingConfirmedModal: React.FC<Props> = ({ onClose }) => {
     return () => clearInterval(timer);
   }, []);
 
+  if (!activeBooking) return null;
+
   const minutes = Math.floor(countdown / 60);
   const seconds = countdown % 60;
   const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
   const copyCode = () => {
-    navigator.clipboard.writeText(activeBooking.bookingCode);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
+    if (activeBooking) {
+      navigator.clipboard.writeText(activeBooking.bookingCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
   };
 
   const copyPatientId = () => {
-    navigator.clipboard.writeText(activeBooking.patientUniqueId);
-    setCopiedId(true);
-    setTimeout(() => setCopiedId(false), 2000);
+    if (activeBooking) {
+      navigator.clipboard.writeText(activeBooking.patientUniqueId);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    }
   };
 
   const handleGoToDriver = () => {

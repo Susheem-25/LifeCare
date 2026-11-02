@@ -508,10 +508,10 @@ export const HospitalPortal: React.FC = () => {
                       <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase font-bold border-b border-slate-100 pb-2">
                         <span className="flex items-center gap-1.5 text-rose-600">
                           <Activity className="w-3.5 h-3.5 animate-pulse" />
-                          Live Streamed Vitals (2-Way Sync)
+                          Paramedic In-Transit Vitals (2-Way Sync)
                         </span>
                         <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">
-                          EDITABLE • REAL-TIME
+                          PARAMEDIC ENTRY • REAL-TIME
                         </span>
                       </div>
 
@@ -719,7 +719,7 @@ export const HospitalPortal: React.FC = () => {
                         </div>
 
                         <span className="text-slate-500 text-[10px] font-mono">
-                          Changes sync live to ambulance
+                          2-Way live sync with paramedic cabin
                         </span>
                       </div>
                     </div>

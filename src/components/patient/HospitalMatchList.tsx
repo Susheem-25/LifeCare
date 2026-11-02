@@ -166,7 +166,7 @@ export const HospitalMatchList: React.FC = () => {
                     <span>Active Bed Reservation At This Hospital</span>
                   </div>
                   <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">
-                    Driver Code: {activeBooking.bookingCode}
+                    Driver Code: {activeBooking?.bookingCode}
                   </span>
                 </div>
               ) : isTopMatch ? (

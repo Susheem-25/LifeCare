@@ -35,17 +35,19 @@ export const AmbulancePortal: React.FC = () => {
     updateAmbulanceStatus,
     updatePatientVitals,
     submitInTransitPaperwork,
-    fetchPatientByAbha
+    fetchPatientByAbha,
+    bookHospitalBed,
+    setCurrentView
   } = useEmergency();
 
   // Lookup state
-  const [codeInput, setCodeInput] = useState<string>(activeBooking.bookingCode || 'AMB-7492');
+  const [codeInput, setCodeInput] = useState<string>(activeBooking?.bookingCode || '');
   const [selectedBooking, setSelectedBooking] = useState(activeBooking);
-  const [hasSearched, setHasSearched] = useState<boolean>(true);
-  const [tripStatus, setTripStatus] = useState<string>(activeBooking.status || 'IN_TRANSIT_TO_HOSPITAL');
+  const [hasSearched, setHasSearched] = useState<boolean>(Boolean(activeBooking));
+  const [tripStatus, setTripStatus] = useState<string>(activeBooking?.status || 'IN_TRANSIT_TO_HOSPITAL');
 
   // In-Ambulance Live Vitals State
-  const initialV = selectedBooking.inTransitPaperwork?.initialVitals;
+  const initialV = selectedBooking?.inTransitPaperwork?.initialVitals;
   const [heartRate, setHeartRate] = useState<number>(initialV?.heartRate || 112);
   const [spO2, setSpO2] = useState<number>(initialV?.spO2 || 92);
   const [bpSys, setBpSys] = useState<number>(initialV?.bloodPressureSys || 154);
@@ -57,11 +59,11 @@ export const AmbulancePortal: React.FC = () => {
   const [vitalsSentSuccess, setVitalsSentSuccess] = useState<boolean>(false);
 
   // In-Ambulance ABHA Paperwork State
-  const currentAbha = selectedBooking.inTransitPaperwork?.abhaDetails || SAMPLE_ABHA_PROFILES[0];
+  const currentAbha = selectedBooking?.inTransitPaperwork?.abhaDetails || SAMPLE_ABHA_PROFILES[0];
   const [ambAbhaInput, setAmbAbhaInput] = useState<string>(currentAbha?.abhaId || '91-4820-9182-3921');
   const [ambAbhaProfile, setAmbAbhaProfile] = useState(currentAbha);
   const [digitalConsent, setDigitalConsent] = useState<boolean>(true);
-  const [paperworkSaved, setPaperworkSaved] = useState<boolean>(selectedBooking.inTransitPaperwork?.isSubmitted ?? true);
+  const [paperworkSaved, setPaperworkSaved] = useState<boolean>(selectedBooking?.inTransitPaperwork?.isSubmitted ?? true);
   const [paperworkSuccessMsg, setPaperworkSuccessMsg] = useState<string>('');
   const [statusFeedbackMsg, setStatusFeedbackMsg] = useState<string>('');
 
@@ -87,8 +89,18 @@ export const AmbulancePortal: React.FC = () => {
         setAmbAbhaInput(ab.abhaId);
       }
       setHasSearched(true);
+    } else if (allBookings.length > 0) {
+      const first = allBookings[0];
+      setSelectedBooking(first);
+      setCodeInput(first.bookingCode);
+      setTripStatus(first.status);
+      setHasSearched(true);
+    } else {
+      setSelectedBooking(null);
+      setCodeInput('');
+      setHasSearched(false);
     }
-  }, [activeBooking]);
+  }, [activeBooking, allBookings]);
 
   const handleLookup = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -115,14 +127,13 @@ export const AmbulancePortal: React.FC = () => {
       setStatusFeedbackMsg(`Loaded ticket ${clean} (${found.hospitalName.split(' ')[0]})`);
       setTimeout(() => setStatusFeedbackMsg(''), 3000);
     } else {
-      setSelectedBooking(activeBooking);
-      setHasSearched(true);
-      setStatusFeedbackMsg(`Ticket "${clean}" not found. Showing active booking ${activeBooking.bookingCode}.`);
+      setStatusFeedbackMsg(`Ticket "${clean}" not found.`);
       setTimeout(() => setStatusFeedbackMsg(''), 3500);
     }
   };
 
   const handleStatusChange = (status: 'AMBULANCE_EN_ROUTE_PICKUP' | 'PATIENT_PICKED_UP' | 'IN_TRANSIT_TO_HOSPITAL' | 'ARRIVED_ER') => {
+    if (!selectedBooking) return;
     setTripStatus(status);
     updateAmbulanceStatus(selectedBooking.bookingCode, status);
 
@@ -144,10 +155,13 @@ export const AmbulancePortal: React.FC = () => {
     if (update.bloodPressureDia !== undefined) setBpDia(update.bloodPressureDia);
     if (update.respiratoryRate !== undefined) setRespiratoryRate(update.respiratoryRate);
 
-    updatePatientVitals(selectedBooking.bookingCode, update);
+    if (selectedBooking) {
+      updatePatientVitals(selectedBooking.bookingCode, update);
+    }
   };
 
   const handleTransmitVitals = () => {
+    if (!selectedBooking) return;
     updatePatientVitals(selectedBooking.bookingCode, {
       heartRate,
       spO2,
@@ -173,7 +187,7 @@ export const AmbulancePortal: React.FC = () => {
   };
 
   const handleSavePaperwork = () => {
-    if (!ambAbhaProfile) return;
+    if (!ambAbhaProfile || !selectedBooking) return;
     submitInTransitPaperwork(
       selectedBooking.bookingCode,
       ambAbhaProfile,
@@ -195,10 +209,10 @@ export const AmbulancePortal: React.FC = () => {
   };
 
   // Build exact Google Maps navigation URL
-  const originLat = selectedBooking.patientPickupCoords.lat || 28.5500;
-  const originLng = selectedBooking.patientPickupCoords.lng || 77.2200;
-  const destLat = selectedBooking.hospitalCoords.lat || 28.5672;
-  const destLng = selectedBooking.hospitalCoords.lng || 77.2100;
+  const originLat = selectedBooking?.patientPickupCoords?.lat || 28.5500;
+  const originLng = selectedBooking?.patientPickupCoords?.lng || 77.2200;
+  const destLat = selectedBooking?.hospitalCoords?.lat || 28.5672;
+  const destLng = selectedBooking?.hospitalCoords?.lng || 77.2100;
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${destLat},${destLng}&travelmode=driving`;
 
   return (
@@ -267,34 +281,73 @@ export const AmbulancePortal: React.FC = () => {
           </button>
         </form>
 
-        <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs font-mono">
-          <span className="text-slate-500 text-[11px] font-medium mr-1">Quick Load:</span>
-          {allBookings.map((b) => (
-            <button
-              key={b.bookingCode}
-              type="button"
-              onClick={() => {
-                setCodeInput(b.bookingCode);
-                setSelectedBooking(b);
-                setTripStatus(b.status);
-                setHasSearched(true);
-                setStatusFeedbackMsg(`Loaded ticket ${b.bookingCode} (${b.hospitalName.split(' ')[0]})`);
-                setTimeout(() => setStatusFeedbackMsg(''), 3000);
-              }}
-              className={`text-[11px] border px-2.5 py-1 rounded-xl cursor-pointer transition shadow-2xs font-semibold ${
-                selectedBooking.bookingCode === b.bookingCode
-                  ? 'bg-rose-50 border-rose-300 text-rose-700 font-bold'
-                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
-              }`}
-            >
-              <span className="text-slate-500">Ticket:</span> <strong className="text-rose-600">{b.bookingCode}</strong> ({b.hospitalName.split(' ')[0]})
-            </button>
-          ))}
-        </div>
+        {allBookings.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs font-mono">
+            <span className="text-slate-500 text-[11px] font-medium mr-1">Quick Load:</span>
+            {allBookings.map((b) => (
+              <button
+                key={b.bookingCode}
+                type="button"
+                onClick={() => {
+                  setCodeInput(b.bookingCode);
+                  setSelectedBooking(b);
+                  setTripStatus(b.status);
+                  setHasSearched(true);
+                  setStatusFeedbackMsg(`Loaded ticket ${b.bookingCode} (${b.hospitalName.split(' ')[0]})`);
+                  setTimeout(() => setStatusFeedbackMsg(''), 3000);
+                }}
+                className={`text-[11px] border px-2.5 py-1 rounded-xl cursor-pointer transition shadow-2xs font-semibold ${
+                  selectedBooking?.bookingCode === b.bookingCode
+                    ? 'bg-rose-50 border-rose-300 text-rose-700 font-bold'
+                    : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                }`}
+              >
+                <span className="text-slate-500">Ticket:</span> <strong className="text-rose-600">{b.bookingCode}</strong> ({b.hospitalName.split(' ')[0]})
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Direction & Navigation View */}
-      {hasSearched && (
+      {/* If No Active Booking is Selected (Zero Bookings State) */}
+      {!selectedBooking ? (
+        <div className="liquid-glass-card rounded-3xl p-8 sm:p-12 border border-dashed border-slate-300 text-center space-y-5 bg-white/85 shadow-md">
+          <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto shadow-sm">
+            <Ambulance className="w-8 h-8" />
+          </div>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+              No Active Ambulance Mission Assigned
+            </h2>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Unit DL-01-AMB-402 is currently on standby with zero active dispatches. You can initiate a new emergency reservation from the Emergency SOS page, or dispatch a test simulated mission below.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setCurrentView('patient')}
+              className="liquid-btn-red px-5 py-2.5 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer shadow-md flex items-center gap-2"
+            >
+              <Heart className="w-4 h-4 text-white" />
+              <span>Go to Emergency SOS & Reserve Bed</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const demo = bookHospitalBed('hosp-aiims-delhi', 'Rahul Sharma', '+91-98104-55678');
+                setSelectedBooking(demo);
+                setCodeInput(demo.bookingCode);
+                setTripStatus(demo.status);
+                setHasSearched(true);
+              }}
+              className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-300 transition cursor-pointer shadow-xs flex items-center gap-2"
+            >
+              <span>⚡ Simulate Emergency Dispatch (AMB Demo)</span>
+            </button>
+          </div>
+        </div>
+      ) : hasSearched && (
         <div className="space-y-6 animate-fadeIn">
           {/* THE BIG GOOGLE MAPS NAVIGATION LAUNCH BUTTON */}
           <div className="liquid-glass-card rounded-3xl p-6 border border-emerald-500/30 bg-white/80 backdrop-blur-xl shadow-lg space-y-4">
@@ -468,15 +521,15 @@ export const AmbulancePortal: React.FC = () => {
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-rose-600 font-extrabold">
-                      In-Cabin Real-Time Telemetry
+                      Paramedic In-Cabin Vitals Entry & Telemetry Sync
                     </span>
                     <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                      <span>ER CATH LAB STREAMING</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dot-pulse"></span>
+                      <span>PARAMEDIC MANUAL ENTRY • 2-WAY ER SYNC</span>
                     </span>
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                    Send Live Patient Vitals to Hospital ER
+                    Transmit Patient Vitals to Hospital ER
                   </h3>
                 </div>
               </div>
@@ -484,6 +537,19 @@ export const AmbulancePortal: React.FC = () => {
               <div className="text-right text-xs font-mono">
                 <div className="text-slate-400 text-[10px]">Last Transmitted:</div>
                 <div className="text-slate-800 font-bold">{lastVitalsSentAt}</div>
+              </div>
+            </div>
+
+            {/* Prototype Phase Clarification for Evaluators */}
+            <div className="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-3.5 text-xs flex items-start gap-2.5 text-amber-950 font-mono">
+              <span className="text-base shrink-0 mt-0.5">💡</span>
+              <div className="space-y-0.5">
+                <div className="font-bold text-amber-900 text-[11px] uppercase tracking-wider">
+                  Prototype Telemetry Workflow Note (HackFront India):
+                </div>
+                <p className="text-[11px] text-amber-800 leading-relaxed">
+                  In the current working prototype, in-transit paramedics manually update and adjust patient vitals using the steppers and sliders below, with instant 2-way real-time synchronization to the ER Cath Lab. Fully automated biomedical sensor streaming via Arduino UnoQ & hardware sensors is scheduled for <strong>Future Tracks</strong> (previewed in the hardware panel above).
+                </p>
               </div>
             </div>
 
