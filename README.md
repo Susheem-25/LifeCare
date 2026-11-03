@@ -4,19 +4,18 @@
 [![HackFront India 2026](https://img.shields.io/badge/HackFront%20India-2026%20by%20whereuelevate.com-DC2626?style=for-the-badge)](https://whereuelevate.com)
 [![Team](https://img.shields.io/badge/Team-BuilderBeings-10B981?style=for-the-badge)](#-hackathon-attribution--team)
 [![React 19](https://img.shields.io/badge/React-19.3-blue?style=for-the-badge&logo=react)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8%20Strict-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
 [![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS-4.3-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
 [![Build Speed](https://img.shields.io/badge/Vite%208-478ms%20Build-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev)
 [![Linter](https://img.shields.io/badge/Oxlint-0%20Warnings-green?style=for-the-badge)](https://oxc.rs)
 
 > 🌐 **Live Deployed Prototype:** [https://lifecare-prototype.netlify.app](https://lifecare-prototype.netlify.app)
 >
-> **LifeCare** is a synchronized emergency healthcare operating system connecting **Distress Callers**, **Ambulance Cockpits**, and **Hospital Emergency Departments** in real time. By uniting **Sarvam Indic Voice AI**, a **Neo4j Cypher Knowledge Graph Engine**, and an **ABDM-Compliant Zero-Wait Emergency Highway** (complemented by an **Arduino UnoQ & Autonomous Sensor Hardware Roadmap**), LifeCare replaces chaotic, fragmented hospital intake with guaranteed **Zero-Wait Golden Hour Admissions**.
+> **LifeCare** is a synchronized emergency healthcare operating system connecting **Distress Callers**, **Ambulance Cockpits**, and **Hospital Emergency Departments** in real time. By uniting **Sarvam Indic Voice AI & Web Speech Engine**, a **Neo4j Cypher Knowledge Graph Engine**, and an **ABDM-Compliant Zero-Wait Emergency Highway** (complemented by an **Arduino UnoQ & Autonomous Sensor Hardware Roadmap**), LifeCare replaces chaotic, fragmented hospital intake with guaranteed **Zero-Wait Golden Hour Admissions**.
 
 ### 👥 Team: BuilderBeings
-- **Susheem Kumar Maurya**
-- **Stuti Jain**
-- **Saksham Kaushik**
+- **Susheem Kumar Maurya** — Team Lead & Full-Stack Architect
+- **Stuti Jain** — Healthcare Systems & Clinical UX Lead
 
 *Engineered for HackFront India 2026 by whereuelevate.com*
 
@@ -30,7 +29,7 @@
 5. [Interactive Demo Walkthrough (Judge's Guide)](#-interactive-demo-walkthrough-judges-guide)
 6. [System Architecture & Data Flow](#-system-architecture--data-flow)
 7. [Repository Organization & File Structure](#-repository-organization--file-structure)
-8. [Visual Identity: Apple OS Liquid Glass](#-visual-identity-apple-os-liquid-glass)
+8. [Visual Identity: Apple OS Liquid Glass & Mobile Responsiveness](#-visual-identity-apple-os-liquid-glass--mobile-responsiveness)
 9. [Local Setup & Verification](#-local-setup--verification)
 10. [Hackathon Attribution & Team](#-hackathon-attribution--team)
 
@@ -44,9 +43,9 @@ LifeCare is architected to reflect the exact state of the prototype: **3 Active 
 
 | Track | Problem Solved | LifeCare Implementation | Code Location | Status |
 |---|---|---|---|---|
-| **Neo4j Track**<br>*(Knowledge Graph)* | Finding hospitals with simultaneously available Bed + on-duty Specialist + operational Equipment. | Graph schema: `(:Hospital)-[:HAS_BAY]->(:ERBay)-[:RESERVES_DOCTOR]->(:Doctor)`. Sub-9ms index-free Cypher traversals for zero-conflict atomic resource locks (`AMB-xxxx`). Includes interactive query visualizer with 1-click Cypher query copying. | `src/components/patient/Neo4jGraphExplorer.tsx`<br>`src/data/trackMockData.ts` | **Active Track** |
-| **Sarvam Track**<br>*(Indic Voice AI)* | Distress callers in panic cannot articulate complex medical symptoms in English or type long text. | Native voice SOS speech-to-text in 7 Indian languages (Hindi, Tamil, Telugu, Bengali, Marathi, Kannada, English) with clinical Acuity scoring (ESI 1-5) and ICD-10 triage classification. | `src/components/patient/EmergencySearch.tsx`<br>`src/services/aiTriageService.ts` | **Active Track** |
-| **General Track**<br>*(Zero-Wait ER)* | Fragmented emergency workflows across dispatchers, ambulances, and hospital ER desks. | Complete end-to-end synchronized platform: 1-tap Google Maps GPS turn-by-turn routing, ABDM In-Transit ABHA Pre-Admission, live 2-way ER vitals sync, and hospital bed/doctor capacity controllers. | `src/App.tsx`<br>`src/components/hospital/HospitalPortal.tsx`<br>`src/context/EmergencyContext.tsx` | **Active Track** |
+| **Neo4j Track**<br>*(Knowledge Graph)* | Finding hospitals with simultaneously available Bed + on-duty Specialist + operational Equipment. | Graph schema: `(:Hospital)-[:HAS_BAY]->(:ERBay)-[:RESERVES_DOCTOR]->(:Doctor)`. Sub-9ms index-free Cypher traversals for zero-conflict atomic resource locks (`AMB-xxxx` & `PAT-2026-xxxx`). Includes interactive query visualizer with 1-click Cypher query copying. | `src/components/patient/Neo4jGraphExplorer.tsx`<br>`src/data/trackMockData.ts` | **Active Track** |
+| **Sarvam Track**<br>*(Indic Voice AI & Speech)* | Distress callers in panic cannot articulate complex medical symptoms in English or type long text on phones. | Native Web Speech API Voice SOS microphone integration & Sarvam Indic AI models supporting 7 Indian languages (Hindi, Tamil, Telugu, Bengali, Marathi, Kannada, English) with clinical Acuity scoring (ESI 1-5), ICD-10 triage classification, and Text-to-Speech (TTS) voice guidance. | `src/components/patient/EmergencySearch.tsx`<br>`src/utils/speechService.ts`<br>`src/services/aiTriageService.ts` | **Active Track** |
+| **General Track**<br>*(Zero-Wait ER)* | Fragmented emergency workflows across dispatchers, ambulances, and hospital ER desks. | Complete end-to-end synchronized platform: 2-tier responsive mobile navigation, 1-tap Google Maps GPS turn-by-turn routing, ABDM In-Transit ABHA Pre-Admission modal with 1-click Aadhaar mock verification, live 2-way ER vitals sync, and hospital bed/doctor capacity controllers. | `src/App.tsx`<br>`src/components/hospital/HospitalPortal.tsx`<br>`src/components/patient/AbhaIntakeModal.tsx`<br>`src/context/EmergencyContext.tsx` | **Active Track** |
 
 ### 2. Future Tracks to be Added (Hardware IoT Roadmap)
 
@@ -71,10 +70,10 @@ Today's emergency response ecosystem in India suffers from **four systemic bottl
   Language barrier                                                                     (20-45 mins)
 ```
 
-1. **Blind Ambulance Transits:** Dispatchers and drivers navigate to the nearest facility without knowing if an ICU bed, cath lab, or neurosurgeon is actually available.
+1. **Blind Ambulance Transits:** Dispatchers and drivers navigate blindly to the nearest facility without knowing if an ICU bed, cath lab, or neurosurgeon is actually available.
 2. **Fatal ER Diverts & Rejections:** Up to 35% of critical trauma patients arrive at emergency facilities only to face hospital rejections because trauma bays are full or specialists are off-site.
-3. **In-Transit Telemetry Void:** Paramedics lack real-time digital sync with trauma centers; receiving teams only begin prepping *after* the patient physically wheels in.
-4. **Manual Intake Paperwork:** 20 to 30 minutes of the precious Golden Hour are lost at hospital desks filling paper admission sheets and verifying insurance policies.
+3. **In-Transit Telemetry Void:** Paramedics lack real-time digital sync with trauma centers; receiving teams only begin prepping *after* the patient physically wheels into the bay.
+4. **Manual Intake Paperwork:** 20 to 30 minutes of the precious Golden Hour are lost at hospital desks filling paper admission sheets, hunting for blood types, and verifying insurance policies.
 
 ---
 
@@ -98,21 +97,22 @@ LifeCare replaces this fragmented process with an **interlocked 4-pillar digital
     ┌───────────────────────────────────────────────┐  ┌───────────────────────────────────────────────┐
     │     Pillar 3: In-Transit ABHA Pre-Admission   │  │     Pillar 4: Smart ER & Ambulance Telemetry  │
     │ - ABDM Health ID Lookup & Verification        │  │ - Paramedic Manual Vitals Entry (Prototype)   │
-    │ - Prior Allergies & Chronic History Pre-Sync │  │ - 2-Way Real-Time Sync to ER Cath Lab        │
+    │ - Prior Allergies & Chronic History Pre-Sync  │  │ - 2-Way Real-Time Sync to ER Cath Lab        │
     │ - 0-Second ER Reception: Direct Bay Admission │  │ - Arduino UnoQ Edge IoT Roadmap (Future)      │
     └───────────────────────────────────────────────┘  └───────────────────────────────────────────────┘
 ```
 
-### Pillar 1: Multilingual Voice SOS (Sarvam Indic AI)
+### Pillar 1: Multilingual Voice SOS & Speech Engine (Sarvam Indic AI)
 - Designed for panic scenarios where typing or speaking English is difficult or impossible.
 - Supports **7 Indian Languages**:
   - **Hindi (हिन्दी):** *"सीने में बहुत तेज दर्द है और सांस लेने में तकलीफ हो रही है"*
   - **Tamil (தமிழ்):** *"நெஞ்சு வலி அதிகமாக உள்ளது, இடது கை மரத்துப்போனது"*
-  - **Telugu (తెలుగు):** *"తీవ్రమైన రోడ్డు ప్రమాదం, తలకు గాయమై స్పృహ కోల్పోయారు"*
+  - **Telugu (తెలుగు):** *"తీవ్రమైన రోడ్డు ప్రమాదం, తలకు గాయమై స్పృह కోల్పోయారు"*
   - **Bengali (বাংলা):** *"বুকে প্রচণ্ড ব্যথা ও শ্বাসকষ্ট হচ্ছে, বাঁ হাত অবশ"*
   - **Marathi (मराठी):** *"अचानक तोल गेला, बोलताना अडखळत आहे आणि डावी बाजू काम करत नाही"*
   - **Kannada (ಕನ್ನಡ):** *"ಎದೆ ನೋವು ತೀವ್ರವಾಗಿದೆ ಮತ್ತು ಉಸಿರಾಟದ ತೊಂದರೆ ಇದೆ"*
   - **English:** Voice & text clinical intake with instant phonetic recognition.
+- Integrated **Web Speech API**: Real-time microphone audio speech-to-text recording with live audio pulse animation and Text-to-Speech (TTS) audio narration for triage advice.
 - Automatically calculates **Acuity Level (ESI 1-5)**, assigns ICD-10 diagnostic codes, and flags required clinical specialists in sub-400ms.
 
 ### Pillar 2: Dynamic Knowledge Graph Matching (Neo4j Cypher Engine)
@@ -124,10 +124,12 @@ LifeCare replaces this fragmented process with an **interlocked 4-pillar digital
 
 ### Pillar 3: In-Transit ABHA Digital Pre-Admission (ABDM Compliant)
 - Pre-loads verified ABDM health records via patient ABHA ID (`91-4820-9182-3921`) during the ambulance journey.
+- Features an interactive **ABHA Intake Modal** allowing callers to proceed with verified ABHA credentials, 1-click mock Aadhaar authentication, or skip directly in urgent life-critical scenarios.
 - Synchronizes blood group (`B+`), chronic conditions, and critical drug allergies (`Penicillin - Anaphylaxis`) directly to the receiving trauma bay.
 - Patient bypasses hospital billing and reception desks completely: **True Zero-Wait ER Admission**.
 
 ### Pillar 4: Smart Ambulance Cockpit & Paramedic Telemetry
+- Dedicated **Driver Authentication Portal** with Driver Badge & PIN security.
 - Provides 1-tap **Google Maps turn-by-turn GPS navigation** with live distance and traffic ETA.
 - Features real-time **2-way synchronized vitals transmission** between the ambulance and the ER triage console.
 - Previews the **Arduino UnoQ Rev 2.0** edge unit with full C++ sketch code, UART serial packet stream, and Lead-II P-Q-R-S-T ECG oscilloscope.
@@ -142,6 +144,7 @@ To ensure complete clarity for HackFront evaluators, the prototype clearly delin
 1. **Pristine Zero-Booking State**: The prototype initializes cleanly with **zero pre-loaded bookings**. Evaluators can follow the natural patient SOS journey or use 1-click test simulation dispatchers.
 2. **Paramedic In-Cabin Vitals Entry**: Paramedics manually enter and adjust vitals (SpO2, Heart Rate, Blood Pressure, Respiratory Rate, GCS Score) using tactile sliders and steppers.
 3. **2-Way Real-Time Sync**: Clicking **"Transmit Paramedic Vitals to Hospital ER Bay"** immediately updates the hospital triage screen via cross-tab/channel synchronization. Hospital ER doctors can also adjust vitals or bay assignments with instant round-trip sync.
+4. **Interlinked Multi-Role Portals**: Role-based authentication separates Citizen/Patient, Ambulance Driver, and Hospital Staff portals while maintaining unified reactive telemetry state.
 
 ### Future Tracks Roadmap (Hardware IoT Ecosystem)
 1. **Automated Arduino UnoQ IoT**: Replaces manual entry with automated streaming via MAX30102 pulse oximetry, AD8232 ECG electrodes, and NIBP transducers over UART.
@@ -155,39 +158,43 @@ To ensure complete clarity for HackFront evaluators, the prototype clearly delin
 Follow this 5-minute interactive test script to verify all features:
 
 ### Step 1: Pristine Initial State & Voice SOS Intake (Citizen View)
-1. Launch the interactive prototype: Open [https://lifecare-prototype.netlify.app](https://lifecare-prototype.netlify.app) (or your local build). Notice that the top navigation reads **"Ready for SOS"** and starts with zero pre-existing bookings.
-2. Under **"Sarvam Indic Voice AI SOS"**, select any language (e.g. **Hindi**, **Tamil**, or **Telugu**).
-3. Click the voice microphone or sample prompt: *"सीने में बहुत तेज दर्द है और सांस लेने में तकलीफ हो रही है"*.
+1. Launch the interactive prototype: Open [https://lifecare-prototype.netlify.app](https://lifecare-prototype.netlify.app). Notice that the top navigation reads **"Ready for SOS"** and starts with zero pre-existing bookings.
+2. Under **"Emergency Medical Intake"**, select any language (e.g. **Hindi**, **Tamil**, or **Telugu**).
+3. Click the **Voice SOS (🎤)** microphone button to speak aloud, or click a quick prompt chip: *"Heart Attack"*, *"Road Accident"*, or *"Stroke"*.
 4. Notice:
    - AI computes **Acuity Level 1 (Critical)** in red.
    - Clinical summary identifies **Acute Coronary Syndrome (STEMI)**.
    - Mandatory specialists flag **Interventional Cardiology & Electrophysiology**.
    - Mandatory machinery flags **Cath Lab (Bi-Plane DSA) & Invasive Ventilator**.
+   - Text-to-Speech (TTS) speaks aloud triage recommendations.
 
 ### Step 2: Zero-Wait Hospital ER Locking
 1. Review the ranked hospital match list. The top recommendation (*AIIMS New Delhi*) displays live beds, free specialists, and sterilized machinery.
 2. Click **"Reserve Bed & Dispatch Ambulance"**.
-3. Audio chime plays; a confetti celebration triggers.
-4. The **Emergency Bed & Slot Confirmed Pass** opens with:
+3. The **ABHA Intake Modal** prompts for optional digital health ID intake with 1-click Aadhaar mock verification or immediate skip.
+4. Audio chime plays; a confetti celebration triggers.
+5. The **Emergency Bed & Slot Confirmed Pass** opens with:
    - **Unique Patient ID:** `PAT-2026-xxxx`
    - **Driver Booking Code:** `AMB-xxxx`
    - **Reserved Bay:** `Trauma Bay #03 (Cath Lab 2)`
    - 20-minute reservation countdown hold timer.
 
 ### Step 3: Ambulance Cockpit & Paramedic Telemetry
-1. Click **"Ambulance Cockpit"** in the navigation bar or bottom floating dock.
-2. Observe:
-   - **1-Tap Google Maps GPS Button:** Click to open exact driving directions from Greater Kailash to AIIMS.
+1. Switch to **"Driver"** in the navigation bar.
+2. Log in using pre-filled demo driver credentials (`DRV-401` / PIN `108`).
+3. Observe:
+   - **1-Tap Google Maps GPS Button:** Click to open driving directions to AIIMS New Delhi.
    - **Trip Status Stepper:** Click through *En Route Pickup*, *Patient Onboard*, *En Route ER Bay*, and *Arrived at Hospital*.
    - **Paramedic Vitals Console:** Adjust Heart Rate and SpO2 sliders, then click **"Transmit Paramedic Vitals to Hospital ER Bay"**.
    - **Arduino UnoQ Hardware Monitor:** Click *View C++ Sketch (.ino)* to view embedded code, or click *Connect COM3* to inspect simulated UART packet streaming and canvas ECG waveform.
    - **In-Transit ABHA Paperwork:** Verify pre-loaded ABHA ID `91-4820-9182-3921` with patient blood group, allergies, and signed digital consent.
 
 ### Step 4: Hospital ER Command Center
-1. Click **"Login as Hospital"** in the navigation bar.
-2. Select **AIIMS-DELHI** using the 1-click demo credentials.
+1. Switch to **"Hospital"** in the navigation bar.
+2. Select **AIIMS-DELHI** using the pre-filled demo credentials (`AIIMS-ER-01` / `aiims@er2026`).
 3. Observe:
-   - The incoming ambulance queue displays the active mission (`AMB-xxxx`).
+   - Sound alert chime sounds on arrival/intake.
+   - The incoming ambulance queue displays the active mission (`AMB-xxxx`) and Patient ID (`PAT-2026-xxxx`).
    - The vitals transmitted by the paramedic appear with live bidirectional sync.
    - Pre-arrival ABHA dossier displays verified blood group (`B+`) and allergy warnings (`⚠️ Penicillin`).
    - **Live Beds Capacity Controller (Tab 2):** Edit ICU or ER bed counts using direct number inputs or +/- buttons to verify instant reactivity.
@@ -206,7 +213,7 @@ Follow this 5-minute interactive test script to verify all features:
 sequenceDiagram
     autonumber
     actor Patient as Distress Caller (Patient)
-    participant Sarvam as Sarvam Indic Voice AI
+    participant Sarvam as Sarvam Indic Voice AI & Web Speech
     participant Neo4j as Neo4j Graph Engine
     participant Amb as Ambulance Cockpit
     participant ABDM as ABHA Health Registry
@@ -216,8 +223,8 @@ sequenceDiagram
     Sarvam-->>Patient: Acuity Score (ESI 1-5), ICD-10 Code & Required Specialty
     Patient->>Neo4j: Query hospitals (Free Bay + Specialist + Equipment)
     Neo4j-->>Patient: Ranked Hospitals with Simultaneous Free Resources
-    Patient->>Neo4j: 1-Click Bed Reservation
-    Neo4j->>Neo4j: Atomic Lock (AMB-xxxx & PAT-xxxx)
+    Patient->>Neo4j: 1-Click Bed Reservation & ABHA Intake
+    Neo4j->>Neo4j: Atomic Lock (AMB-xxxx & PAT-2026-xxxx)
     Neo4j-->>Amb: Dispatch Route & GPS Navigation
     Neo4j-->>ER: Bay Locked Alert & Incoming ETA
 
@@ -241,53 +248,60 @@ sequenceDiagram
 
 ```
 LifeCare/
-├── public/                               # Favicon and static assets
-│   └── favicon.svg                       # LifeCare heartbeat pulse icon
+├── public/                               # Favicon and SVG vector icons
+│   ├── favicon.svg                       # LifeCare heartbeat pulse brand icon
+│   └── icons.svg                         # Standalone SVG symbols
 ├── src/
 │   ├── components/
 │   │   ├── ambulance/                    # Ambulance cockpit & hardware telemetry
-│   │   │   ├── AmbulancePortal.tsx       # Live transit, paramedic vitals & ABHA sync
-│   │   │   └── ArduinoUnoQMonitor.tsx    # Arduino UnoQ hardware telemetry preview
+│   │   │   ├── AmbulancePortal.tsx       # Live transit, paramedic vitals, PIN auth & ABHA sync
+│   │   │   └── ArduinoUnoQMonitor.tsx    # Arduino UnoQ hardware telemetry preview & C++ sketch
+│   │   ├── common/                       # Shared reusable components
+│   │   │   └── LiveGpsTracker.tsx        # High-contrast live GPS radar & turn-by-turn map
 │   │   ├── hospital/                     # Hospital ER triage command
-│   │   │   └── HospitalPortal.tsx        # ER command station & bed/doctor capacity
+│   │   │   └── HospitalPortal.tsx        # ER command station, auth & bed/doctor capacity
 │   │   ├── patient/                      # Citizen emergency intake & triage
-│   │   │   ├── BookingConfirmedModal.tsx # Driver dispatch code & ABHA pass modal
-│   │   │   ├── EmergencySearch.tsx       # Sarvam Indic Voice SOS & clinical triage
-│   │   │   ├── HospitalMatchList.tsx     # Hospital zero-wait ranking & booking
-│   │   │   └── Neo4jGraphExplorer.tsx    # Interactive Cypher graph canvas & copier
+│   │   │   ├── AbhaIntakeModal.tsx       # ABHA intake dialog with 1-click Aadhaar verification
+│   │   │   ├── BookingConfirmedModal.tsx # Driver dispatch code, Patient ID & ABHA pass modal
+│   │   │   ├── EmergencySearch.tsx       # Web Speech Voice SOS, TTS & clinical triage
+│   │   │   ├── HospitalMatchList.tsx     # Hospital zero-wait ranking & bed reservation
+│   │   │   └── Neo4jGraphExplorer.tsx    # Interactive Cypher graph canvas & query copier
 │   │   ├── tracks/                       # HackFront hackathon multi-track showcase
-│   │   │   ├── FooterTracksSection.tsx   # Persistent tracks & hardware roadmap
-│   │   │   └── HackFrontTrackModal.tsx   # Track breakdown & code mapping modal
-│   │   └── Navbar.tsx                    # Apple OS Liquid Glass navigation
+│   │   │   ├── FooterTracksSection.tsx   # Persistent tracks & hardware roadmap cards
+│   │   │   └── HackFrontTrackModal.tsx   # Deep-dive track breakdown & code mapping modal
+│   │   └── Navbar.tsx                    # 2-Tier responsive mobile header & role navigation
 │   ├── context/
-│   │   └── EmergencyContext.tsx          # Reactive global state (Locks, Vitals, Beds)
+│   │   └── EmergencyContext.tsx          # Reactive global state (Locks, Vitals, Beds, Bookings)
 │   ├── data/
-│   │   ├── mockData.ts                   # Realistic hospitals, ER bays, doctors & ABHA
-│   │   └── trackMockData.ts              # Cypher queries, graph nodes & Arduino packets
+│   │   ├── mockData.ts                   # Realistic hospitals, ER bays, doctors, drivers & ABHA
+│   │   └── trackMockData.ts              # Cypher queries, graph nodes & Arduino telemetry packets
 │   ├── services/
 │   │   └── aiTriageService.ts            # Clinical acuity scoring & specialty matching
 │   ├── utils/
-│   │   ├── audio.ts                      # Web Audio API procedural sound engine
-│   │   └── scrollHelper.ts               # Smooth UX fast-scroll helper
-│   ├── App.tsx                           # Master layout, view switcher & floating dock
-│   ├── index.css                         # Apple Liquid Glass styling and animations
+│   │   ├── audio.ts                      # Web Audio API procedural sound engine & alerts
+│   │   ├── scrollHelper.ts               # Smooth UX fast-scroll helper
+│   │   └── speechService.ts              # Web Speech API recognition & speech synthesis engine
+│   ├── App.tsx                           # Master layout, view switcher & responsive shell
+│   ├── index.css                         # Apple Liquid Glass styling, layout guards & animations
 │   ├── main.tsx                          # React 19 entry point
 │   └── types.ts                          # Strictly typed TypeScript interfaces
+├── LifeCare_Presentation.pptx            # 10-Slide Widescreen (16:9) HackFront Pitch Deck
 ├── index.html                            # HTML5 entry with Plus Jakarta Sans & JetBrains Mono
-├── package.json                          # Dependencies (React 19, Tailwind CSS 4, Lucide)
-├── tsconfig.json                         # TypeScript strict configuration
+├── package.json                          # Clean dependencies (React 19, Tailwind CSS 4, Lucide)
+├── tsconfig.json                         # TypeScript strict compiler configuration
 └── vite.config.ts                        # Vite 8 build pipeline
 ```
 
 ---
 
-## 🎨 Visual Identity: Apple OS Liquid Glass
+## 🎨 Visual Identity: Apple OS Liquid Glass & Mobile Responsiveness
 
-LifeCare is styled with an **Apple OS Liquid Glass (White & Red Healthcare)** aesthetic:
+LifeCare is styled with an **Apple OS Liquid Glass (White & Red Healthcare)** aesthetic and full mobile optimization:
 
-- **Liquid Glass Cards:** Multi-surface frosted glass cards (`backdrop-filter: blur(28px) saturate(190%)`) with hairline translucent borders (`rgba(255, 255, 255, 0.85)`) and specular top-edge light highlights (`box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95)`).
+- **Strict Mobile Responsiveness:** Enforces zero horizontal scroll (`overflow-x: hidden` and `max-width: 100%`) across all Android and iOS viewports.
+- **2-Tier Segmented Header:** Separates brand identity and emergency helpline in Row 1 from a full-width 3-tab segmented control (`SOS Triage`, `Driver`, `Hospital`) in Row 2, preventing tab overlap on narrow phone screens.
+- **Liquid Glass Cards:** Multi-surface frosted glass cards (`backdrop-filter: blur(28px) saturate(190%)`) with hairline translucent borders (`rgba(255, 255, 255, 0.85)`) and specular top-edge light highlights.
 - **Liquid Red Glossy Buttons:** Tactile pill design with specular top reflection gradients (`linear-gradient(180deg, #F87171 0%, #EF4444 32%, #DC2626 100%)`) and spring-like active compression (`active:scale-[0.975]`).
-- **Fluid Ambient Canvas:** Multi-layered organic ambient lighting mesh with floating fluid aura gradients (`radial-gradient` spheres of soft rose/crimson `#EF4444`, peach, and icy slate) that refract through frosted glass cards.
 - **Auditory Feedback:** Procedural sound synthesis via browser Web Audio API — synthesizes clinical heart monitor pulses, driver lock chimes, and emergency alerts without external audio assets.
 
 ---
@@ -314,7 +328,7 @@ Open the running local application address displayed in your terminal.
 ```bash
 npm run build
 ```
-Compiles TypeScript and bundles via Vite:
+Compiles TypeScript with 0 errors and bundles via Vite:
 ```
 ✓ 2045 modules transformed.
 dist/index.html                   1.84 kB
@@ -340,9 +354,8 @@ Found 0 warnings and 0 errors.
 - **Host / Platform:** whereuelevate.com
 - **Team Name:** **BuilderBeings**
 - **Team Members:**
-  - **Susheem Kumar Maurya**
-  - **Stuti Jain**
-  - **Saksham Kaushik**
+  - **Susheem Kumar Maurya** — Team Lead & Full-Stack Architect
+  - **Stuti Jain** — Healthcare Systems & Clinical UX Lead
 - **Repository Name:** LifeCare
 - **Live Deployed Prototype:** [https://lifecare-prototype.netlify.app](https://lifecare-prototype.netlify.app)
 - **Project Name:** LifeCare — AI Emergency Triage & Zero-Wait Hospital Orchestration

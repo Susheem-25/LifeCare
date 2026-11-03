@@ -86,7 +86,7 @@ const MainAppContent: React.FC = () => {
           </div>
           <div className="text-xs text-slate-500 max-w-xl mx-auto space-y-0.5">
             <p>
-              HackFront India 2026 • <strong>Team BuilderBeings</strong> (Susheem Kumar Maurya • Stuti Jain • Saksham Kaushik)
+              HackFront India 2026 • <strong>Team BuilderBeings</strong> (Susheem Kumar Maurya • Stuti Jain)
             </p>
             <p className="text-[11px] text-slate-400">
               Sarvam Indic Voice AI • Neo4j Multi-Resource Graph Locking • ABDM ABHA In-Transit Pre-Admission
