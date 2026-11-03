@@ -288,6 +288,7 @@ LifeCare/
 │   ├── main.tsx                          # React 19 entry point
 │   └── types.ts                          # Strictly typed TypeScript interfaces
 ├── LifeCare_Presentation.pptx            # 10-Slide Widescreen (16:9) HackFront Pitch Deck
+├── LifeCare_Winning_Pitch_Deck.pptx      # Synced 10-Slide HackFront Presentation Deck
 ├── index.html                            # HTML5 entry with Plus Jakarta Sans & JetBrains Mono
 ├── package.json                          # Clean dependencies (React 19, Tailwind CSS 4, Lucide)
 ├── tsconfig.json                         # TypeScript strict compiler configuration
