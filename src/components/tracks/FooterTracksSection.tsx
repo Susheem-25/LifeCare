@@ -8,7 +8,8 @@ import {
   CheckCircle2, 
   Clock, 
   Bed, 
-  Fingerprint
+  Fingerprint,
+  WifiOff
 } from 'lucide-react';
 import { useEmergency } from '../../context/EmergencyContext';
 
@@ -60,7 +61,7 @@ export const FooterTracksSection: React.FC = () => {
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
-              <span>Hardware Roadmap</span>
+              <span>Future Scope & PWA</span>
             </button>
           </div>
         </div>
@@ -211,9 +212,9 @@ export const FooterTracksSection: React.FC = () => {
           </div>
         )}
 
-        {/* 2. FUTURE HARDWARE TRACKS (3 CARDS) */}
+        {/* 2. FUTURE TRACKS & PWA OFFLINE ARCHITECTURE (4 CARDS) */}
         {activeTab === 'future' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 animate-fadeIn">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 animate-fadeIn">
             {/* FUTURE 1: ARDUINO UNOQ TELEMETRY */}
             <div
               onClick={() => navigateToTrack('arduino')}
@@ -357,6 +358,56 @@ export const FooterTracksSection: React.FC = () => {
 
               <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs font-semibold text-amber-700 group-hover:text-amber-800">
                 <span>View Doctor Logic</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            {/* FUTURE 4: OFFLINE-FIRST PWA (ZERO-NETWORK ZONE TRIAGE) */}
+            <div
+              onClick={() => {
+                setCurrentView('patient');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="bg-slate-50 hover:bg-white rounded-xl p-4 border border-indigo-200 hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
+              title="Inspect Offline PWA Scope"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+                    <WifiOff className="w-4 h-4 text-indigo-700" />
+                  </div>
+                  <span className="text-[11px] font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded">
+                    Zero-Net PWA
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-xs text-indigo-700 font-bold block uppercase tracking-wide">
+                    Future: PWA Scope
+                  </span>
+                  <h4 className="font-bold text-slate-900 text-base group-hover:text-indigo-700">
+                    Offline PWA Triage
+                  </h4>
+                </div>
+
+                <div className="space-y-1 text-xs text-slate-600">
+                  <div className="flex items-center justify-between">
+                    <span>Offline Engine:</span>
+                    <strong className="text-slate-900 font-mono text-[11px]">ServiceWorker + Cache</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>No Network:</span>
+                    <strong className="text-indigo-800">IndexedDB Queue & SMS</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Stabilization:</span>
+                    <strong className="text-emerald-700">Offline CPR / FAST AI</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs font-semibold text-indigo-700 group-hover:text-indigo-800">
+                <span>View Offline Blueprint</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>

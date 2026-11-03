@@ -5,7 +5,8 @@ import {
   Layers, 
   Cpu, 
   X, 
-  ArrowRight
+  ArrowRight,
+  WifiOff
 } from 'lucide-react';
 
 interface Props {
@@ -218,6 +219,32 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
               <div className="text-blue-700 font-bold flex items-center gap-1 shrink-0">
                 <span>View Prototype Details</span>
                 <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </div>
+
+            {/* Future Scope: Offline-First PWA for Zero-Network Zones */}
+            <div 
+              className="bg-gradient-to-r from-indigo-50/80 to-purple-50/70 p-4 rounded-2xl border-2 border-dashed border-indigo-300 hover:border-indigo-500 hover:shadow-md transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono group"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold">
+                  <WifiOff className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] uppercase font-bold text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded">
+                      Future Scope to be Added
+                    </span>
+                    <strong className="text-slate-900 text-xs">Offline-First PWA (No-Network Emergency Triage)</strong>
+                  </div>
+                  <p className="text-slate-600 text-[11px] mt-0.5">
+                    ServiceWorker cache + IndexedDB offline triage engine. Ensures life-critical CPR/FAST guidance and distress dispatch queueing with automatic SMS/sync in zero-connectivity dead zones.
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-indigo-700 font-bold flex items-center gap-1 shrink-0">
+                <span className="text-[10px] bg-indigo-100 px-2 py-1 rounded-md">PWA Roadmap</span>
               </div>
             </div>
           </div>

@@ -11,11 +11,10 @@ import {
   HeartPulse,
   Award,
   Sparkles,
-  Code2,
-  Stethoscope,
   Layers,
   ShieldCheck,
-  PhoneCall
+  PhoneCall,
+  WifiOff
 } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
@@ -131,97 +130,46 @@ const MainAppContent: React.FC = () => {
             </div>
           </div>
 
-          {/* Middle Row: Prominent Team BuilderBeings Member Showcase Cards */}
-          <div className="space-y-4">
+          {/* Middle Row: Team BuilderBeings Member Showcase (Clean & Concise) */}
+          <div className="space-y-3">
             <div className="text-center">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-mono font-bold shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                 Team BuilderBeings
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-1.5">
-                Core Architects & Clinical Design Leads
-              </h3>
-              <p className="text-xs text-slate-500 max-w-xl mx-auto mt-0.5">
-                Engineered from the ground up for HackFront India 2026 to eliminate Golden Hour trauma mortality.
+              <p className="text-xs text-slate-500 mt-1">
+                HackFront India 2026 by whereuelevate.com
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 max-w-xl mx-auto">
               {/* Member 1: Susheem Kumar Maurya */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-white/95 border border-slate-200/90 shadow-sm hover:shadow-md transition-all space-y-3 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-rose-500 to-amber-500"></div>
-                <div className="flex items-start gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-red-500/25 shrink-0 group-hover:scale-105 transition-transform">
-                    SM
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1 flex-wrap">
-                      <h4 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">
-                        Susheem Kumar Maurya
-                      </h4>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                        Team Lead
-                      </span>
-                    </div>
-                    <p className="text-xs font-medium text-emerald-700 flex items-center gap-1 mt-0.5">
-                      <Code2 className="w-3 h-3 text-emerald-600" />
-                      Full-Stack Architect & Systems Lead
-                    </p>
-                  </div>
+              <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center font-bold text-xs shadow-sm shadow-red-500/20 shrink-0">
+                  SM
                 </div>
-
-                <div className="pt-2 border-t border-slate-100 text-xs text-slate-600 space-y-1.5">
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-red-500 font-bold shrink-0">•</span>
-                    <span><strong>Neo4j Cypher Graph Engine:</strong> Sub-9ms index-free multi-resource atomic locks</span>
-                  </div>
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-red-500 font-bold shrink-0">•</span>
-                    <span><strong>Sarvam Indic Voice AI & Web Speech:</strong> 7 native language voice intake & TTS</span>
-                  </div>
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-red-500 font-bold shrink-0">•</span>
-                    <span><strong>ABDM In-Transit Pre-Admission:</strong> Zero-wait patient intake & Aadhaar verification</span>
-                  </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm leading-tight">
+                    Susheem Kumar Maurya
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Team Lead & Full-Stack Architect
+                  </p>
                 </div>
               </div>
 
               {/* Member 2: Stuti Jain */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-white/95 border border-slate-200/90 shadow-sm hover:shadow-md transition-all space-y-3 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
-                <div className="flex items-start gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-emerald-500/25 shrink-0 group-hover:scale-105 transition-transform">
-                    SJ
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1 flex-wrap">
-                      <h4 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">
-                        Stuti Jain
-                      </h4>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        UX Lead
-                      </span>
-                    </div>
-                    <p className="text-xs font-medium text-emerald-700 flex items-center gap-1 mt-0.5">
-                      <Stethoscope className="w-3 h-3 text-emerald-600" />
-                      Healthcare Systems & Clinical UX Lead
-                    </p>
-                  </div>
+              <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-xs shadow-sm shadow-emerald-500/20 shrink-0">
+                  SJ
                 </div>
-
-                <div className="pt-2 border-t border-slate-100 text-xs text-slate-600 space-y-1.5">
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-emerald-500 font-bold shrink-0">•</span>
-                    <span><strong>Clinical Triage Protocols:</strong> Emergency Severity Index (ESI 1-5) & ICD-10 codes</span>
-                  </div>
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-emerald-500 font-bold shrink-0">•</span>
-                    <span><strong>Apple OS Liquid Glass UI:</strong> Mobile-first 2-tier responsiveness & zero scroll guard</span>
-                  </div>
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-emerald-500 font-bold shrink-0">•</span>
-                    <span><strong>Paramedic Cockpit & Telemetry:</strong> Live 2-way vital synchronization with ER Cath Labs</span>
-                  </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm leading-tight">
+                    Stuti Jain
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Healthcare Systems & Clinical UX Lead
+                  </p>
                 </div>
               </div>
             </div>
@@ -243,6 +191,10 @@ const MainAppContent: React.FC = () => {
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-500">
               Arduino UnoQ IoT (Roadmap)
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 shadow-2xs" title="Offline-First PWA for Zero-Network Highway Zones">
+              <WifiOff className="w-3 h-3 text-indigo-600" />
+              Offline-First PWA (Roadmap)
             </span>
           </div>
 

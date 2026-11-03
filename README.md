@@ -47,13 +47,14 @@ LifeCare is architected to reflect the exact state of the prototype: **3 Active 
 | **Sarvam Track**<br>*(Indic Voice AI & Speech)* | Distress callers in panic cannot articulate complex medical symptoms in English or type long text on phones. | Native Web Speech API Voice SOS microphone integration & Sarvam Indic AI models supporting 7 Indian languages (Hindi, Tamil, Telugu, Bengali, Marathi, Kannada, English) with clinical Acuity scoring (ESI 1-5), ICD-10 triage classification, and Text-to-Speech (TTS) voice guidance. | `src/components/patient/EmergencySearch.tsx`<br>`src/utils/speechService.ts`<br>`src/services/aiTriageService.ts` | **Active Track** |
 | **General Track**<br>*(Zero-Wait ER)* | Fragmented emergency workflows across dispatchers, ambulances, and hospital ER desks. | Complete end-to-end synchronized platform: 2-tier responsive mobile navigation, 1-tap Google Maps GPS turn-by-turn routing, ABDM In-Transit ABHA Pre-Admission modal with 1-click Aadhaar mock verification, live 2-way ER vitals sync, and hospital bed/doctor capacity controllers. | `src/App.tsx`<br>`src/components/hospital/HospitalPortal.tsx`<br>`src/components/patient/AbhaIntakeModal.tsx`<br>`src/context/EmergencyContext.tsx` | **Active Track** |
 
-### 2. Future Tracks to be Added (Hardware IoT Roadmap)
+### 2. Future Tracks & Architectural Roadmap (Hardware IoT & Offline-First PWA)
 
-| Hardware System | Target Board & Sensors | Architectural Purpose | Working Component | Status |
+| System / Roadmap | Target Stack & Sensors | Architectural Purpose | Working Component | Status |
 |---|---|---|---|---|
 | **1. Arduino UnoQ Ambulance IoT** | Arduino UnoQ Rev 2.0, MAX30102 (SpO2/HR), AD8232 Lead-II ECG, UART @ 115200 bps | Continuous automated biosensor streaming from transit directly to the hospital cath lab. *(Currently previewed in Standby mode with working C++ `.ino` sketch and UART simulator).* | `src/components/ambulance/ArduinoUnoQMonitor.tsx` | **Future Track Simulator** |
 | **2. Piezoelectric Auto-Bed Sensor** | PVDF Piezoelectric Film Matrix under ER mattresses | Continuous weight & presence sensing (>15 kg = Occupied / <5 kg = Free), updating Neo4j graph in <250ms without nurse data entry. | `src/components/tracks/FooterTracksSection.tsx`<br>`src/components/hospital/HospitalPortal.tsx` | **Future Hardware Track** |
 | **3. Biometric Doctor Tracking** | Optical Fingerprint + BLE Proximity Turnstiles at OT/ER scrub | Physical on-duty verification ensuring patients are only dispatched to hospitals with verified on-site specialists. | `src/components/tracks/FooterTracksSection.tsx`<br>`src/components/hospital/HospitalPortal.tsx` | **Future Hardware Track** |
+| **4. Offline-First PWA (Zero-Network Zone)** | ServiceWorker Cache API, IndexedDB Emergency Queue, Web Speech Offline Models & SMS Fallback | Ensures LifeCare remains fully operational when victims or drivers encounter remote highway dead zones, tunnels, or cellular dropouts. Provides offline CPR/FAST first-aid instructions, local triage scoring, and queues distress dispatches that automatically broadcast or fall back to encrypted SMS the instant a single bar of cellular signal is detected. | `src/components/tracks/FooterTracksSection.tsx`<br>`src/components/tracks/HackFrontTrackModal.tsx` | **Future PWA Scope** |
 
 ---
 
@@ -146,10 +147,11 @@ To ensure complete clarity for HackFront evaluators, the prototype clearly delin
 3. **2-Way Real-Time Sync**: Clicking **"Transmit Paramedic Vitals to Hospital ER Bay"** immediately updates the hospital triage screen via cross-tab/channel synchronization. Hospital ER doctors can also adjust vitals or bay assignments with instant round-trip sync.
 4. **Interlinked Multi-Role Portals**: Role-based authentication separates Citizen/Patient, Ambulance Driver, and Hospital Staff portals while maintaining unified reactive telemetry state.
 
-### Future Tracks Roadmap (Hardware IoT Ecosystem)
+### Future Tracks Roadmap (Hardware IoT & Offline PWA)
 1. **Automated Arduino UnoQ IoT**: Replaces manual entry with automated streaming via MAX30102 pulse oximetry, AD8232 ECG electrodes, and NIBP transducers over UART.
 2. **Piezoelectric Auto-Bed Sensors**: Under-mattress pressure film matrix detecting patient weight shifts (>15 kg occupied / <5 kg vacant), updating Neo4j availability within <250ms without nurse input.
 3. **Biometric Doctor Tracking**: Optical fingerprint scanners and BLE proximity beacons at OT scrub-in rooms verifying on-duty presence to eliminate paper roster lag.
+4. **Offline-First PWA (Zero-Network Zone Emergency Triage)**: Progressive Web App architecture caching essential clinical triage logic, CPR/FAST stabilization walkthroughs, and queuing distress dispatches locally in IndexedDB with background sync and emergency SMS fallback when traveling through zero-connectivity dead zones or remote highways.
 
 ---
 
