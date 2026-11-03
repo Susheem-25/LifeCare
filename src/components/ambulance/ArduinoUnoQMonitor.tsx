@@ -163,45 +163,45 @@ export const ArduinoUnoQMonitor: React.FC<Props> = ({
   };
 
   return (
-    <div className="liquid-glass-card rounded-3xl p-5 sm:p-6 border border-emerald-500/20 space-y-5 oled-glow-emerald">
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-xs">
-            <Cpu className="w-5 h-5 text-emerald-600" />
+          <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
+            <Cpu className="w-5 h-5 text-blue-600" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-blue-800 bg-blue-100 border border-blue-300 px-2.5 py-0.5 rounded-full font-extrabold flex items-center gap-1">
+              <span className="text-xs uppercase tracking-wider text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1">
                 <span>FUTURE HARDWARE TRACK • ARDUINO UNOQ IoT</span>
               </span>
-              <span className="text-[9px] font-mono text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded font-bold">
-                Board: Arduino UnoQ Rev 2.0 (Dual-Core IoT Roadmap)
+              <span className="text-[11px] text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-mono">
+                Arduino UnoQ Rev 2.0 (Dual-Core Roadmap)
               </span>
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5">
               Ambulance Biomedical IoT Sensor Hub & UART Stream
             </h3>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 text-xs font-mono">
+        <div className="flex items-center space-x-2 text-xs">
           <button
             type="button"
             onClick={() => setShowSketchModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-btn-glass text-slate-800 font-bold hover:text-emerald-700 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold border border-slate-200 transition cursor-pointer"
           >
-            <Code2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>View C++ Sketch (.ino)</span>
+            <Code2 className="w-3.5 h-3.5 text-blue-600" />
+            <span>View C++ Sketch</span>
           </button>
 
           <button
             type="button"
             onClick={() => setIsConnected(!isConnected)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
               isConnected
                 ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
             }`}
           >
             <Radio className="w-3.5 h-3.5" />
@@ -341,10 +341,10 @@ export const ArduinoUnoQMonitor: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={copySketch}
-                className="px-4 py-2 rounded-xl liquid-btn-red text-white font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 {copiedSketch ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedSketch ? 'Copied to Clipboard' : 'Copy Arduino C++ Sketch'}</span>
+                <span>{copiedSketch ? 'Copied' : 'Copy Arduino C++ Sketch'}</span>
               </button>
             </div>
           </div>

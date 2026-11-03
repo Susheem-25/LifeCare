@@ -75,3 +75,14 @@ class SoundEffectsManager {
 }
 
 export const soundEffects = new SoundEffectsManager();
+
+export { 
+  speakText, 
+  stopSpeaking, 
+  isSpeaking, 
+  startVoiceSos, 
+  stopVoiceSos, 
+  isSpeechRecognitionSupported, 
+  isSpeechSynthesisSupported 
+} from './speechService';
+

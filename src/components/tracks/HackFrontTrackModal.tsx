@@ -20,23 +20,23 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-2xl overflow-y-auto animate-fadeIn">
-      <div className="relative w-full max-w-4xl bg-white/90 backdrop-blur-2xl rounded-3xl border border-white/80 p-6 sm:p-8 shadow-2xl space-y-6 my-8 liquid-glass-card">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto animate-fadeIn">
+      <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 shadow-xl space-y-5 my-8">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition cursor-pointer"
+          className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Header */}
-        <div className="space-y-2">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-100 border border-red-200 text-[11px] font-mono text-red-700 font-black">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200 text-xs text-red-700 font-semibold">
             <span>HACKFRONT INDIA 2026 • TRACKS USED & ROADMAP</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Tracks Used
           </h2>
 
@@ -46,13 +46,13 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
         </div>
 
         {/* Track Tabs */}
-        <div className="flex items-center space-x-1.5 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200 font-mono text-xs overflow-x-auto">
+        <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs overflow-x-auto">
           <button
             onClick={() => setActiveTrackTab('overview')}
-            className={`px-3.5 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
               activeTrackTab === 'overview'
-                ? 'liquid-btn-red text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                ? 'bg-red-600 text-white font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             Tracks Used Overview
@@ -60,10 +60,10 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
 
           <button
             onClick={() => setActiveTrackTab('neo4j')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
               activeTrackTab === 'neo4j'
-                ? 'liquid-btn-red text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                ? 'bg-red-600 text-white font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <Network className="w-3.5 h-3.5" />
@@ -72,10 +72,10 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
 
           <button
             onClick={() => setActiveTrackTab('sarvam')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
               activeTrackTab === 'sarvam'
-                ? 'liquid-btn-red text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                ? 'bg-red-600 text-white font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <Languages className="w-3.5 h-3.5" />
@@ -84,10 +84,10 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
 
           <button
             onClick={() => setActiveTrackTab('general')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
               activeTrackTab === 'general'
-                ? 'liquid-btn-red text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                ? 'bg-red-600 text-white font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -96,9 +96,9 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
 
           <button
             onClick={() => setActiveTrackTab('arduino')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
               activeTrackTab === 'arduino'
-                ? 'bg-blue-600 text-white shadow-sm'
+                ? 'bg-blue-600 text-white font-semibold shadow-xs'
                 : 'text-blue-700 bg-blue-50 hover:bg-blue-100'
             }`}
           >
@@ -257,7 +257,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
                   onClose();
                   onNavigateToView('patient');
                 }}
-                className="px-4 py-2 rounded-xl liquid-btn-red text-white font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <span>View Neo4j Graph & Cypher Runner</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -269,7 +269,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
         {/* Tab 3: Sarvam Track */}
         {activeTrackTab === 'sarvam' && (
           <div className="space-y-4 animate-fadeIn text-xs">
-            <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 space-y-2">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
               <div className="flex items-center space-x-2 text-amber-800 font-bold text-sm">
                 <Languages className="w-4 h-4 text-amber-600" />
                 <span>Track Used: Sarvam Indic Multilingual AI</span>
@@ -280,21 +280,21 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
               <p className="text-amber-950 leading-relaxed">
                 LifeCare utilizes <strong>Sarvam AI</strong> sovereign models:
               </p>
-              <ul className="list-disc list-inside space-y-1 text-amber-900 font-mono text-[11px] pl-1">
+              <ul className="list-disc list-inside space-y-1 text-amber-900 text-xs pl-1">
                 <li><strong>Sarvam Saaras ASR:</strong> Multilingual speech-to-text accurately capturing panic-stricken vernacular speech in Hindi, Tamil, Telugu, Bengali, Marathi, etc.</li>
                 <li><strong>Sarvam-1 Indic LLM:</strong> Translates regional conversational emergency accounts into standardized clinical triage summaries with ICD-10 medical coding.</li>
-                <li><strong>Zero Nuance Loss:</strong> Accurately interprets cultural phrases (e.g., "सीने में भारीपन", "छातीत धडधड", "நெஞ்சில் பாரம்") into clinical cardiac protocols.</li>
+                <li><strong>Zero Nuance Loss:</strong> Accurately interprets cultural phrases (e.g., "सीने में भारीपन", "छातीत धडधड", "நெஞ்சில் பாரम") into clinical cardiac protocols.</li>
               </ul>
             </div>
 
             <div className="flex items-center justify-between pt-2">
-              <span className="font-mono text-slate-500">Test voice SOS in 7 Indic languages on the patient search intake.</span>
+              <span className="text-slate-500">Test voice SOS in 7 Indic languages on the patient search intake.</span>
               <button
                 onClick={() => {
                   onClose();
                   onNavigateToView('patient');
                 }}
-                className="px-4 py-2 rounded-xl liquid-btn-red text-white font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <span>Try Sarvam Indic Voice SOS</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -306,7 +306,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
         {/* Tab 4: General Track */}
         {activeTrackTab === 'general' && (
           <div className="space-y-4 animate-fadeIn text-xs">
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
               <div className="flex items-center space-x-2 text-slate-800 font-bold text-sm">
                 <Layers className="w-4 h-4 text-red-600" />
                 <span>Track Used: General Track (Zero-Wait Emergency Orchestration)</span>
@@ -314,20 +314,20 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
               <p className="text-slate-700 leading-relaxed">
                 LifeCare delivers an end-to-end mission-critical platform designed to solve the <strong>Golden Hour mortality crisis</strong> in Indian emergency healthcare:
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-[11px]">
-                <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div className="bg-white p-2.5 rounded-lg border border-slate-200">
                   <div className="font-bold text-red-700">1. Pre-Reservation Lock</div>
                   <div className="text-slate-500">Simultaneously reserves ICU Bed, on-duty specialist doctor, and machinery.</div>
                 </div>
-                <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+                <div className="bg-white p-2.5 rounded-lg border border-slate-200">
                   <div className="font-bold text-red-700">2. Google Maps Navigation</div>
                   <div className="text-slate-500">Ambulance driver enters booking code to launch live GPS turn-by-turn routing.</div>
                 </div>
-                <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+                <div className="bg-white p-2.5 rounded-lg border border-slate-200">
                   <div className="font-bold text-red-700">3. In-Transit ABHA Admission</div>
                   <div className="text-slate-500">ABDM health records & PM-JAY ₹5L cashless cover attach before arrival.</div>
                 </div>
-                <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+                <div className="bg-white p-2.5 rounded-lg border border-slate-200">
                   <div className="font-bold text-red-700">4. Hospital ER Console</div>
                   <div className="text-slate-500">Real-time doctor roster, editable bay assignments, and telemetry monitor.</div>
                 </div>
@@ -337,7 +337,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
             <div className="flex items-center justify-end pt-2">
               <button
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl liquid-btn-red text-white font-bold shadow-sm cursor-pointer"
+                className="px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold shadow-xs cursor-pointer"
               >
                 Close & Return to App
               </button>

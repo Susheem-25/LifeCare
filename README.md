@@ -2,7 +2,7 @@
 
 [![Live Prototype](https://img.shields.io/badge/Live%20Prototype-lifecare--prototype.netlify.app-00C7B7?style=for-the-badge&logo=netlify)](https://lifecare-prototype.netlify.app)
 [![HackFront India 2026](https://img.shields.io/badge/HackFront%20India-2026%20by%20whereuelevate.com-DC2626?style=for-the-badge)](https://whereuelevate.com)
-[![Team](https://img.shields.io/badge/Team-Builder%20Beings-10B981?style=for-the-badge)](#-hackathon-attribution--team)
+[![Team](https://img.shields.io/badge/Team-BuilderBeings-10B981?style=for-the-badge)](#-hackathon-attribution--team)
 [![React 19](https://img.shields.io/badge/React-19.3-blue?style=for-the-badge&logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8%20Strict-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
 [![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS-4.3-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
@@ -13,7 +13,7 @@
 >
 > **LifeCare** is a synchronized emergency healthcare operating system connecting **Distress Callers**, **Ambulance Cockpits**, and **Hospital Emergency Departments** in real time. By uniting **Sarvam Indic Voice AI**, a **Neo4j Cypher Knowledge Graph Engine**, and an **ABDM-Compliant Zero-Wait Emergency Highway** (complemented by an **Arduino UnoQ & Autonomous Sensor Hardware Roadmap**), LifeCare replaces chaotic, fragmented hospital intake with guaranteed **Zero-Wait Golden Hour Admissions**.
 
-### 👥 Team: Builder Beings
+### 👥 Team: BuilderBeings
 - **Susheem Kumar Maurya**
 - **Stuti Jain**
 - **Saksham Kaushik**
@@ -338,7 +338,7 @@ Found 0 warnings and 0 errors.
 
 - **Competition:** HackFront India 2026
 - **Host / Platform:** whereuelevate.com
-- **Team Name:** **Builder Beings**
+- **Team Name:** **BuilderBeings**
 - **Team Members:**
   - **Susheem Kumar Maurya**
   - **Stuti Jain**

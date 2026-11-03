@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
+import { soundEffects } from '../../utils/audio';
 import { INITIAL_HOSPITALS } from '../../data/mockData';
-import type { Doctor, Equipment } from '../../types';
+import type { Doctor, Equipment, EmergencyBooking } from '../../types';
 import { 
   Building2, 
   Lock, 
@@ -22,6 +23,7 @@ import {
   Fingerprint,
   Gauge
 } from 'lucide-react';
+import { LiveGpsTracker } from '../common/LiveGpsTracker';
 
 export const HospitalPortal: React.FC = () => {
   const { 
@@ -76,6 +78,20 @@ export const HospitalPortal: React.FC = () => {
     setTimeout(() => setFeedbackMsg(''), 3500);
   };
 
+  // Hospital Bookings & Real-Time Admission Alerts
+  const hospitalBookings = loggedHospital ? allBookings.filter((b) => b.hospitalId === loggedHospital.id) : [];
+  const [admissionNotification, setAdmissionNotification] = useState<EmergencyBooking | null>(null);
+  const latestAdmissionCode = hospitalBookings[0]?.bookingCode;
+
+  useEffect(() => {
+    if (hospitalBookings.length > 0) {
+      // oxlint-disable-next-line react/set-state-in-effect
+      setAdmissionNotification(hospitalBookings[0]);
+      soundEffects.playSuccessChime();
+    }
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [latestAdmissionCode, hospitalBookings.length]);
+
   // Handle Login
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,63 +106,63 @@ export const HospitalPortal: React.FC = () => {
   if (!loggedHospital) {
     return (
       <div className="max-w-md mx-auto my-8 space-y-6 animate-fadeIn">
-        <div className="liquid-glass-card border border-white/90 rounded-3xl p-6 sm:p-8 oled-glow-emerald space-y-6 bg-white/85 backdrop-blur-2xl shadow-xl">
-          <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600 shadow-xs">
-              <Building2 className="w-6 h-6" />
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-5 shadow-xs">
+          <div className="text-center space-y-1.5">
+            <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600">
+              <Building2 className="w-5 h-5" />
             </div>
-            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               Hospital Staff Portal
             </h2>
-            <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed">
+            <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
               Secure authentication for ER doctors and hospital administrators to manage incoming traumas, live bed inventory, and doctor shift rosters.
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4 text-xs font-mono">
+          <form onSubmit={handleLogin} className="space-y-3.5 text-xs">
             <div>
-              <label className="block uppercase text-slate-600 font-bold mb-1.5 text-[10px]">
+              <label className="block uppercase text-slate-600 font-bold mb-1 text-[11px]">
                 Unique Hospital ID Code
               </label>
               <div className="relative">
-                <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 <input
                   type="text"
                   value={hospCodeInput}
                   onChange={(e) => setHospCodeInput(e.target.value.toUpperCase())}
                   placeholder="e.g. AIIMS-DELHI"
-                  className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-rose-500 focus:outline-none uppercase shadow-2xs font-bold"
+                  className="w-full bg-white text-slate-900 pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:border-red-500 focus:outline-none uppercase font-semibold"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block uppercase text-slate-600 font-bold mb-1.5 text-[10px]">
+              <label className="block uppercase text-slate-600 font-bold mb-1 text-[11px]">
                 Hospital Staff Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 <input
                   type="password"
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-rose-500 focus:outline-none shadow-2xs"
+                  className="w-full bg-white text-slate-900 pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:border-red-500 focus:outline-none"
                   required
                 />
               </div>
             </div>
 
             {loginError && (
-              <div className="text-[11px] text-rose-700 bg-rose-50 border border-rose-200 p-2.5 rounded-xl font-bold">
+              <div className="text-xs text-red-700 bg-red-50 border border-red-200 p-2.5 rounded-lg font-medium">
                 {loginError}
               </div>
             )}
 
             <button
               type="submit"
-              className="liquid-btn-red w-full py-3 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center justify-center gap-2 shadow-md active:scale-95"
+              className="bg-red-600 hover:bg-red-700 w-full py-2.5 rounded-lg text-white font-semibold text-xs tracking-tight transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
             >
               <span>Login as Hospital Staff</span>
               <ArrowRight className="w-4 h-4 text-white" />
@@ -155,10 +171,10 @@ export const HospitalPortal: React.FC = () => {
 
           {/* Quick Demo Logins */}
           <div className="pt-3 border-t border-slate-200 space-y-2">
-            <div className="text-[10px] font-mono uppercase text-slate-500 text-center font-bold">
+            <div className="text-[11px] uppercase text-slate-500 text-center font-semibold">
               1-Click Demo Hospital Credentials:
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div className="grid grid-cols-2 gap-2 text-xs">
               {INITIAL_HOSPITALS.map((h) => (
                 <button
                   key={h.id}
@@ -168,10 +184,10 @@ export const HospitalPortal: React.FC = () => {
                     setPasswordInput(h.password);
                     loginHospital(h.hospitalCode, h.password);
                   }}
-                  className="p-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-left transition cursor-pointer shadow-2xs"
+                  className="p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition cursor-pointer"
                 >
-                  <div className="font-bold text-slate-900 text-[11px] truncate">{h.name.split(' ')[0]}</div>
-                  <div className="text-[9px] text-slate-500 font-bold">{h.hospitalCode}</div>
+                  <div className="font-semibold text-slate-900 text-xs truncate">{h.name.split(' ')[0]}</div>
+                  <div className="text-[11px] text-slate-500 font-mono">{h.hospitalCode}</div>
                 </button>
               ))}
             </div>
@@ -180,11 +196,6 @@ export const HospitalPortal: React.FC = () => {
       </div>
     );
   }
-
-  // Filter active incoming bookings for this hospital
-  const hospitalBookings = allBookings.filter(
-    (b) => b.hospitalId === loggedHospital.id || b.hospitalName.toLowerCase().includes(loggedHospital.name.toLowerCase().split(' ')[0])
-  );
 
   // Save edited hospital info
   const handleSaveHospitalInfo = () => {
@@ -247,33 +258,33 @@ export const HospitalPortal: React.FC = () => {
       )}
 
       {/* Authenticated Hospital Header */}
-      <div className="liquid-glass-card rounded-3xl p-6 border border-white/90 shadow-xl bg-white/85 backdrop-blur-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 oled-glow-emerald">
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start sm:items-center space-x-3.5">
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 shrink-0 mt-1 sm:mt-0 shadow-xs">
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 shrink-0 mt-1 sm:mt-0 shadow-xs">
             <Building2 className="w-6 h-6" />
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
+              <span className="text-xs uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
                 Hospital ER Command Console
               </span>
-              <span className="text-[9px] font-mono bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded font-bold">
+              <span className="text-[11px] font-mono bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded">
                 ID: {loggedHospital.hospitalCode}
               </span>
-              <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded flex items-center gap-1 font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dot-pulse"></span>
+              <span className="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded flex items-center gap-1 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 <span>ONLINE & LIVE</span>
               </span>
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-0.5">
               {loggedHospital.name}
             </h1>
 
-            <div className="text-xs text-slate-600 flex flex-wrap items-center gap-2 font-mono">
+            <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2">
               <span>{loggedHospital.address}</span>
               <span>•</span>
-              <span className="text-slate-800 font-semibold">Hotline: {loggedHospital.phone}</span>
+              <span className="text-slate-700 font-medium">Hotline: {loggedHospital.phone}</span>
               <button
                 type="button"
                 onClick={() => {
@@ -281,7 +292,7 @@ export const HospitalPortal: React.FC = () => {
                   setEditAddress(loggedHospital.address);
                   setIsEditingInfo(!isEditingInfo);
                 }}
-                className="text-[10px] text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer ml-1"
+                className="text-xs text-red-600 hover:text-red-700 font-semibold underline cursor-pointer ml-1"
               >
                 {isEditingInfo ? 'Cancel Edit' : 'Edit Info'}
               </button>
@@ -291,19 +302,19 @@ export const HospitalPortal: React.FC = () => {
 
         {/* Live Quick Counters & Logout */}
         <div className="flex items-center space-x-3 self-end md:self-center">
-          <div className="bg-white border border-slate-200 px-3.5 py-2 rounded-2xl text-center text-xs font-mono shadow-2xs">
-            <div className="text-[9px] text-slate-500 uppercase font-bold">Free ICU Beds</div>
+          <div className="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-center text-xs shadow-2xs">
+            <div className="text-[10px] text-slate-500 uppercase font-semibold">Free ICU Beds</div>
             <div className="text-base font-bold text-emerald-700">{loggedHospital.beds.icuFree} / {loggedHospital.beds.icuTotal}</div>
           </div>
 
-          <div className="bg-white border border-slate-200 px-3.5 py-2 rounded-2xl text-center text-xs font-mono shadow-2xs">
-            <div className="text-[9px] text-slate-500 uppercase font-bold">Free ER Bays</div>
+          <div className="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-center text-xs shadow-2xs">
+            <div className="text-[10px] text-slate-500 uppercase font-semibold">Free ER Bays</div>
             <div className="text-base font-bold text-blue-700">{loggedHospital.beds.emergencyFree} / {loggedHospital.beds.emergencyTotal}</div>
           </div>
 
           <button
             onClick={logoutHospital}
-            className="flex items-center space-x-1.5 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 text-xs font-mono transition cursor-pointer shadow-2xs font-bold"
+            className="flex items-center space-x-1.5 px-3 py-2.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-700 border border-slate-200 hover:border-red-200 text-xs transition cursor-pointer font-semibold"
             title="Logout of Hospital Console"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -311,6 +322,54 @@ export const HospitalPortal: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Real-Time Incoming Admission Notification Banner */}
+      {admissionNotification && (
+        <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn border border-red-400">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+              <Activity className="w-5 h-5 text-white animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-red-100 font-mono font-bold">
+                <span>🚨 NEW CODE RED ADMISSION DISPATCHED</span>
+                <span className="bg-white/20 px-2 py-0.2 rounded font-mono text-white text-[10px]">LIVE ER BAY</span>
+              </div>
+              <h3 className="text-base font-bold text-white mt-0.5">
+                Patient Unique ID: <span className="font-mono underline font-extrabold">{admissionNotification.patientUniqueId}</span> ({admissionNotification.patientName})
+              </h3>
+              <div className="text-xs text-red-100 font-mono flex flex-wrap items-center gap-2 mt-0.5">
+                <span>Driver: {admissionNotification.ambulanceDetails.driverName} ({admissionNotification.ambulanceDetails.vehicleNumber})</span>
+                <span>•</span>
+                <span>Driver Code: <strong>{admissionNotification.bookingCode}</strong></span>
+                <span>•</span>
+                <span>Reserved Bay: <strong>{admissionNotification.reservedBay}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('incoming');
+                setAdmissionNotification(null);
+              }}
+              className="bg-white hover:bg-red-50 text-red-700 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer shadow-xs"
+            >
+              Acknowledge & View Bay
+            </button>
+            <button
+              type="button"
+              onClick={() => setAdmissionNotification(null)}
+              className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition cursor-pointer text-xs font-bold"
+              title="Dismiss Alert"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Inline Hospital Info Editor */}
       {isEditingInfo && (
@@ -356,14 +415,14 @@ export const HospitalPortal: React.FC = () => {
         </div>
       )}
 
-      {/* Internal Navigation Tabs (Liquid Glass Dock) */}
-      <div className="flex items-center space-x-1.5 bg-slate-100/80 backdrop-blur-xl p-1.5 rounded-2xl border border-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] text-xs font-mono overflow-x-auto">
+      {/* Internal Navigation Tabs */}
+      <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs overflow-x-auto">
         <button
           onClick={() => setActiveTab('incoming')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
             activeTab === 'incoming'
-              ? 'liquid-btn-red text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+              ? 'bg-red-600 text-white font-semibold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white'
           }`}
         >
           <Clock className={`w-3.5 h-3.5 ${activeTab === 'incoming' ? 'text-white' : 'text-red-600'}`} />
@@ -379,10 +438,10 @@ export const HospitalPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('resources')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
             activeTab === 'resources'
-              ? 'liquid-btn-red text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+              ? 'bg-red-600 text-white font-semibold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white'
           }`}
         >
           <Bed className={`w-3.5 h-3.5 ${activeTab === 'resources' ? 'text-white' : 'text-emerald-600'}`} />
@@ -391,10 +450,10 @@ export const HospitalPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('doctors')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
             activeTab === 'doctors'
-              ? 'liquid-btn-red text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+              ? 'bg-red-600 text-white font-semibold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white'
           }`}
         >
           <Stethoscope className={`w-3.5 h-3.5 ${activeTab === 'doctors' ? 'text-white' : 'text-blue-600'}`} />
@@ -403,10 +462,10 @@ export const HospitalPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('equipment')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
             activeTab === 'equipment'
-              ? 'liquid-btn-red text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+              ? 'bg-red-600 text-white font-semibold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white'
           }`}
         >
           <Activity className={`w-3.5 h-3.5 ${activeTab === 'equipment' ? 'text-white' : 'text-amber-600'}`} />
@@ -415,10 +474,10 @@ export const HospitalPortal: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl transition cursor-pointer font-bold whitespace-nowrap ${
+          className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-lg transition cursor-pointer font-medium whitespace-nowrap ${
             activeTab === 'history'
-              ? 'liquid-btn-red text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+              ? 'bg-red-600 text-white font-semibold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white'
           }`}
         >
           <ShieldCheck className={`w-3.5 h-3.5 ${activeTab === 'history' ? 'text-white' : 'text-purple-600'}`} />
@@ -440,7 +499,7 @@ export const HospitalPortal: React.FC = () => {
               return (
                 <div
                   key={booking.bookingCode}
-                  className="liquid-glass-card rounded-3xl p-6 space-y-5 border border-rose-200/80 bg-white/85 backdrop-blur-xl shadow-lg"
+                  className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs"
                 >
                   {/* Top Row: Patient, ETA & Bay */}
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 pb-4">
@@ -500,6 +559,9 @@ export const HospitalPortal: React.FC = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Live Incoming Ambulance GPS Telemetry */}
+                  <LiveGpsTracker booking={booking} role="hospital" />
 
                   {/* Vitals Streamed from Ambulance + ABHA Records */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
@@ -819,7 +881,7 @@ export const HospitalPortal: React.FC = () => {
                   bookHospitalBed(loggedHospital.id, 'Arjun Rampal', '+91-98111-22334');
                   showFeedback(`Simulated Code Red Emergency dispatched to ${loggedHospital.name.split(' ')[0]}!`);
                 }}
-                className="liquid-btn-red px-5 py-2.5 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer shadow-md active:scale-95 flex items-center justify-center gap-2 mx-auto"
+                className="bg-red-600 hover:bg-red-700 px-5 py-2.5 rounded-lg text-white font-semibold text-xs tracking-tight transition cursor-pointer shadow-xs flex items-center justify-center gap-2 mx-auto"
               >
                 <span>⚡ Dispatch Simulated Emergency Patient to this Hospital</span>
               </button>
@@ -1100,7 +1162,7 @@ export const HospitalPortal: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowAddDoctor(!showAddDoctor)}
-              className="liquid-btn-red px-4 py-2 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-semibold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs"
             >
               <Plus className="w-4 h-4" />
               <span>{showAddDoctor ? 'Close Form' : 'Add On-Duty Specialist'}</span>
@@ -1308,7 +1370,7 @@ export const HospitalPortal: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowAddEq(!showAddEq)}
-              className="liquid-btn-red px-4 py-2 rounded-xl text-white font-bold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-semibold text-xs tracking-tight transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs"
             >
               <Plus className="w-4 h-4" />
               <span>{showAddEq ? 'Close Form' : 'Register New Machine'}</span>

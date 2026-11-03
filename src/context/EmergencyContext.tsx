@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment } from '../types';
-import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES } from '../data/mockData';
+import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount } from '../types';
+import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, SAMPLE_DRIVERS } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
 import { soundEffects } from '../utils/audio';
 import confetti from 'canvas-confetti';
@@ -15,6 +15,7 @@ interface EmergencyContextType {
   allBookings: EmergencyBooking[];
   currentView: AppView;
   loggedHospital: Hospital | null;
+  loggedDriver: DriverAccount | null;
   selectedAbhaProfile: ABHAMedicalRecord | null;
   searchTriageMode: 'standard' | 'sarvam' | 'neo4j';
   setSearchTriageMode: (mode: 'standard' | 'sarvam' | 'neo4j') => void;
@@ -24,8 +25,12 @@ interface EmergencyContextType {
   fetchPatientByAbha: (abhaId: string) => ABHAMedicalRecord | undefined;
   loginHospital: (hospitalCode: string, password: string) => boolean;
   logoutHospital: () => void;
+  loginDriver: (driverId: string, pin: string) => boolean;
+  logoutDriver: () => void;
   searchEmergency: (brief: string) => AITriageAnalysis;
-  bookHospitalBed: (hospitalId: string, patientName?: string, patientPhone?: string) => EmergencyBooking;
+  bookHospitalBed: (hospitalId: string, patientName?: string, patientPhone?: string, abhaRecord?: ABHAMedicalRecord | null) => EmergencyBooking;
+  loginAmbulanceDriver: (bookingCode: string) => boolean;
+  linkAmbulanceToBooking: (bookingCode: string, driver?: DriverAccount) => EmergencyBooking | undefined;
   getBookingByCode: (code: string) => EmergencyBooking | undefined;
   updateAmbulanceStatus: (bookingCode: string, status: EmergencyBooking['status'], etaMins?: number, speed?: number) => void;
   submitInTransitPaperwork: (bookingCode: string, abha: ABHAMedicalRecord, vitals: PatientVitals, consent: boolean) => void;
@@ -47,6 +52,7 @@ const STORAGE_KEY_HOSPITALS = 'lifecare_hospitals_data_v2';
 const STORAGE_KEY_BOOKINGS = 'lifecare_bookings_v2';
 const STORAGE_KEY_ACTIVE = 'lifecare_active_booking_v2';
 const STORAGE_KEY_LOGGED_HOSP_ID = 'lifecare_logged_hosp_id_v2';
+const STORAGE_KEY_LOGGED_DRIVER = 'lifecare_logged_driver_v2';
 
 const EmergencyContext = createContext<EmergencyContextType | undefined>(undefined);
 
@@ -84,18 +90,28 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  // Logged in Hospital ID - persistent and reactive
+  // Logged in Hospital ID - null until hospital logs in with credentials
   const [loggedHospitalId, setLoggedHospitalId] = useState<string | null>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_LOGGED_HOSP_ID);
-      return saved ? saved : 'hosp-aiims-delhi';
+      return saved ? saved : null;
     } catch {
-      return 'hosp-aiims-delhi';
+      return null;
     }
   });
 
   // Derived dynamically from current hospitals array so any edit is 100% reactive
-  const loggedHospital = hospitals.find((h) => h.id === loggedHospitalId) || hospitals[0] || null;
+  const loggedHospital = loggedHospitalId ? (hospitals.find((h) => h.id === loggedHospitalId) || null) : null;
+
+  // Logged in Driver - null until driver logs in with credentials
+  const [loggedDriver, setLoggedDriver] = useState<DriverAccount | null>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_LOGGED_DRIVER);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
 
   // Active booking from localStorage or pristine null (zero-booking start)
   const [activeBooking, setActiveBooking] = useState<EmergencyBooking | null>(() => {
@@ -218,6 +234,36 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentView('patient');
   };
 
+  const loginDriver = (driverId: string, pin: string): boolean => {
+    const cleanId = driverId.trim().toUpperCase();
+    const cleanPin = pin.trim();
+    const matched = SAMPLE_DRIVERS.find(
+      (d) => d.driverId.toUpperCase() === cleanId && d.pin === cleanPin
+    );
+
+    if (matched) {
+      setLoggedDriver(matched);
+      try {
+        localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(matched));
+      } catch {
+        // ignore
+      }
+      soundEffects.playSuccessChime();
+      return true;
+    }
+    return false;
+  };
+
+  const logoutDriver = () => {
+    setLoggedDriver(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY_LOGGED_DRIVER);
+    } catch {
+      // ignore
+    }
+    setCurrentView('patient');
+  };
+
   // Look up patient records by ABHA ID or Patient Name
   const fetchPatientByAbha = (abhaIdOrName: string): ABHAMedicalRecord | undefined => {
     const raw = abhaIdOrName.trim().toLowerCase();
@@ -269,7 +315,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const bookHospitalBed = (
     hospitalId: string,
     patientName?: string,
-    patientPhone?: string
+    patientPhone?: string,
+    abhaRecord?: ABHAMedicalRecord | null
   ): EmergencyBooking => {
     const hosp = hospitals.find((h) => h.id === hospitalId) || hospitals[0];
     const triage = currentTriage || analyzeEmergencyBrief('Acute Chest Pain Emergency');
@@ -289,8 +336,11 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const now = new Date();
     const expiry = new Date(now.getTime() + 20 * 60000);
 
-    const nameToUse = patientName || selectedAbhaProfile?.fullName || 'Rahul Sharma';
-    const phoneToUse = patientPhone || selectedAbhaProfile?.phoneNumber || '+91-98104-55678';
+    // Determine target ABHA profile
+    const targetAbha = abhaRecord !== undefined ? abhaRecord : selectedAbhaProfile;
+
+    const nameToUse = patientName || targetAbha?.fullName || 'Emergency Patient';
+    const phoneToUse = patientPhone || targetAbha?.phoneNumber || '+91-98104-55678';
 
     const newBooking: EmergencyBooking = {
       patientUniqueId,
@@ -319,6 +369,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       createdAt: now.toISOString(),
       expiresAt: expiry.toISOString(),
       status: 'AMBULANCE_EN_ROUTE_PICKUP',
+      driverLoggedIn: false,
       ambulanceDetails: {
         vehicleNumber: 'DL-01-AMB-' + Math.floor(100 + Math.random() * 900),
         driverName: 'Rajesh Kumar Yadav',
@@ -329,9 +380,9 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         distanceRemainingKm: 2.8,
       },
       inTransitPaperwork: {
-        isSubmitted: Boolean(selectedAbhaProfile),
-        submittedAt: selectedAbhaProfile ? now.toISOString() : undefined,
-        abhaDetails: selectedAbhaProfile || undefined,
+        isSubmitted: Boolean(targetAbha),
+        submittedAt: targetAbha ? now.toISOString() : undefined,
+        abhaDetails: targetAbha || undefined,
         initialVitals: {
           heartRate: 112,
           bloodPressureSys: 154,
@@ -346,6 +397,10 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         preAdmitRegistrationNumber: 'ABDM-ER-' + Math.floor(100000 + Math.random() * 900000),
       },
     };
+
+    if (targetAbha) {
+      setSelectedAbhaProfile(targetAbha);
+    }
 
     const updatedHospitals = hospitals.map((h) => {
       if (h.id === hospitalId) {
@@ -376,6 +431,63 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     return newBooking;
+  };
+
+  // Interlink Ambulance Driver with Emergency Booking Code & Patient ID
+  const linkAmbulanceToBooking = (code: string, driver?: DriverAccount): EmergencyBooking | undefined => {
+    const cleanCode = code.trim().toUpperCase();
+    const currentDriver = driver || loggedDriver || SAMPLE_DRIVERS[0];
+
+    const found = allBookings.find(
+      (b) =>
+        b.bookingCode.toUpperCase() === cleanCode ||
+        b.patientUniqueId.toUpperCase() === cleanCode ||
+        b.bookingCode.toUpperCase().includes(cleanCode) ||
+        cleanCode.includes(b.bookingCode.toUpperCase())
+    );
+
+    if (!found) return undefined;
+
+    const now = new Date().toISOString();
+    const updatedBooking: EmergencyBooking = {
+      ...found,
+      driverLoggedIn: true,
+      driverLoggedInAt: now,
+      status: found.status === 'PENDING_AMBULANCE' ? 'AMBULANCE_EN_ROUTE_PICKUP' : found.status,
+      ambulanceDetails: {
+        ...found.ambulanceDetails,
+        driverName: currentDriver.driverName,
+        driverPhone: currentDriver.phone,
+        vehicleNumber: currentDriver.vehicleNumber,
+        type: currentDriver.vehicleType as any,
+        currentSpeedKmh: 54,
+      },
+    };
+
+    saveActive(updatedBooking);
+    const updatedList = allBookings.map((b) => (b.bookingCode === found.bookingCode ? updatedBooking : b));
+    saveAll(updatedList);
+    broadcastState(updatedBooking, updatedList, hospitals);
+
+    try {
+      const channel = new BroadcastChannel('lifecare_sync_channel');
+      channel.postMessage({
+        type: 'DRIVER_INTERLINKED',
+        booking: updatedBooking,
+        driver: currentDriver,
+      });
+      channel.close();
+    } catch {
+      // fallback
+    }
+
+    soundEffects.playSuccessChime();
+    return updatedBooking;
+  };
+
+  const loginAmbulanceDriver = (code: string): boolean => {
+    const res = linkAmbulanceToBooking(code);
+    return Boolean(res);
   };
 
   const updateAmbulanceStatus = (
@@ -709,6 +821,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         allBookings,
         currentView,
         loggedHospital,
+        loggedDriver,
         selectedAbhaProfile,
         searchTriageMode,
         setSearchTriageMode,
@@ -718,8 +831,12 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         fetchPatientByAbha,
         loginHospital,
         logoutHospital,
+        loginDriver,
+        logoutDriver,
         searchEmergency,
         bookHospitalBed,
+        loginAmbulanceDriver,
+        linkAmbulanceToBooking,
         getBookingByCode,
         updateAmbulanceStatus,
         submitInTransitPaperwork,

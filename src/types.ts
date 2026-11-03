@@ -22,6 +22,15 @@ export interface Equipment {
   totalQuantity: number;
 }
 
+export interface DriverAccount {
+  driverId: string;
+  pin: string;
+  driverName: string;
+  phone: string;
+  vehicleNumber: string;
+  vehicleType: string;
+}
+
 export interface Hospital {
   id: string;
   hospitalCode: string;
@@ -126,6 +135,8 @@ export interface EmergencyBooking {
   createdAt: string;
   expiresAt: string; // 20 min hold
   status: 'PENDING_AMBULANCE' | 'AMBULANCE_EN_ROUTE_PICKUP' | 'PATIENT_PICKED_UP' | 'IN_TRANSIT_TO_HOSPITAL' | 'ARRIVED_ER' | 'ADMITTED';
+  driverLoggedIn?: boolean;
+  driverLoggedInAt?: string;
   ambulanceDetails: {
     vehicleNumber: string;
     driverName: string;

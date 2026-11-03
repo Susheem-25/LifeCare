@@ -1,4 +1,4 @@
-import { Hospital, ABHAMedicalRecord, EmergencyBooking } from '../types';
+import { Hospital, ABHAMedicalRecord, EmergencyBooking, DriverAccount } from '../types';
 
 export const INITIAL_HOSPITALS: Hospital[] = [
   {
@@ -351,7 +351,7 @@ export const INITIAL_HOSPITALS: Hospital[] = [
 export const PRESET_EMERGENCIES = [
   {
     id: 'preset-cardiac',
-    label: 'Chest Pain / Heart Attack',
+    label: 'Heart Attack',
     icon: 'HeartPulse',
     brief: 'Severe crushing chest pain radiating to left arm and jaw, profuse cold sweating, shortness of breath and dizziness. Symptoms started 25 minutes ago.',
     category: 'CARDIOLOGY',
@@ -359,7 +359,7 @@ export const PRESET_EMERGENCIES = [
   },
   {
     id: 'preset-trauma',
-    label: 'Road Accident / Head Injury',
+    label: 'Road Accident',
     icon: 'CarFront',
     brief: 'High-speed two-wheeler collision. Patient has severe scalp laceration with active arterial bleeding, brief loss of consciousness, confused and disoriented.',
     category: 'TRAUMA',
@@ -367,7 +367,7 @@ export const PRESET_EMERGENCIES = [
   },
   {
     id: 'preset-stroke',
-    label: 'Stroke / Facial Droop / Paralysis',
+    label: 'Stroke',
     icon: 'Brain',
     brief: 'Sudden right-sided arm and leg weakness, facial asymmetry, slurred speech (dysarthria). Symptom onset 35 minutes ago, patient cannot hold a cup.',
     category: 'NEUROLOGY',
@@ -375,7 +375,7 @@ export const PRESET_EMERGENCIES = [
   },
   {
     id: 'preset-respiratory',
-    label: 'Severe Asthma / SpO2 Drop',
+    label: 'Breathing / Asthma',
     icon: 'Wind',
     brief: 'Severe acute asthma exacerbation, patient unable to speak full sentences, audible wheezing, blue lips (cyanosis), pulse oximeter shows SpO2 81%.',
     category: 'PULMONOLOGY',
@@ -383,7 +383,7 @@ export const PRESET_EMERGENCIES = [
   },
   {
     id: 'preset-pediatric',
-    label: 'Child High Fever & Seizure',
+    label: 'Child Emergency',
     icon: 'Baby',
     brief: '3-year-old child with sudden high-grade fever 104°F having continuous generalized tonic-clonic seizure for over 5 minutes, eyes rolled upward.',
     category: 'PEDIATRICS',
@@ -391,7 +391,7 @@ export const PRESET_EMERGENCIES = [
   },
   {
     id: 'preset-burn',
-    label: 'Major Burn / Explosion',
+    label: 'Severe Burn',
     icon: 'Flame',
     brief: 'LPG cylinder flash burn covering face, neck, and both arms (approx 30% TBSA). Intense pain, blistering, potential smoke inhalation and hoarseness.',
     category: 'BURNS_TRAUMA',
@@ -543,5 +543,24 @@ export const DEFAULT_ACTIVE_BOOKING: EmergencyBooking = {
     preAdmitRegistrationNumber: 'ABDM-ER-819203',
   },
 };
+
+export const SAMPLE_DRIVERS: DriverAccount[] = [
+  {
+    driverId: 'DRV-101',
+    pin: '1234',
+    driverName: 'Rajesh Kumar Yadav',
+    phone: '+91-98188-72619',
+    vehicleNumber: 'DL-01-AMB-402',
+    vehicleType: 'Advanced Cardiac Life Support (ACLS)',
+  },
+  {
+    driverId: 'DRV-102',
+    pin: '1234',
+    driverName: 'Amit Saxena',
+    phone: '+91-98104-99120',
+    vehicleNumber: 'DL-01-AMB-508',
+    vehicleType: 'Trauma Mobile ICU',
+  },
+];
 
 

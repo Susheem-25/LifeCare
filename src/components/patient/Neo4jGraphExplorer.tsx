@@ -60,57 +60,57 @@ export const Neo4jGraphExplorer: React.FC = () => {
     : INITIAL_NEO4J_NODES.filter(n => n.type === selectedTypeFilter);
 
   return (
-    <div className="liquid-glass-card rounded-3xl p-5 sm:p-6 border border-emerald-500/30 space-y-5 oled-glow-emerald bg-white/80 backdrop-blur-2xl shadow-xl">
+    <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-6 space-y-4 shadow-xs w-full max-w-full overflow-hidden">
       {/* Track Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-xs shrink-0">
-            <Network className="w-5 h-5 text-emerald-600" />
+          <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600 shrink-0">
+            <Network className="w-5 h-5 text-teal-600" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full font-extrabold">
-                NEO4J TRACK: KNOWLEDGE GRAPH ENGINE
+              <span className="text-xs uppercase tracking-wider text-teal-800 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full font-semibold">
+                NEO4J TRACK • KNOWLEDGE GRAPH ENGINE
               </span>
-              <span className="text-[9px] font-mono text-slate-500 bg-white border border-slate-200 px-1.5 py-0.2 rounded font-semibold">
+              <span className="text-[11px] text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded font-mono">
                 Cypher 5.x • Index-Free Adjacency
               </span>
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5">
               Real-Time Emergency Multi-Resource Graph Traversal
             </h3>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 text-xs font-mono">
-          <span className="flex items-center gap-1.5 text-emerald-700 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full text-[11px] font-bold">
-            <Database className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+        <div className="flex items-center space-x-2 text-xs">
+          <span className="flex items-center gap-1.5 text-teal-800 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full text-xs font-semibold">
+            <Database className="w-3.5 h-3.5 text-teal-600 animate-pulse" />
             <span>Neo4j Engine Active ({latencyMs}ms)</span>
           </span>
         </div>
       </div>
 
       {/* Why Neo4j Callout */}
-      <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3.5 text-xs flex items-start gap-2.5 text-emerald-950 font-mono shadow-2xs">
-        <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-        <p className="leading-relaxed text-[11px]">
+      <div className="bg-teal-50/70 border border-teal-200 rounded-xl p-3 text-xs flex items-start gap-2.5 text-teal-950">
+        <Sparkles className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+        <p className="leading-relaxed text-xs">
           <strong>Why Neo4j solves this better than relational SQL:</strong> Emergency hospital allocation is a high-stakes multi-constraint graph problem. SQL requires 6+ complex table JOINs that choke under high concurrency. Neo4j executes pointer-hopping traversal across <strong>(Emergency) ➔ (Specialty) ➔ (Free Doctor) ➔ (Hospital) ➔ (Locked ICU Bay)</strong> in <strong>{latencyMs}ms</strong> with zero schema bottlenecks.
         </p>
       </div>
 
       {/* Filter and Canvas Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-slate-500">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
         <div className="flex items-center gap-1.5 overflow-x-auto py-1">
           <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <span className="font-bold text-slate-700 uppercase text-[10px]">Filter Graph:</span>
+          <span className="font-semibold text-slate-700 uppercase text-[11px]">Filter Graph:</span>
           {['ALL', 'PATIENT', 'HOSPITAL', 'DOCTOR', 'SPECIALTY', 'BED', 'EQUIPMENT', 'ALLERGY'].map((type) => (
             <button
               key={type}
               type="button"
               onClick={() => setSelectedTypeFilter(type)}
-              className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+              className={`px-2 py-0.5 rounded-lg text-xs font-medium transition cursor-pointer ${
                 selectedTypeFilter === type
-                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  ? 'bg-teal-600 text-white font-semibold'
                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
               }`}
             >
