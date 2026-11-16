@@ -23,7 +23,6 @@ import {
   Fingerprint,
   Gauge
 } from 'lucide-react';
-import { LiveGpsTracker } from '../common/LiveGpsTracker';
 
 export const HospitalPortal: React.FC = () => {
   const { 
@@ -31,7 +30,6 @@ export const HospitalPortal: React.FC = () => {
     loginHospital, 
     logoutHospital, 
     allBookings, 
-    updatePatientVitals,
     updateHospitalBeds, 
     updateDoctorStatus,
     addDoctor,
@@ -492,7 +490,6 @@ export const HospitalPortal: React.FC = () => {
         <div className="space-y-4">
           {hospitalBookings.length > 0 ? (
             hospitalBookings.map((booking) => {
-              const vitals = booking.inTransitPaperwork?.initialVitals;
               const abha = booking.inTransitPaperwork?.abhaDetails;
               const isArrived = booking.status === 'ARRIVED_ER';
 
@@ -560,229 +557,45 @@ export const HospitalPortal: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Live Incoming Ambulance GPS Telemetry */}
-                  <LiveGpsTracker booking={booking} role="hospital" />
-
-                  {/* Vitals Streamed from Ambulance + ABHA Records */}
+                  {/* Pre-Arrival Clinical Status & Dossier */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-                    {/* Live Streamed In-Ambulance Vitals — FULLY EDITABLE TELEMETRY */}
+                    {/* Clinical Triage & Assigned Bay Summary */}
                     <div className="bg-white/90 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-2xs">
                       <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase font-bold border-b border-slate-100 pb-2">
                         <span className="flex items-center gap-1.5 text-rose-600">
-                          <Activity className="w-3.5 h-3.5 animate-pulse" />
-                          Paramedic In-Transit Vitals (2-Way Sync)
+                          <Activity className="w-3.5 h-3.5" />
+                          Clinical Triage & Resource Allocation
                         </span>
                         <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">
-                          PARAMEDIC ENTRY • REAL-TIME
+                          ATOMIC LOCK ACTIVE
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2.5 text-center">
-                        {/* 1. SpO2 */}
-                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col justify-between">
-                          <div className="flex items-center justify-between text-[9px] text-slate-500 uppercase font-bold">
-                            <span>SpO2 %</span>
-                            <span className="text-blue-600">Oxygen</span>
-                          </div>
-
-                          <div className="flex items-center justify-center gap-1 my-1">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newSpO2 = Math.max(60, (vitals?.spO2 || 92) - 1);
-                                updatePatientVitals(booking.bookingCode, { spO2: newSpO2 });
-                                showFeedback(`SpO2 updated to ${newSpO2}%`);
-                              }}
-                              className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer transition"
-                              title="Decrease SpO2"
-                            >
-                              -
-                            </button>
-
-                            <input
-                              type="number"
-                              min="60"
-                              max="100"
-                              value={vitals?.spO2 || 92}
-                              onChange={(e) => {
-                                const val = Math.min(100, Math.max(60, Number(e.target.value)));
-                                updatePatientVitals(booking.bookingCode, { spO2: val });
-                              }}
-                              className="w-12 text-center text-lg font-bold text-blue-700 bg-transparent border-b border-blue-400 focus:border-blue-600 focus:outline-none"
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newSpO2 = Math.min(100, (vitals?.spO2 || 92) + 1);
-                                updatePatientVitals(booking.bookingCode, { spO2: newSpO2 });
-                                showFeedback(`SpO2 updated to ${newSpO2}%`);
-                              }}
-                              className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer transition"
-                              title="Increase SpO2"
-                            >
-                              +
-                            </button>
-                          </div>
-
-                          <div className={`text-[9px] text-center font-bold ${
-                            (vitals?.spO2 || 92) < 90 ? 'text-rose-600' : 'text-emerald-700'
-                          }`}>
-                            {(vitals?.spO2 || 92) < 90 ? '⚠️ Hypoxic' : '✓ Stable'}
-                          </div>
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 font-sans">Acuity Level:</span>
+                          <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded font-bold font-mono">
+                            ESI Level {booking.aiAnalysis?.esiLevel || 1}
+                          </span>
                         </div>
-
-                        {/* 2. Heart Rate */}
-                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col justify-between">
-                          <div className="flex items-center justify-between text-[9px] text-slate-500 uppercase font-bold">
-                            <span>Heart Rate</span>
-                            <span className="text-rose-600">BPM</span>
-                          </div>
-
-                          <div className="flex items-center justify-center gap-1 my-1">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newHR = Math.max(40, (vitals?.heartRate || 112) - 2);
-                                updatePatientVitals(booking.bookingCode, { heartRate: newHR });
-                                showFeedback(`Heart rate updated to ${newHR} BPM`);
-                              }}
-                              className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer transition"
-                              title="Decrease HR"
-                            >
-                              -
-                            </button>
-
-                            <input
-                              type="number"
-                              min="40"
-                              max="220"
-                              value={vitals?.heartRate || 112}
-                              onChange={(e) => {
-                                const val = Math.min(220, Math.max(40, Number(e.target.value)));
-                                updatePatientVitals(booking.bookingCode, { heartRate: val });
-                              }}
-                              className="w-14 text-center text-lg font-bold text-rose-600 bg-transparent border-b border-rose-400 focus:border-rose-600 focus:outline-none"
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newHR = Math.min(220, (vitals?.heartRate || 112) + 2);
-                                updatePatientVitals(booking.bookingCode, { heartRate: newHR });
-                                showFeedback(`Heart rate updated to ${newHR} BPM`);
-                              }}
-                              className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer transition"
-                              title="Increase HR"
-                            >
-                              +
-                            </button>
-                          </div>
-
-                          <div className={`text-[9px] text-center font-bold ${
-                            (vitals?.heartRate || 112) > 100 ? 'text-amber-600' : 'text-emerald-700'
-                          }`}>
-                            {(vitals?.heartRate || 112) > 100 ? '⚡ Tachycardia' : '✓ Normal Sinus'}
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 font-sans">ICD-10 Code:</span>
+                          <strong className="text-slate-900 font-mono font-bold">
+                            {booking.aiAnalysis?.icdCodeEstimate || 'I21.9 (STEMI)'}
+                          </strong>
                         </div>
-
-                        {/* 3. Blood Pressure */}
-                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col justify-between">
-                          <div className="flex items-center justify-between text-[9px] text-slate-500 uppercase font-bold">
-                            <span>BP (Sys/Dia)</span>
-                            <span className="text-slate-500">mmHg</span>
-                          </div>
-
-                          <div className="flex items-center justify-center gap-1 my-1">
-                            <input
-                              type="number"
-                              min="70"
-                              max="240"
-                              value={vitals?.bloodPressureSys || 154}
-                              onChange={(e) => {
-                                const val = Number(e.target.value);
-                                updatePatientVitals(booking.bookingCode, { bloodPressureSys: val });
-                              }}
-                              className="w-11 text-center text-base font-bold text-slate-900 bg-transparent border-b border-slate-300 focus:border-slate-600 focus:outline-none"
-                              title="Systolic"
-                            />
-                            <span className="text-slate-400 font-bold">/</span>
-                            <input
-                              type="number"
-                              min="40"
-                              max="140"
-                              value={vitals?.bloodPressureDia || 94}
-                              onChange={(e) => {
-                                const val = Number(e.target.value);
-                                updatePatientVitals(booking.bookingCode, { bloodPressureDia: val });
-                              }}
-                              className="w-11 text-center text-base font-bold text-slate-900 bg-transparent border-b border-slate-300 focus:border-slate-600 focus:outline-none"
-                              title="Diastolic"
-                            />
-                          </div>
-
-                          <div className="text-[9px] text-center text-slate-500 font-semibold">
-                            {(vitals?.bloodPressureSys || 154) > 140 ? '⚠️ Stage 2 HTN' : '✓ Normotensive'}
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 font-sans">Specialist Assigned:</span>
+                          <strong className="text-slate-900 font-sans">
+                            {booking.assignedDoctor.name}
+                          </strong>
                         </div>
-                      </div>
-
-                      {/* Respiratory Rate & GCS Steppers */}
-                      <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-700 pt-2 border-t border-slate-100 gap-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-slate-500 text-[10px] font-bold">Resp:</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newResp = Math.max(8, (vitals?.respiratoryRate || 24) - 1);
-                              updatePatientVitals(booking.bookingCode, { respiratoryRate: newResp });
-                            }}
-                            className="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer"
-                          >
-                            -
-                          </button>
-                          <strong className="text-slate-900 font-mono">{vitals?.respiratoryRate || 24}</strong>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newResp = Math.min(45, (vitals?.respiratoryRate || 24) + 1);
-                              updatePatientVitals(booking.bookingCode, { respiratoryRate: newResp });
-                            }}
-                            className="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer"
-                          >
-                            +
-                          </button>
-                          <span className="text-slate-400 text-[10px]">bpm</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 font-sans">Assigned Trauma Bay:</span>
+                          <strong className="text-emerald-700 font-mono font-bold">
+                            {booking.reservedBay}
+                          </strong>
                         </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-slate-500 text-[10px] font-bold">GCS:</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newGcs = Math.max(3, (vitals?.gcsScore || 15) - 1);
-                              updatePatientVitals(booking.bookingCode, { gcsScore: newGcs });
-                            }}
-                            className="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer"
-                          >
-                            -
-                          </button>
-                          <strong className="text-slate-900 font-mono">{vitals?.gcsScore || 15}/15</strong>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newGcs = Math.min(15, (vitals?.gcsScore || 15) + 1);
-                              updatePatientVitals(booking.bookingCode, { gcsScore: newGcs });
-                            }}
-                            className="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 flex items-center justify-center border border-slate-300 text-xs font-bold cursor-pointer"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <span className="text-slate-500 text-[10px] font-mono">
-                          2-Way live sync with paramedic cabin
-                        </span>
                       </div>
                     </div>
 

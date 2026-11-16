@@ -8,7 +8,7 @@ import {
   PhoneCall,
   Lock,
   LogOut,
-  Layers
+  Presentation
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -26,6 +26,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
     logoutHospital
   } = useEmergency();
 
+  const handleGoToSosTriage = () => {
+    setCurrentView('patient');
+    setTimeout(() => {
+      const el = document.getElementById('citizen-sos-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const input = document.getElementById('emergency-search-input') as HTMLInputElement | null;
+        if (input) input.focus();
+      }
+    }, 60);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-2xl border-b border-slate-200/80 shadow-xs">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -33,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
         <div className="min-h-14 sm:min-h-16 py-1.5 sm:py-2 flex items-center justify-between gap-2">
           {/* Brand & Team Member Attribution */}
           <div
-            onClick={() => setCurrentView('patient')}
+            onClick={handleGoToSosTriage}
             className="flex items-center space-x-2.5 cursor-pointer group shrink-0"
           >
             <div className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-b from-red-500 to-red-600 text-white shadow-md shadow-red-500/25 group-hover:scale-105 transition-transform">
@@ -45,17 +57,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
                 <span className="text-base sm:text-lg font-bold tracking-tight text-slate-900 font-mono leading-none">
                   Life<span className="text-red-600">Care</span>
                 </span>
-                <span className="hidden sm:inline-flex items-center text-[10px] font-mono text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded-md font-semibold">
-                  HackFront 2026
+                <span className="hidden sm:inline-flex items-center text-[10px] font-mono text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.2 rounded-md font-semibold">
+                  Zero-Wait ER
+                </span>
+                <span className="hidden md:inline-flex items-center text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded-md font-semibold">
+                  108 Grid
                 </span>
               </div>
               <div className="flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-[11px] text-slate-600">
                 <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.2 rounded font-mono text-[9px] sm:text-[9.5px]">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  BuilderBeings
+                  Connected
                 </span>
-                <span className="font-medium text-slate-700 truncate max-w-[140px] xs:max-w-[190px] sm:max-w-none">
-                  Susheem Kumar Maurya <span className="text-slate-300">•</span> Stuti Jain
+                <span className="font-medium text-slate-700">
+                  Autonomous Emergency Healthcare Operating System
                 </span>
               </div>
             </div>
@@ -64,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
           {/* Desktop Role-Based Portal Tabs (Hidden on mobile <sm, visible on sm+) */}
           <nav className="hidden sm:flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button
-              onClick={() => setCurrentView('patient')}
+              onClick={handleGoToSosTriage}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer ${
                 currentView === 'patient'
                   ? 'bg-red-600 text-white font-semibold shadow-xs'
@@ -85,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             >
               <Ambulance className="w-3.5 h-3.5" />
               <span className="font-semibold text-xs">
-                {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Driver'}
+                {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Paramedic'}
               </span>
               {!loggedDriver && <Lock className="w-2.5 h-2.5 text-slate-400" />}
               {activeBooking?.bookingCode && (
@@ -115,7 +130,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
               ) : (
                 <>
                   <Lock className="w-2.5 h-2.5 text-slate-400" />
-                  <span className="font-semibold text-xs">Hospital</span>
+                  <span className="font-semibold text-xs">Hospital ER</span>
                 </>
               )}
             </button>
@@ -127,12 +142,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
               <button
                 type="button"
                 onClick={onOpenTrackModal}
-                className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-mono text-slate-700 font-bold transition cursor-pointer shadow-2xs"
-                title="View HackFront Multi-Track Architecture"
+                className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-[11px] font-mono text-red-800 font-bold transition cursor-pointer shadow-2xs"
+                title="View Architecture & 5-Step Methodology"
               >
-                <Layers className="w-3 h-3 text-red-600" />
-                <span>Tracks</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <Presentation className="w-3 h-3 text-red-600" />
+                <span className="hidden xs:inline">Architecture Pitch</span>
+                <span className="xs:hidden">Overview</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               </button>
             )}
 
@@ -194,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             >
               <Ambulance className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">
-                {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Driver'}
+                {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Paramedic'}
               </span>
               {!loggedDriver && <Lock className="w-2.5 h-2.5 text-slate-400 shrink-0" />}
               {activeBooking?.bookingCode && (

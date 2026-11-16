@@ -1,5 +1,8 @@
 export type UrgencyLevel = 'CRITICAL_RED' | 'URGENT_AMBER' | 'PRIORITY_YELLOW';
 
+// Emergency Severity Index (ESI) 1-5 triage standard (Slide 3 & 4)
+export type ESILevel = 1 | 2 | 3 | 4 | 5;
+
 export interface Doctor {
   id: string;
   name: string;
@@ -65,12 +68,19 @@ export interface AITriageAnalysis {
   summary: string;
   urgency: UrgencyLevel;
   urgencyLabel: string;
+  esiLevel: ESILevel; // ESI 1-5 Severity Standard (LifeCare PPTX Slide 3 & 4)
+  esiCategory: string; // e.g., 'ESI-1: Immediate Resuscitation' | 'ESI-2: Emergent'
   goldenHourWindowMinutes: number;
   recommendedSpeciality: string[];
   requiredMachinery: string[];
   firstAidImmediateInstructions: string[];
-  icdCodeEstimate: string;
+  icdCodeEstimate: string; // e.g., ICD-10 I21.9
   aiConfidenceScore: number;
+  bhashiniLanguage?: string; // Bhashini STT + TTS
+  groqModel?: string; // Groq Llama 3.3
+  atomicLockTimeMs?: number; // <9ms Neo4j graph lock
+  gateRejectionRisk?: string; // 0% Gate Rejection
+  receptionWaitTime?: string; // 0 sec Reception Intake
 }
 
 export interface PatientVitals {
@@ -102,10 +112,10 @@ export interface ABHAMedicalRecord {
   currentMedications: string[];
   pastSurgeries: string[];
   insuranceProvider: string;
-  pmjayEligible: boolean;
+  pmjayEligible: boolean; // PM-JAY Ayushman Bharat (Slide 2, 3, 4, 5)
   pmjayCardNumber?: string;
   coverageAmountINR: number;
-  verifiedWithABDM: boolean;
+  verifiedWithABDM: boolean; // ABDM Sandbox v3
 }
 
 export interface EmergencyBooking {
@@ -157,32 +167,38 @@ export interface EmergencyBooking {
 }
 
 /* ========================================================
-   HACKFRONT INDIA MULTI-TRACK DATA STRUCTURES
+   LIFECARE: ZERO-WAIT EMERGENCY HEALTHCARE OS
+   Autonomous Emergency Triage & Resource Allocation
    ======================================================== */
 
-// 1. Sarvam Track Types
-export type SarvamLanguageCode = 'hi' | 'en' | 'bn' | 'mr' | 'ta' | 'te' | 'pa';
+export type IndicLanguageCode = 'hi' | 'en' | 'bn' | 'mr' | 'ta' | 'te' | 'gu' | 'pa';
+// Backward compatibility alias
+export type SarvamLanguageCode = IndicLanguageCode;
 
-export interface SarvamLanguageInfo {
-  code: SarvamLanguageCode;
+export interface IndicLanguageInfo {
+  code: IndicLanguageCode;
   name: string;
   nativeName: string;
   samplePrompt: string;
   audioSampleLabel: string;
 }
+export type SarvamLanguageInfo = IndicLanguageInfo;
 
-export interface SarvamTranslationResult {
-  detectedLanguage: SarvamLanguageCode;
+export interface VoiceTriageResult {
+  detectedLanguage: IndicLanguageCode;
   originalText: string;
   clinicalTranslation: string;
   confidenceScore: number;
   extractedSymptoms: string[];
   suggestedICD10: string;
-  sarvamModel: 'sarvam-1-indic' | 'sarvam-saaras-speech';
+  esiLevel: ESILevel;
+  voiceEngine: 'Bhashini STT + TTS' | 'Whisper Backup';
+  inferenceEngine: 'Groq Llama 3.3';
   processingTimeMs: number;
 }
+export type SarvamTranslationResult = VoiceTriageResult;
 
-// 2. Neo4j Track Types
+// Neo4j AuraDB Graph Engine Types (<9ms Atomic Resource Locking)
 export type Neo4jNodeType = 'PATIENT' | 'HOSPITAL' | 'DOCTOR' | 'SPECIALTY' | 'EQUIPMENT' | 'BED' | 'ALLERGY';
 
 export interface Neo4jNode {
@@ -208,33 +224,12 @@ export interface Neo4jGraphPayload {
   cypherQuery: string;
   executionTimeMs: number;
   matchCount: number;
+  transactionId?: string;
 }
 
-// 3. Arduino Track Types
-export interface ArduinoUnoQPacket {
-  timestamp: string;
-  rawHex: string;
-  pulseOxSpO2: number;
-  heartRateBpm: number;
-  ecgMicrovolts: number;
-  cabinTempC: number;
-  cabinTempF: number;
-  transportVibrationG: number;
-  packetSeq: number;
-}
-
-export interface ArduinoUnoQDeviceState {
-  boardModel: 'Arduino UnoQ Rev 2.0 (Dual-Core IoT)';
-  firmwareVersion: 'v2.4-LifeCare-UnoQ';
-  connectionStatus: 'CONNECTED' | 'DISCONNECTED' | 'STREAMING';
-  serialPort: 'COM3 (USB-Serial)' | '/dev/ttyACM0';
-  baudRate: 115200;
-  connectedSensors: {
-    max30102: boolean; // SpO2 & Heart Rate
-    ad8232: boolean;   // Lead-II ECG Heart Monitor
-    bmp280: boolean;   // Cabin temp & pressure
-    mpu6050: boolean;  // 6-DOF transport stability accelerometer
-  };
-}
-
-
+// System Metadata & Mission Standards
+export const SYSTEM_INFO = {
+  name: 'LifeCare',
+  tagline: 'AI-powered solution for saving critical minutes during medical emergency',
+  motto: 'Every Minute Saved Is a Life Preserved.',
+} as const;

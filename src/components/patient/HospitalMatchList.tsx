@@ -312,7 +312,7 @@ export const HospitalMatchList: React.FC = () => {
                       onClick={() => handleSelectHospital(hospital)}
                       className="bg-red-600 hover:bg-red-700 text-white font-semibold w-full sm:w-auto px-4 py-2 rounded-lg text-xs tracking-tight flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
                     >
-                      <span>Select Hospital & Reserve Bed</span>
+                      <span>Atomic Lock Bay & Doctor (&lt;9ms)</span>
                       <ArrowRight className="w-3.5 h-3.5 text-white" />
                     </button>
                   )}

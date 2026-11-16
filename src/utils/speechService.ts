@@ -7,6 +7,7 @@ export const LANG_CODE_MAP: Record<string, string> = {
   mr: 'mr-IN',
   ta: 'ta-IN',
   te: 'te-IN',
+  gu: 'gu-IN',
   pa: 'pa-IN',
 };
 
