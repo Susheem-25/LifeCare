@@ -263,18 +263,36 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
 
           {/* Live Mic HUD Status */}
           {isListening && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-2.5 flex items-center space-x-2 text-xs text-red-800 animate-fadeIn font-mono">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping shrink-0"></span>
-              <span>
-                <strong>Sarvam AI Speech Engine ({voiceLang === 'hi-IN' ? 'Hindi हिन्दी' : 'Indian English'}):</strong> Listening live... Speak patient name, age, symptoms, allergies, and contact phone number.
-              </span>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-2.5 flex items-center justify-between text-xs text-red-800 animate-fadeIn font-mono">
+              <div className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping shrink-0"></span>
+                <span>
+                  <strong>Recording with Sarvam AI ({voiceLang === 'hi-IN' ? 'हिन्दी' : 'English'}):</strong> Speak name, age, symptoms, allergies, and phone number.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={toggleListening}
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-sans font-bold cursor-pointer shrink-0 ml-2 shadow-xs"
+              >
+                Done Speaking
+              </button>
             </div>
           )}
 
           {micNotice && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-xs text-amber-800 flex items-center space-x-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>{micNotice}</span>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-xs text-amber-800 flex items-center justify-between gap-2">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>{micNotice}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMicNotice(null)}
+                className="text-[11px] font-bold text-amber-700 hover:text-amber-900 cursor-pointer underline"
+              >
+                Dismiss
+              </button>
             </div>
           )}
         </div>

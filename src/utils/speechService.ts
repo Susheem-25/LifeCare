@@ -164,41 +164,45 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
       };
 
       recognition.onerror = (event: { error: string; message?: string }) => {
-        console.warn('SpeechRecognition notice:', event.error);
-        // 'no-speech' is triggered when user pauses; do NOT kill user listening session
-        if (event.error === 'no-speech' || event.error === 'aborted') {
-          return;
-        }
+        const errType = (event.error || '').toLowerCase();
+        console.warn('SpeechRecognition notice:', errType);
 
-        // When network error occurs (Google speech servers blocked by VPN/adblocker/localhost),
-        // keep recording active via MediaRecorder so Sarvam AI STT processes the speech on stop!
-        if (event.error === 'network') {
-          console.info('Native Web Speech API encountered network error. Sarvam AI audio fallback is active.');
-          return;
-        }
-
-        isUserListeningActive = false;
-        options.onListeningChange(false);
-        if (options.onError) {
-          let msg = `Microphone notice: ${event.error}`;
-          if (event.error === 'not-allowed') {
-            msg = 'Microphone permission blocked. Please enable mic access in your browser address bar.';
-          } else if (event.error === 'audio-capture') {
-            msg = 'No microphone device found. Please plug in or enable a microphone.';
+        // If error is network, no-speech, aborted, or service-not-allowed:
+        // Disconnect native recognition completely so it stops firing and doesn't loop.
+        // The background MediaRecorder + Sarvam AI will seamlessly transcribe the audio!
+        if (
+          errType.includes('network') || 
+          errType === 'no-speech' || 
+          errType === 'aborted' || 
+          errType.includes('service')
+        ) {
+          try {
+            recognition.onend = null;
+            recognition.onerror = null;
+            recognition.abort();
+          } catch {
+            // ignore
           }
-          options.onError(msg);
+          activeRecognition = null;
+          return;
         }
+
+        if (errType.includes('not-allowed') || errType.includes('permission')) {
+          isUserListeningActive = false;
+          options.onListeningChange(false);
+          if (options.onError) {
+            options.onError('Microphone access blocked. Please allow mic access in your browser address bar.');
+          }
+          return;
+        }
+
+        // Never emit raw technical error strings to the user.
+        // Audio continues recording smoothly in MediaRecorder.
       };
 
       recognition.onend = () => {
-        if (isUserListeningActive) {
-          try {
-            recognition.start();
-            return;
-          } catch {
-            // Keep user session active with MediaRecorder
-          }
-        }
+        // Recognition completed or disconnected; do NOT loop start()
+        activeRecognition = null;
       };
 
       activeRecognition = recognition;
@@ -224,64 +228,90 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
   return false;
 };
 
-export const stopVoiceSos = async (): Promise<void> => {
-  const wasActive = isUserListeningActive;
-  isUserListeningActive = false;
+export const stopVoiceSos = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const wasActive = isUserListeningActive;
+    isUserListeningActive = false;
 
-  const currentOpts = currentActiveOptions;
-  const recordedText = currentRecordedText;
+    const currentOpts = currentActiveOptions;
+    const recordedText = currentRecordedText;
 
-  // Stop native speech recognition
-  if (activeRecognition) {
-    try {
-      activeRecognition.stop();
-    } catch {
-      // ignore
+    // Disconnect and stop native recognition
+    if (activeRecognition) {
+      try {
+        activeRecognition.onend = null;
+        activeRecognition.onerror = null;
+        activeRecognition.stop();
+      } catch {
+        // ignore
+      }
+      activeRecognition = null;
     }
-    activeRecognition = null;
-  }
 
-  // Stop background MediaRecorder
-  if (activeMediaRecorder && activeMediaRecorder.state !== 'inactive') {
-    try {
-      activeMediaRecorder.stop();
-    } catch {
-      // ignore
+    if (currentOpts) {
+      currentOpts.onListeningChange(false);
     }
-  }
 
-  // Stop all active microphone tracks and release hardware
-  if (activeMediaStream) {
-    try {
-      activeMediaStream.getTracks().forEach((track) => track.stop());
-    } catch {
-      // ignore
-    }
-    activeMediaStream = null;
-  }
+    // Stop MediaRecorder and wait for the final chunk in onstop
+    if (activeMediaRecorder && activeMediaRecorder.state !== 'inactive') {
+      activeMediaRecorder.onstop = async () => {
+        // Release hardware mic tracks
+        if (activeMediaStream) {
+          try {
+            activeMediaStream.getTracks().forEach((track) => track.stop());
+          } catch {
+            // ignore
+          }
+          activeMediaStream = null;
+        }
+        activeMediaRecorder = null;
 
-  if (currentOpts) {
-    currentOpts.onListeningChange(false);
-  }
-
-  // If native SpeechRecognition didn't produce text (e.g. because of 'network' error)
-  // but we recorded audio chunks, transcribe synchronously with Sarvam AI STT!
-  if (wasActive && !recordedText.trim() && recordedAudioChunks.length > 0 && currentOpts) {
-    try {
-      const mimeType = recordedAudioChunks[0]?.type || 'audio/webm';
-      const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
-      if (audioBlob.size > 800) {
-        const lang = (currentOpts.langCode && LANG_CODE_MAP[currentOpts.langCode]) || currentOpts.langCode || 'hi-IN';
-        const transcript = await transcribeAudioWithSarvam(audioBlob, lang);
-        if (transcript.trim()) {
-          currentOpts.onTranscript(transcript.trim(), true);
+        // If native recognition already produced complete text, we're done
+        if (recordedText.trim()) {
+          resolve();
           return;
         }
+
+        // If we have recorded audio chunks, transcribe with Sarvam AI STT
+        if (wasActive && recordedAudioChunks.length > 0 && currentOpts) {
+          try {
+            const mimeType = recordedAudioChunks[0]?.type || 'audio/webm';
+            const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
+            if (audioBlob.size > 500) {
+              const lang =
+                (currentOpts.langCode && LANG_CODE_MAP[currentOpts.langCode]) ||
+                currentOpts.langCode ||
+                'hi-IN';
+              const transcript = await transcribeAudioWithSarvam(audioBlob, lang);
+              if (transcript && transcript.trim()) {
+                currentOpts.onTranscript(transcript.trim(), true);
+              }
+            }
+          } catch (sarvamErr) {
+            console.warn('Sarvam AI STT processing notice:', sarvamErr);
+          }
+        }
+        resolve();
+      };
+
+      try {
+        activeMediaRecorder.stop();
+      } catch {
+        resolve();
       }
-    } catch (sarvamErr) {
-      console.warn('Sarvam AI STT fallback notice:', sarvamErr);
+    } else {
+      // Release hardware mic tracks
+      if (activeMediaStream) {
+        try {
+          activeMediaStream.getTracks().forEach((track) => track.stop());
+        } catch {
+          // ignore
+        }
+        activeMediaStream = null;
+      }
+      resolve();
     }
-  }
+  });
 };
 
 /* ========================================================
