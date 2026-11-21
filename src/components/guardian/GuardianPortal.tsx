@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
 import { 
   HeartPulse, 
@@ -19,7 +19,8 @@ import {
   ShieldCheck,
   Droplet,
   AlertTriangle,
-  QrCode
+  QrCode,
+  Languages
 } from 'lucide-react';
 import { PRESET_EMERGENCIES, SAMPLE_ABHA_PROFILES } from '../../data/mockData';
 import { sanitizeText, sanitizeIdentifier } from '../../utils/security';
@@ -60,9 +61,23 @@ export const GuardianPortal: React.FC = () => {
   const [emergencyBrief, setEmergencyBrief] = useState<string>('');
   const [isListening, setIsListening] = useState<boolean>(false);
   const [voiceNotice, setVoiceNotice] = useState<string>('');
+  const [voiceLanguage, setVoiceLanguage] = useState<'hi-IN' | 'en-IN'>('hi-IN');
   const [isSpeakingTts, setIsSpeakingTts] = useState<boolean>(false);
   const [triageAnalysis, setTriageAnalysis] = useState<AITriageAnalysis | null>(currentTriage);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentTranscriptRef = useRef<string>('');
+
+  // Clean up silence timer and audio on unmount
+  useEffect(() => {
+    return () => {
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
+      stopVoiceSos();
+    };
+  }, []);
 
   // Hospital Selection & Neo4j State
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
@@ -87,36 +102,65 @@ export const GuardianPortal: React.FC = () => {
   }, [activeBooking]);
 
   // Voice SOS toggle (Speech-to-Text)
-  const handleToggleVoiceInput = () => {
+  const handleToggleVoiceInput = async () => {
     if (isListening) {
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
       stopVoiceSos();
       setIsListening(false);
+
+      const captured = currentTranscriptRef.current.trim();
+      if (captured.length >= 3) {
+        handleAnalyzeProblem(captured);
+      }
       return;
     }
 
     setVoiceNotice('');
+    currentTranscriptRef.current = emergencyBrief;
 
-    const started = startVoiceSos({
-      langCode: 'hi-IN',
-      onTranscript: (text, isFinal) => {
+    const started = await startVoiceSos({
+      langCode: voiceLanguage,
+      onTranscript: (text) => {
+        currentTranscriptRef.current = text;
         setEmergencyBrief(text);
-        if (isFinal) {
-          handleAnalyzeProblem(text);
-          setIsListening(false);
+
+        // Reset silence debounce timer
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
         }
+
+        // Auto-finalize after 2.5 seconds of silence if user spoke something substantial
+        silenceTimerRef.current = setTimeout(() => {
+          stopVoiceSos();
+          setIsListening(false);
+          if (text.trim().length >= 3) {
+            handleAnalyzeProblem(text.trim());
+          }
+        }, 2500);
       },
       onListeningChange: (listening) => {
         setIsListening(listening);
+        if (!listening && silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
       },
       onError: (err) => {
         setIsListening(false);
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
         setVoiceNotice(err || 'Microphone error. Please speak louder or select a sample emergency.');
       },
     });
 
     if (!started) {
       setIsListening(false);
-      setVoiceNotice('Microphone access is not supported or blocked in this browser. You can click "Simulate Voice SOS" below or type.');
+      setVoiceNotice('Microphone access is not available or blocked in this browser. You can click a sample emergency below or type.');
     }
   };
 
@@ -467,6 +511,33 @@ export const GuardianPortal: React.FC = () => {
 
               {/* Voice Actions */}
               <div className="flex items-center space-x-2">
+                {/* Language selector toggle */}
+                <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-xs font-bold">
+                  <Languages className="w-3 h-3 text-slate-500 mr-1" />
+                  <button
+                    type="button"
+                    onClick={() => setVoiceLanguage('hi-IN')}
+                    className={`px-2 py-1 rounded-lg transition cursor-pointer text-[11px] ${
+                      voiceLanguage === 'hi-IN'
+                        ? 'bg-white text-red-600 shadow-2xs font-extrabold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    हिन्दी
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVoiceLanguage('en-IN')}
+                    className={`px-2 py-1 rounded-lg transition cursor-pointer text-[11px] ${
+                      voiceLanguage === 'en-IN'
+                        ? 'bg-white text-red-600 shadow-2xs font-extrabold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleToggleVoiceInput}
@@ -518,10 +589,14 @@ export const GuardianPortal: React.FC = () => {
                   <div>
                     <div className="font-extrabold text-red-900 text-sm flex items-center space-x-1.5">
                       <Radio className="w-4 h-4 text-red-600 animate-pulse" />
-                      <span>Microphone Active — Listening to your voice...</span>
+                      <span>
+                        Microphone Active — Listening in {voiceLanguage === 'hi-IN' ? 'हिन्दी (Hindi)' : 'English (India)'}...
+                      </span>
                     </div>
-                    <div className="text-red-700 text-xs">
-                      Speak your emergency symptoms clearly in Hindi or English (e.g. "सीने में तेज दर्द हो रहा है" or "Severe chest pain").
+                    <div className="text-red-700 text-xs mt-0.5">
+                      {voiceLanguage === 'hi-IN'
+                        ? 'कृपया अपने लक्षण बोलें (उदा: "सीने में बहुत तेज दर्द हो रहा है और बायीं बांह में खिंचाव है")'
+                        : 'Speak symptoms clearly (e.g., "Severe crushing chest pain radiating to left arm and sweating")'}
                     </div>
                   </div>
                 </div>

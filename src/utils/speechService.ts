@@ -55,6 +55,7 @@ interface SpeechRecognitionEvent {
 }
 
 let activeRecognition: SpeechRecognitionInstance | null = null;
+let isUserListeningActive = false;
 
 export interface VoiceSosOptions {
   langCode?: string;
@@ -63,7 +64,7 @@ export interface VoiceSosOptions {
   onError?: (errorMessage: string) => void;
 }
 
-export const startVoiceSos = (options: VoiceSosOptions): boolean => {
+export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> => {
   if (typeof window === 'undefined') return false;
 
   const SpeechRec =
@@ -72,13 +73,33 @@ export const startVoiceSos = (options: VoiceSosOptions): boolean => {
 
   if (!SpeechRec) {
     if (options.onError) {
-      options.onError('Browser Speech Recognition not supported in this browser. Please use Chrome/Edge or click sample voice.');
+      options.onError('Browser Speech Recognition not supported in this browser. Please use Chrome/Edge or click a sample emergency.');
     }
     return false;
   }
 
+  // Request microphone permission explicitly so browser shows native permission prompt if not granted
+  if (navigator?.mediaDevices?.getUserMedia) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Release stream tracks immediately so the mic hardware is available for SpeechRecognition
+      stream.getTracks().forEach((track) => track.stop());
+    } catch (mediaErr: unknown) {
+      const errObj = mediaErr as { name?: string; message?: string };
+      console.warn('Microphone permission check warning:', errObj);
+      if (errObj?.name === 'NotAllowedError' || errObj?.name === 'PermissionDeniedError') {
+        if (options.onError) {
+          options.onError('Microphone access blocked. Please click the camera/mic icon in the address bar to allow microphone access.');
+        }
+        options.onListeningChange(false);
+        return false;
+      }
+    }
+  }
+
   // Stop any active recognition
   if (activeRecognition) {
+    isUserListeningActive = false;
     try {
       activeRecognition.abort();
     } catch {
@@ -95,46 +116,71 @@ export const startVoiceSos = (options: VoiceSosOptions): boolean => {
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
+    isUserListeningActive = true;
+
     recognition.onstart = () => {
       options.onListeningChange(true);
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let interim = '';
-      let final = '';
+      let finalTranscript = '';
+      let interimTranscript = '';
 
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
+      for (let i = 0; i < event.results.length; ++i) {
         const item = event.results[i];
         if (item.isFinal) {
-          final += item[0].transcript;
+          finalTranscript += (finalTranscript ? ' ' : '') + item[0].transcript.trim();
         } else {
-          interim += item[0].transcript;
+          interimTranscript += (interimTranscript ? ' ' : '') + item[0].transcript.trim();
         }
       }
 
-      const transcript = final || interim;
-      if (transcript.trim()) {
-        options.onTranscript(transcript.trim(), !!final);
+      const combined = (finalTranscript + (interimTranscript ? ' ' + interimTranscript : '')).trim();
+      if (combined) {
+        options.onTranscript(combined, Boolean(finalTranscript && !interimTranscript));
       }
     };
 
     recognition.onerror = (event: { error: string; message?: string }) => {
-      console.warn('SpeechRecognition error:', event.error);
+      console.warn('SpeechRecognition notice:', event.error);
+      // 'no-speech' is triggered when user pauses; do NOT kill user listening session
+      if (event.error === 'no-speech') {
+        return;
+      }
+      if (event.error === 'aborted') {
+        return;
+      }
+
+      isUserListeningActive = false;
       options.onListeningChange(false);
       if (options.onError) {
         let msg = `Microphone notice: ${event.error}`;
         if (event.error === 'not-allowed') {
-          msg = 'Microphone permission blocked. Please enable mic access in your browser settings.';
-        } else if (event.error === 'no-speech') {
-          msg = 'No voice detected. Please speak louder into your microphone.';
+          msg = 'Microphone permission blocked. Please enable mic access in your browser address bar.';
+        } else if (event.error === 'network') {
+          msg = 'Speech recognition network error. Please check your internet connection or use a sample emergency.';
+        } else if (event.error === 'audio-capture') {
+          msg = 'No microphone device found. Please plug in or enable a microphone.';
         }
         options.onError(msg);
       }
     };
 
     recognition.onend = () => {
-      options.onListeningChange(false);
-      activeRecognition = null;
+      if (isUserListeningActive) {
+        // Recognition ended unexpectedly (e.g. Chrome pause), restart if user is still actively recording
+        try {
+          recognition.start();
+          return;
+        } catch {
+          isUserListeningActive = false;
+          options.onListeningChange(false);
+          activeRecognition = null;
+        }
+      } else {
+        options.onListeningChange(false);
+        activeRecognition = null;
+      }
     };
 
     activeRecognition = recognition;
@@ -142,15 +188,17 @@ export const startVoiceSos = (options: VoiceSosOptions): boolean => {
     return true;
   } catch (err) {
     console.error('Failed to start speech recognition:', err);
+    isUserListeningActive = false;
     options.onListeningChange(false);
     if (options.onError) {
-      options.onError('Could not start microphone. Fallback available.');
+      options.onError('Could not initialize microphone. Please check browser permissions or select a sample emergency.');
     }
     return false;
   }
 };
 
 export const stopVoiceSos = () => {
+  isUserListeningActive = false;
   if (activeRecognition) {
     try {
       activeRecognition.stop();
