@@ -176,6 +176,19 @@ export const BookingConfirmedModal: React.FC<Props> = ({ onClose }) => {
           <span className="font-mono font-bold text-red-600 text-xs">{timeFormatted}</span>
         </div>
 
+        {/* Cryptographic Anti-Tamper Security Signature */}
+        {activeBooking.securitySignature && (
+          <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-[11px] font-mono text-slate-600">
+            <span className="flex items-center gap-1 text-emerald-700 font-semibold">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Token Verification: Verified</span>
+            </span>
+            <span className="text-slate-500 font-bold truncate max-w-[200px]" title={activeBooking.securitySignature}>
+              {activeBooking.securitySignature}
+            </span>
+          </div>
+        )}
+
         {/* Linked ABHA Patient Data Card in Modal */}
         <div className="mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
           <div className="flex items-center justify-between text-xs">

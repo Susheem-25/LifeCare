@@ -91,25 +91,22 @@ const MainAppContent: React.FC = () => {
             <div className="flex items-center space-x-2 text-xs w-full sm:w-auto">
               <button
                 onClick={navigateToPatient}
-                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
-                  currentView === 'patient' ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${currentView === 'patient' ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  }`}
               >
                 SOS Triage
               </button>
               <button
                 onClick={() => setCurrentView('ambulance')}
-                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
-                  currentView === 'ambulance' ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${currentView === 'ambulance' ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  }`}
               >
                 Paramedic
               </button>
               <button
                 onClick={() => setCurrentView('hospital')}
-                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
-                  currentView === 'hospital' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'
-                }`}
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${currentView === 'hospital' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'
+                  }`}
               >
                 ER Command
               </button>

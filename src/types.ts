@@ -164,6 +164,8 @@ export interface EmergencyBooking {
     digitalConsentSigned: boolean;
     preAdmitRegistrationNumber?: string;
   };
+  securitySignature?: string;
+  tokenExpiryTimestamp?: number;
 }
 
 /* ========================================================

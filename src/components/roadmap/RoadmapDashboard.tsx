@@ -14,7 +14,9 @@ import {
   Sparkles,
   Building2,
   Ambulance,
-  HeartPulse
+  HeartPulse,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface Props {
@@ -45,6 +47,7 @@ export const RoadmapDashboard: React.FC<Props> = ({ onStepClick }) => {
   }
 
   const [selectedPreviewStep, setSelectedPreviewStep] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState<boolean>(currentStep > 1);
   const activeDisplayStep = selectedPreviewStep || currentStep;
   const isInspectingDifferentStep = selectedPreviewStep !== null && selectedPreviewStep !== currentStep;
 
@@ -253,6 +256,16 @@ export const RoadmapDashboard: React.FC<Props> = ({ onStepClick }) => {
 
               <button
                 type="button"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="p-1.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-2xs"
+                title={isExpanded ? "Hide detailed step timeline" : "Show detailed step timeline"}
+              >
+                <span>{isExpanded ? 'Hide Steps' : 'View 5 Steps'}</span>
+                {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-500" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-500" />}
+              </button>
+
+              <button
+                type="button"
                 onClick={resetEmergencyState}
                 className="p-1.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-slate-600 transition cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-2xs"
                 title="Reset lifecycle to Step 1"
@@ -352,8 +365,10 @@ export const RoadmapDashboard: React.FC<Props> = ({ onStepClick }) => {
         </div>
       </div>
 
-      {/* 2. THE 5-STEP ROADMAP TIMELINE NODES */}
-      <div className="space-y-2">
+      {isExpanded && (
+        <div className="space-y-4 pt-1 animate-fadeIn">
+          {/* 2. THE 5-STEP ROADMAP TIMELINE NODES */}
+          <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
           <span className="font-bold text-slate-700 flex items-center gap-1.5">
             <Zap className="w-3.5 h-3.5 text-red-600" />
@@ -630,5 +645,7 @@ export const RoadmapDashboard: React.FC<Props> = ({ onStepClick }) => {
         </div>
       </div>
     </div>
+  )}
+</div>
   );
 };

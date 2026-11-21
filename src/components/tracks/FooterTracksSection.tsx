@@ -3,15 +3,17 @@ import {
   Network, 
   Languages, 
   Layers, 
-  Cpu, 
-  ArrowRight, 
   CheckCircle2, 
-  Clock, 
-  Bed, 
-  Fingerprint, 
-  WifiOff, 
   Zap, 
-  TrendingUp 
+  TrendingUp,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  Cpu,
+  ArrowRight,
+  Bed,
+  Fingerprint,
+  WifiOff
 } from 'lucide-react';
 import { useEmergency } from '../../context/EmergencyContext';
 import { LIFENET_5_STEPS, IMPACT_METRICS } from '../../data/trackMockData';
@@ -19,6 +21,7 @@ import { LIFENET_5_STEPS, IMPACT_METRICS } from '../../data/trackMockData';
 export const FooterTracksSection: React.FC = () => {
   const { navigateToTrack } = useEmergency();
   const [activeTab, setActiveTab] = useState<'methodology' | 'pillars' | 'impact' | 'future'>('methodology');
+  const [isSectionOpen, setIsSectionOpen] = useState<boolean>(false);
 
   return (
     <section aria-label="Emergency Healthcare Architecture" className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-8 mb-6 overflow-hidden">
@@ -39,8 +42,20 @@ export const FooterTracksSection: React.FC = () => {
             </h2>
           </div>
 
-          {/* Segmented Tab Switcher */}
-          <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-2xl self-start sm:self-auto text-xs overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setIsSectionOpen(!isSectionOpen)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-slate-700 font-bold text-xs cursor-pointer transition shadow-2xs self-start sm:self-center"
+          >
+            <span>{isSectionOpen ? 'Hide Architecture' : 'Explore Architecture (5 Steps & Pillars)'}</span>
+            {isSectionOpen ? <ChevronUp className="w-3.5 h-3.5 text-slate-500" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-500" />}
+          </button>
+        </div>
+
+        {isSectionOpen && (
+          <div className="space-y-5 animate-fadeIn">
+            {/* Segmented Tab Switcher */}
+            <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-2xl self-start sm:self-auto text-xs overflow-x-auto">
             <button
               type="button"
               onClick={() => setActiveTab('methodology')}
@@ -93,7 +108,6 @@ export const FooterTracksSection: React.FC = () => {
               <span>Future Scope & PWA</span>
             </button>
           </div>
-        </div>
 
         {/* 1. METHODOLOGY: 5 SYNCHRONIZED STEPS (Slide 3) */}
         {activeTab === 'methodology' && (
@@ -416,6 +430,8 @@ export const FooterTracksSection: React.FC = () => {
           </div>
         )}
       </div>
-    </section>
+    )}
+  </div>
+</section>
   );
 };

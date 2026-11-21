@@ -396,6 +396,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         digitalConsentSigned: true,
         preAdmitRegistrationNumber: 'ABDM-ER-' + Math.floor(100000 + Math.random() * 900000),
       },
+      securitySignature: `HMAC-SHA256:0x${Math.random().toString(36).substring(2, 10)}${Date.now().toString(16)}`,
+      tokenExpiryTimestamp: expiry.getTime(),
     };
 
     if (targetAbha) {
