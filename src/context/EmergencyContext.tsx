@@ -132,7 +132,15 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Firebase Authentication & Role-based Unique ID Profile State
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getSavedUserProfile());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isVoiceQrModalOpen, setIsVoiceQrModalOpen] = useState(false);
+  const [isVoiceQrModalOpen, setRawIsVoiceQrModalOpen] = useState(false);
+
+  const setIsVoiceQrModalOpen = (open: boolean) => {
+    if (open && currentUser && currentUser.role !== 'guardian') {
+      console.warn('[RBAC] Voice-to-QR intake generation is restricted strictly to Guardian role.');
+      return;
+    }
+    setRawIsVoiceQrModalOpen(open);
+  };
 
   useEffect(() => {
     // Listen to Firebase Auth state

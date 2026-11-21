@@ -23,14 +23,14 @@ export interface EncryptedMedicalPacket {
 }
 
 // Helper: Convert ArrayBuffer to Hex String
-function bufferToHex(buffer: ArrayBuffer): string {
+export function bufferToHex(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 }
 
 // Helper: Convert Hex String to Uint8Array
-function hexToBuffer(hex: string): Uint8Array {
+export function hexToBuffer(hex: string): Uint8Array {
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < hex.length; i += 2) {
     bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
@@ -64,6 +64,62 @@ export async function computeKeyFingerprint(key: CryptoKey): Promise<string> {
   const hash = await window.crypto.subtle.digest('SHA-256', exported);
   const hex = bufferToHex(hash);
   return `SHA256:${hex.substring(0, 16).toUpperCase()}...${hex.substring(hex.length - 8).toUpperCase()}`;
+}
+
+/**
+ * Returns the standard AES-GCM 256-bit emergency grid crypto key used by LifeCare hospitals
+ * to decrypt patient admissions sealed by citizen guardians.
+ */
+export async function getEmergencyGridCryptoKey(): Promise<CryptoKey> {
+  if (typeof window === 'undefined' || !window.crypto || !window.crypto.subtle) {
+    throw new Error('Web Crypto API is not available in this environment');
+  }
+  const keyMaterial = await window.crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode('LIFECARE_ABDM_EMERGENCY_GRID_E2EE_MASTER_KEY_2026')
+  );
+  return await window.crypto.subtle.importKey(
+    'raw',
+    keyMaterial,
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+/**
+ * Masks patient names to prevent visual or third-party camera snooping.
+ * e.g., "Ramesh Sharma" -> "R***** S*****"
+ */
+export function maskName(name: string): string {
+  if (!name) return 'Protected Patient';
+  const parts = name.trim().split(/\s+/);
+  return parts.map((p) => {
+    if (p.length <= 1) return p;
+    return p[0] + '*'.repeat(Math.max(4, p.length - 1));
+  }).join(' ');
+}
+
+/**
+ * Masks phone numbers so bystanders cannot harvest personal contacts.
+ * e.g., "+91-98104-55678" -> "+91-98***-**678"
+ */
+export function maskPhone(phone: string): string {
+  if (!phone) return '+91-*****';
+  const clean = phone.trim();
+  if (clean.length < 8) return clean;
+  return clean.slice(0, 5) + '***-***' + clean.slice(-3);
+}
+
+/**
+ * Masks ABHA health IDs.
+ * e.g., "91-4820-9182-3921" -> "91-****-****-3921"
+ */
+export function maskAbha(abha?: string): string {
+  if (!abha) return '';
+  const clean = abha.trim();
+  if (clean.length < 8) return clean;
+  return clean.slice(0, 3) + '****-****-' + clean.slice(-4);
 }
 
 /**

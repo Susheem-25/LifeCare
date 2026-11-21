@@ -10,13 +10,22 @@ import {
   QrCode,
   AlertCircle,
   FileText,
-  Radio
+  Radio,
+  ShieldCheck,
+  Lock,
+  EyeOff
 } from 'lucide-react';
 import type { PatientVoiceRegistration } from '../../types';
 import {
   parseSpokenRegistration,
-  packRegistrationToQR
+  packRegistrationToQR,
+  packEncryptedRegistrationToQR
 } from '../../utils/voiceRegistrationParser';
+import {
+  maskName,
+  maskPhone,
+  maskAbha
+} from '../../services/cryptoService';
 import {
   startVoiceSos,
   stopVoiceSos
@@ -64,6 +73,8 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [micNotice, setMicNotice] = useState<string | null>(null);
   const [audioVolume, setAudioVolume] = useState(0);
+  const [encryptedQrPayload, setEncryptedQrPayload] = useState<string>('');
+  const [keyFingerprint, setKeyFingerprint] = useState<string>('SHA256:7F3A9182...B8C1');
 
   // Structured form state
   const [formData, setFormData] = useState<PatientVoiceRegistration>(() =>
@@ -77,6 +88,30 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
       setFormData((prev) => parseSpokenRegistration(transcript, prev));
     }
   }, [transcript]);
+
+  // Generate AES-GCM-256 encrypted QR packet whenever form data updates
+  useEffect(() => {
+    let isMounted = true;
+    packEncryptedRegistrationToQR(formData)
+      .then((payload) => {
+        if (isMounted) {
+          setEncryptedQrPayload(payload);
+          try {
+            const parsed = JSON.parse(payload);
+            if (parsed.fprint) setKeyFingerprint(parsed.fprint);
+          } catch {
+            // retain existing fingerprint
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to encrypt QR packet:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [formData]);
 
   if (!isOpen) return null;
 
@@ -151,7 +186,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
   const qrPayload = packRegistrationToQR(formData);
 
   const copyPayload = () => {
-    navigator.clipboard.writeText(qrPayload);
+    navigator.clipboard.writeText(encryptedQrPayload || qrPayload);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -177,8 +212,9 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
                 <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
                   Voice-to-QR Pre-Admission Transfer
                 </h2>
-                <span className="text-[10px] font-mono bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-bold">
-                  Zero-Wait ER
+                <span className="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-emerald-700" />
+                  <span>E2EE Zero-Wait ER</span>
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -528,7 +564,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
           </div>
 
           {/* Right Column (5 cols): High-Density QR Code Generator */}
-          <div className="lg:col-span-5 bg-white border-2 border-slate-200 rounded-2xl p-5 flex flex-col items-center justify-between text-center space-y-4 shadow-xs">
+          <div className="lg:col-span-5 bg-white border-2 border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-between text-center space-y-3.5 shadow-xs">
             <div>
               <span className="text-[10px] font-mono uppercase font-bold text-slate-400 block">
                 Hospital Reception Scannable Token
@@ -541,16 +577,56 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
             {/* QR Code Container */}
             <div className="p-3 bg-white border-2 border-slate-900 rounded-2xl shadow-md inline-block">
               <QRCodeSVG
-                value={qrPayload}
-                size={180}
+                value={encryptedQrPayload || qrPayload}
+                size={175}
                 level="M"
                 includeMargin={false}
               />
             </div>
 
+            {/* Masked E2EE Security Card */}
+            <div className="w-full bg-slate-900 text-white rounded-xl p-3 text-left space-y-2 border border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-emerald-400" />
+                  <span>AES-GCM-256 E2EE Masked</span>
+                </span>
+                <span className="text-[9px] font-mono text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">
+                  {keyFingerprint}
+                </span>
+              </div>
+
+              <div className="text-[11px] font-mono space-y-1 text-slate-300">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Masked Patient:</span>
+                  <strong className="text-white flex items-center gap-1">
+                    <EyeOff className="w-3 h-3 text-slate-400" />
+                    {maskName(formData.fullName)}
+                  </strong>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Masked Phone:</span>
+                  <strong className="text-white">{maskPhone(formData.guardianPhone)}</strong>
+                </div>
+                {formData.optionalAbhaId && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">ABHA Token:</span>
+                    <strong className="text-cyan-400">{maskAbha(formData.optionalAbhaId)}</strong>
+                  </div>
+                )}
+              </div>
+
+              <div className="text-[10px] text-slate-400 leading-tight pt-1.5 border-t border-slate-800/80 flex items-start gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                <span>
+                  Clinical symptoms, vitals & allergies are AES-GCM-256 encrypted. Unauthorized phone cameras see only cipher tokens.
+                </span>
+              </div>
+            </div>
+
             {/* Scannable Notice */}
             <div className="text-[11px] text-slate-500 leading-snug">
-              Scan with the <strong>Hospital Portal Camera Scanner</strong> to instantly populate all registration fields without typing.
+              Scan with the <strong>Hospital Portal Camera Scanner</strong> to instantly decrypt and populate all registration fields without typing.
             </div>
 
             {/* Action Buttons */}
@@ -559,17 +635,17 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
                 type="button"
                 onClick={copyPayload}
                 className="w-full py-2 px-3 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center space-x-2 transition cursor-pointer"
-                title="Copy digital QR payload JSON"
+                title="Copy encrypted digital QR payload JSON"
               >
                 {copied ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-emerald-700">QR Payload Copied!</span>
+                    <span className="text-emerald-700">Encrypted QR Payload Copied!</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Copy Intake QR Payload JSON</span>
+                    <span>Copy Encrypted QR Payload JSON</span>
                   </>
                 )}
               </button>

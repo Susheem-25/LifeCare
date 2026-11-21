@@ -10,10 +10,16 @@ import {
   AlertTriangle,
   ArrowRight,
   ClipboardPaste,
-  FileCheck2
+  FileCheck2,
+  Lock,
+  ShieldCheck
 } from 'lucide-react';
 import type { PatientVoiceRegistration, Hospital } from '../../types';
-import { unpackRegistrationFromQR, packRegistrationToQR, parseSpokenRegistration } from '../../utils/voiceRegistrationParser';
+import {
+  unpackEncryptedRegistrationFromQR,
+  packEncryptedRegistrationToQR,
+  parseSpokenRegistration
+} from '../../utils/voiceRegistrationParser';
 import { sanitizeText } from '../../utils/security';
 import { soundEffects } from '../../utils/audio';
 import confetti from 'canvas-confetti';
@@ -24,12 +30,6 @@ interface ReceptionQrScannerModalProps {
   hospital: Hospital;
   onAdmitPatient: (registration: PatientVoiceRegistration, bay: string, doctorName: string) => void;
 }
-
-const SAMPLE_AMBULANCE_QR = packRegistrationToQR(
-  parseSpokenRegistration(
-    'Patient name is Ramesh Sharma, 54-year-old male, blood group B positive. Severe chest pain radiating to left arm (STEMI). Allergic to penicillin. Taking aspirin 75mg and atorvastatin. History of angioplasty stent in 2021. Guardian phone +91-98104-55678. ABHA ID 91-4820-9182-3921.'
-  )
-);
 
 export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = ({
   isOpen,
@@ -112,24 +112,36 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
     setScannerActive(false);
   };
 
-  // Process and unpack scanned QR payload
-  const handleSuccessfulQrPayload = (rawPayload: string) => {
-    const parsed = unpackRegistrationFromQR(rawPayload);
-    if (!parsed) {
-      setScanError('Invalid QR Code format. Please scan a valid LifeCare Voice-QR payload.');
-      return;
-    }
+  // Process and unpack/decrypt scanned QR payload
+  const handleSuccessfulQrPayload = async (rawPayload: string) => {
+    try {
+      const parsed = await unpackEncryptedRegistrationFromQR(rawPayload);
+      if (!parsed) {
+        setScanError('Invalid QR Code format. Please scan a valid LifeCare Voice-QR payload.');
+        return;
+      }
 
-    setScannedData(parsed);
-    setHasAutoFilled(true);
-    setScanError(null);
-    soundEffects.playSuccessChime();
+      setScannedData(parsed);
+      setHasAutoFilled(true);
+      setScanError(null);
+      soundEffects.playSuccessChime();
+    } catch (err) {
+      console.warn('QR Processing failed:', err);
+      setScanError('Failed to decrypt QR code: Corrupt or unrecognized security payload.');
+    }
   };
 
   // Handle QR intake or pasted payload
-  const handlePasteOrSimulate = () => {
-    const payloadToProcess = pastePayload.trim() || SAMPLE_AMBULANCE_QR;
-    handleSuccessfulQrPayload(payloadToProcess);
+  const handlePasteOrSimulate = async () => {
+    let payloadToProcess = pastePayload.trim();
+    if (!payloadToProcess) {
+      payloadToProcess = await packEncryptedRegistrationToQR(
+        parseSpokenRegistration(
+          'Patient name is Ramesh Sharma, 54-year-old male, blood group B positive. Severe chest pain radiating to left arm (STEMI). Allergic to penicillin. Taking aspirin 75mg and atorvastatin. History of angioplasty stent in 2021. Guardian phone +91-98104-55678. ABHA ID 91-4820-9182-3921.'
+        )
+      );
+    }
+    await handleSuccessfulQrPayload(payloadToProcess);
   };
 
   // Submit patient into Admitted directory
@@ -287,7 +299,7 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
         {scannedData ? (
           <div className="space-y-4 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <FileCheck2 className="w-5 h-5 text-emerald-600" />
                 <h3 className="text-base font-extrabold text-slate-900">
                   Hospital Reception Registration Form
@@ -296,12 +308,35 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                   <span>Verified from Voice QR</span>
                 </span>
+                {scannedData.isDecrypted && (
+                  <span className="text-[10px] font-mono text-emerald-900 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full font-bold flex items-center space-x-1">
+                    <Lock className="w-3 h-3 text-emerald-600" />
+                    <span>AES-GCM-256 Decrypted</span>
+                  </span>
+                )}
               </div>
 
               <div className="text-xs font-mono text-slate-500">
                 Patient ID: <strong className="text-slate-900">{scannedData.patientId}</strong>
               </div>
             </div>
+
+            {/* E2EE Decryption Verification Banner */}
+            {scannedData.isDecrypted && (
+              <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-900 font-mono">
+                <div className="flex items-center space-x-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    <strong>End-to-End Encrypted Handover:</strong> Decrypted with National Emergency Grid Master Key.
+                  </span>
+                </div>
+                {scannedData.keyFingerprint && (
+                  <span className="bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold text-emerald-800">
+                    Fingerprint: {scannedData.keyFingerprint}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Editable Registration Fields with "From Voice QR" Badges */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">

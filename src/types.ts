@@ -30,6 +30,20 @@ export interface PatientVoiceRegistration {
   guardianPhone: string;
   optionalAbhaId?: string;
   createdAt: string;
+  isDecrypted?: boolean;
+  keyFingerprint?: string;
+}
+
+export interface EncryptedVoiceQRPacket {
+  t: 'LC_E2EE_V2';
+  pid: string;
+  maskedName: string;
+  maskedPhone: string;
+  ct: string; // Hex-encoded AES-GCM-256 ciphertext
+  iv: string; // Hex-encoded 12-byte IV
+  fprint: string; // SHA-256 key fingerprint
+  ts: number;
+  notice: string;
 }
 
 export interface CompactRegistrationQRPacket {

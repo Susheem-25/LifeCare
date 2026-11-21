@@ -236,11 +236,13 @@ const MainAppContent: React.FC = () => {
         onClose={() => setIsAuthModalOpen(false)}
       />
 
-      {/* Ambulance / Guardian Voice-to-QR Pre-Admission Modal */}
-      <VoiceToQrModal
-        isOpen={isVoiceQrModalOpen}
-        onClose={() => setIsVoiceQrModalOpen(false)}
-      />
+      {/* Guardian Voice-to-QR Pre-Admission Modal (Restricted strictly to Guardian) */}
+      {currentRole === 'guardian' && (!currentUser || currentUser.role === 'guardian') && (
+        <VoiceToQrModal
+          isOpen={isVoiceQrModalOpen}
+          onClose={() => setIsVoiceQrModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
