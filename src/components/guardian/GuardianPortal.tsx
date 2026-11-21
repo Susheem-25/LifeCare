@@ -45,11 +45,6 @@ const triggerAmbulanceCall = () => {
   }
 };
 
-const generateNextPatientId = (): string => {
-  const randomNum = Math.floor(1000 + Math.random() * 9000);
-  return `PAT-2026-${randomNum}`;
-};
-
 export const GuardianPortal: React.FC = () => {
   const {
     hospitals,
@@ -280,47 +275,30 @@ export const GuardianPortal: React.FC = () => {
       return a.distanceKm - b.distanceKm;
     });
 
-  // Select & Lock Hospital -> Immediately opens phone dialer to call 108, generates Patient ID, and locks Neo4j graph
-  const handleSelectHospital = (hospital: Hospital) => {
+  // Lock Hospital -> Immediately saves to database, locks Neo4j graph & reserves hospital bed
+  const handleLockHospital = (hospital: Hospital) => {
     setSelectedHospital(hospital);
     setIsGraphProcessing(true);
 
-    const newPatientId = generateNextPatientId();
-    setGeneratedPatientId(newPatientId);
-
-    // Straightaway open phone dialer to call ambulance 108
-    triggerAmbulanceCall();
-
-    setTimeout(() => {
-      setIsGraphProcessing(false);
-    }, 600);
-  };
-
-  // Finalize Emergency Dispatch & Save to Hospital Database as Incoming Patient
-  const handleConfirmReservation = () => {
-    if (!selectedHospital) return;
-
     const booking = bookHospitalBed(
-      selectedHospital.id,
-      generatedPatientId ? `PATIENT [${generatedPatientId}]` : 'PATIENT [PAT-2026-4821]',
+      hospital.id,
+      undefined,
       'PROTECTED (ZERO PII)'
     );
 
-    if (generatedPatientId) {
-      booking.patientUniqueId = generatedPatientId;
-    }
-
+    setGeneratedPatientId(booking.patientUniqueId);
     setCompletedRegistration(booking);
     setTrackedBooking(booking);
     setTrackPatientIdInput(booking.patientUniqueId);
 
-    // Straightaway open phone dialer to call 108 ambulance
-    triggerAmbulanceCall();
-
     speakTextWithSarvam(
-      `Hospital confirmed at ${selectedHospital.name}. Patient ID ${booking.patientUniqueId}. Ambulance dispatched and incoming record logged.`,
+      `Hospital locked at ${hospital.name}. Patient ID ${booking.patientUniqueId} saved to database.`,
       { langCode: 'hi-IN' }
     );
+
+    setTimeout(() => {
+      setIsGraphProcessing(false);
+    }, 600);
   };
 
   // Track Patient Lookup
@@ -776,7 +754,7 @@ export const GuardianPortal: React.FC = () => {
                 return (
                   <div
                     key={hosp.id}
-                    onClick={() => handleSelectHospital(hosp)}
+                    onClick={() => handleLockHospital(hosp)}
                     className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between gap-3 ${
                       isSelected
                         ? 'border-emerald-600 bg-emerald-50/50 shadow-md ring-2 ring-emerald-600/20'
@@ -811,30 +789,45 @@ export const GuardianPortal: React.FC = () => {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectHospital(hosp);
-                      }}
-                      className={`w-full py-2.5 rounded-xl text-xs font-bold transition cursor-pointer text-center flex items-center justify-center space-x-1.5 ${
-                        isSelected
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
-                      }`}
-                    >
-                      {isSelected ? (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>✓ Hospital Locked • Dialing 108</span>
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-3.5 h-3.5" />
-                          <span>Lock Hospital & Call 108</span>
-                        </>
-                      )}
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLockHospital(hosp);
+                        }}
+                        className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition cursor-pointer text-center flex items-center justify-center space-x-1.5 ${
+                          isSelected
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
+                        }`}
+                      >
+                        {isSelected ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>✓ Hospital Locked</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-3.5 h-3.5" />
+                            <span>Lock Hospital</span>
+                          </>
+                        )}
+                      </button>
+
+                      <a
+                        href="tel:108"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          triggerAmbulanceCall();
+                        }}
+                        className="py-2.5 px-3.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer shrink-0 text-center"
+                        title="Call 108 Ambulance"
+                      >
+                        <PhoneCall className="w-3.5 h-3.5 text-white animate-pulse" />
+                        <span>Call Ambulance</span>
+                      </a>
+                    </div>
                   </div>
                 );
               })}
@@ -858,10 +851,10 @@ export const GuardianPortal: React.FC = () => {
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                     </div>
                     <h4 className="text-base font-black tracking-tight mt-0.5">
-                      Emergency Ambulance 108 Dialed
+                      Emergency Ambulance Dispatch Available
                     </h4>
                     <p className="text-xs text-red-100">
-                      Emergency bed & trauma doctor reserved at <strong>{selectedHospital.name}</strong>. Phone dialer opened for 108.
+                      Emergency bed & trauma doctor locked at <strong>{selectedHospital.name}</strong> and saved to database.
                     </p>
                   </div>
                 </div>
@@ -916,6 +909,13 @@ export const GuardianPortal: React.FC = () => {
                   <span className="text-slate-900 font-extrabold">{selectedHospital.name}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-700">
+                  <span>Database Status:</span>
+                  <span className="text-emerald-700 font-mono font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Saved to Hospital Database
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-slate-700">
                   <span>Emergency ER Bay:</span>
                   <span className="text-emerald-700 font-mono font-bold">Trauma Bay #03 (Reserved)</span>
                 </div>
@@ -925,15 +925,16 @@ export const GuardianPortal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Confirm & Save Button */}
-              <button
-                type="button"
-                onClick={handleConfirmReservation}
+              {/* Call Ambulance Action */}
+              <a
+                href="tel:108"
+                onClick={triggerAmbulanceCall}
                 className="w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md shadow-red-600/25 flex items-center justify-center space-x-2 cursor-pointer mt-2"
+                title="Direct Phone Dialer to Call 108 Ambulance"
               >
-                <span>Dispatch 108 Ambulance & Save to Hospital Database</span>
-                <ArrowRight className="w-4 h-4 text-white" />
-              </button>
+                <PhoneCall className="w-4 h-4 text-white animate-pulse" />
+                <span>Call Ambulance (108)</span>
+              </a>
             </div>
           )}
 
