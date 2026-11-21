@@ -10,6 +10,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { SAMPLE_DRIVERS } from '../../data/mockData';
+import { sanitizeIdentifier } from '../../utils/security';
 import { LiveRouteMap } from '../common/LiveRouteMap';
 import { getGoogleMapsNavigationUrl } from '../../services/sarvamAiService';
 
@@ -115,7 +116,7 @@ export const DriverPortal: React.FC = () => {
                 <input
                   type="text"
                   value={driverIdInput}
-                  onChange={(e) => setDriverIdInput(e.target.value.toUpperCase())}
+                  onChange={(e) => setDriverIdInput(sanitizeIdentifier(e.target.value))}
                   placeholder="e.g. DRV-101"
                   className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-amber-500 focus:outline-none font-mono font-bold uppercase"
                   required
@@ -237,7 +238,7 @@ export const DriverPortal: React.FC = () => {
             <input
               type="text"
               value={patientIdInput}
-              onChange={(e) => setPatientIdInput(e.target.value.toUpperCase())}
+              onChange={(e) => setPatientIdInput(sanitizeIdentifier(e.target.value))}
               placeholder="e.g. PAT-2026-4821 or AMB-7492"
               className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-amber-500 focus:outline-none font-mono text-sm uppercase font-bold"
             />

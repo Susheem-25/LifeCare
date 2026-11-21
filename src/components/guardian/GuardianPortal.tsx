@@ -18,6 +18,7 @@ import {
   Radio
 } from 'lucide-react';
 import { PRESET_EMERGENCIES, SAMPLE_ABHA_PROFILES } from '../../data/mockData';
+import { sanitizeText, sanitizeIdentifier } from '../../utils/security';
 import { 
   speakTextWithSarvam, 
   stopSarvamSpeech, 
@@ -359,7 +360,7 @@ export const GuardianPortal: React.FC = () => {
                 <input
                   type="text"
                   value={trackPatientIdInput}
-                  onChange={(e) => setTrackPatientIdInput(e.target.value.toUpperCase())}
+                  onChange={(e) => setTrackPatientIdInput(sanitizeIdentifier(e.target.value))}
                   placeholder="Enter Patient ID (e.g. PAT-2026-8941)"
                   className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-red-500 focus:outline-none font-mono text-xs uppercase font-bold"
                 />
@@ -542,9 +543,10 @@ export const GuardianPortal: React.FC = () => {
                 rows={2}
                 value={emergencyBrief}
                 onChange={(e) => {
-                  setEmergencyBrief(e.target.value);
-                  if (e.target.value.trim().length >= 4) {
-                    searchEmergency(e.target.value);
+                  const clean = sanitizeText(e.target.value);
+                  setEmergencyBrief(clean);
+                  if (clean.length >= 4) {
+                    searchEmergency(clean);
                   }
                 }}
                 placeholder="What happened? (e.g. chest pain, breathing difficulty, severe bleeding)..."
@@ -729,7 +731,7 @@ export const GuardianPortal: React.FC = () => {
                   <input
                     type="text"
                     value={abhaInput}
-                    onChange={(e) => setAbhaInput(e.target.value)}
+                    onChange={(e) => setAbhaInput(sanitizeIdentifier(e.target.value, 24))}
                     placeholder="Enter ABHA ID (e.g. 91-4820-9182-3921)"
                     className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-semibold"
                   />

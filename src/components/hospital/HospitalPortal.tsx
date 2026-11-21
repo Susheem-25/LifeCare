@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
 import { INITIAL_HOSPITALS } from '../../data/mockData';
+import { sanitizeIdentifier } from '../../utils/security';
 import type { Doctor, Equipment, EmergencyBooking } from '../../types';
 import { 
   Building2, 
@@ -182,7 +183,7 @@ export const HospitalPortal: React.FC = () => {
                 <input
                   type="text"
                   value={hospCodeInput}
-                  onChange={(e) => setHospCodeInput(e.target.value.toUpperCase())}
+                  onChange={(e) => setHospCodeInput(sanitizeIdentifier(e.target.value))}
                   placeholder="e.g. AIIMS-DELHI"
                   className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-500 focus:outline-none font-mono font-bold uppercase"
                   required
