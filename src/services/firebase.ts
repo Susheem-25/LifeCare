@@ -139,13 +139,11 @@ export async function signInWithGoogle(role: AppRole): Promise<UserProfile> {
         lastLoginAt: new Date().toISOString(),
       };
 
-      // Store in Cloud Firestore if available
+      // Store in Cloud Firestore in background (non-blocking so authentication completes instantly)
       if (db) {
-        try {
-          await setDoc(doc(db, 'users', profile.uid), profile, { merge: true });
-        } catch (dbErr) {
-          console.warn('[Firestore] Profile write fallback:', dbErr);
-        }
+        setDoc(doc(db, 'users', profile.uid), profile, { merge: true }).catch((dbErr) => {
+          console.warn('[Firestore] Profile write deferred or offline:', dbErr);
+        });
       }
 
       persistUserProfile(profile);
