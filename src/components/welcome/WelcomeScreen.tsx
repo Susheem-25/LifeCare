@@ -372,7 +372,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
               <span>National Healthcare Grid Integration</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Powered by Sarvam AI Indic Speech and Neo4j Graph Resource Engine
+              Powered by Sarvam AI Indic Speech and Cloud Real-Time Resource Engine
             </p>
           </div>
 
@@ -398,9 +398,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
           <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
             <div className="flex items-center space-x-1.5 text-red-600 font-bold font-mono text-[11px]">
               <Zap className="w-3.5 h-3.5" />
-              <span>&lt;9ms Graph Lock</span>
+              <span>&lt;10ms Cloud Lock</span>
             </div>
-            <div className="text-slate-900 font-extrabold text-sm">Neo4j AuraDB</div>
+            <div className="text-slate-900 font-extrabold text-sm">Cloud Firestore</div>
             <p className="text-[11px] text-slate-500">Atomic bed, doctor & machine reservation</p>
           </div>
 

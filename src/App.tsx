@@ -203,7 +203,7 @@ const MainAppContent: React.FC = () => {
           <div className="py-2 flex flex-wrap items-center justify-center gap-2 text-[11px] font-mono text-slate-600">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-teal-800 shadow-2xs font-bold">
               <Zap className="w-3 h-3 text-teal-600" />
-              Neo4j Atomic Lock &lt;9ms
+              Cloud Atomic Lock &lt;10ms
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-2xs font-bold">
               <ShieldCheck className="w-3 h-3 text-emerald-600" />

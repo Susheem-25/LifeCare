@@ -878,22 +878,22 @@ export const GuardianPortal: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 3: Neo4j Graph Processing & Patient ID */}
+          {/* Card 3: Cloud Database Resource Reservation & Patient ID */}
           {selectedHospital && (
             <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4 animate-fadeIn">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="space-y-0.5">
-                  <div className="text-[10px] font-mono font-bold text-purple-700 uppercase">
-                    Neo4j Graph Processing & Storage
+                  <div className="text-[10px] font-mono font-bold text-emerald-700 uppercase">
+                    Cloud Backend Resource Reservation
                   </div>
                   <h3 className="text-base font-extrabold text-slate-900">
-                    Atomic Resource Reservation
+                    Atomic Hospital Bed Reservation
                   </h3>
                 </div>
 
                 <div className="flex items-center space-x-1.5 text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-bold">
-                  <Zap className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{isGraphProcessing ? 'Locking in Neo4j...' : 'Neo4j Graph Locked (<9ms)'}</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{isGraphProcessing ? 'Saving to Database...' : 'Database Locked (<10ms)'}</span>
                 </div>
               </div>
 
@@ -931,8 +931,11 @@ export const GuardianPortal: React.FC = () => {
                   <span className="text-emerald-700 font-mono font-bold">Trauma Bay #03 (Reserved)</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-700">
-                  <span>Atomic Graph Status:</span>
-                  <span className="text-purple-700 font-mono font-bold">Neo4j Locked (&lt;9ms)</span>
+                  <span>Atomic Reservation Status:</span>
+                  <span className="text-emerald-700 font-mono font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Locked in Cloud Database
+                  </span>
                 </div>
               </div>
 
