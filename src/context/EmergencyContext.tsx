@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole, UserProfile, PatientVoiceRegistration } from '../types';
-import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, SAMPLE_DRIVERS } from '../data/mockData';
+import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, SAMPLE_DRIVERS, DEFAULT_ACTIVE_BOOKING } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
 import { soundEffects } from '../utils/audio';
 import confetti from 'canvas-confetti';
@@ -380,22 +380,22 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentRole('welcome');
   };
 
-  // Active booking from localStorage or pristine null (zero-booking start)
+  // Active booking from localStorage or default active mission for immediate ER readiness
   const [activeBooking, setActiveBooking] = useState<EmergencyBooking | null>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_ACTIVE);
-      return saved ? JSON.parse(saved) : null;
+      return saved ? JSON.parse(saved) : DEFAULT_ACTIVE_BOOKING;
     } catch {
-      return null;
+      return DEFAULT_ACTIVE_BOOKING;
     }
   });
 
   const [allBookings, setAllBookings] = useState<EmergencyBooking[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_BOOKINGS);
-      return saved ? JSON.parse(saved) : [];
+      return saved && JSON.parse(saved).length > 0 ? JSON.parse(saved) : [DEFAULT_ACTIVE_BOOKING];
     } catch {
-      return [];
+      return [DEFAULT_ACTIVE_BOOKING];
     }
   });
 
