@@ -101,7 +101,11 @@ export const EmergencySearch: React.FC = () => {
   const handleVoiceSosToggle = async () => {
     if (isListening) {
       setIsListening(false);
-      await stopVoiceSos();
+      const spoken = await stopVoiceSos();
+      if (spoken && spoken.trim()) {
+        setBrief(spoken.trim());
+        handleSearch(spoken.trim());
+      }
       return;
     }
 

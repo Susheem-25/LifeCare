@@ -228,19 +228,20 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
   return false;
 };
 
-export const stopVoiceSos = (): Promise<void> => {
+export const stopVoiceSos = (): Promise<string> => {
   return new Promise((resolve) => {
     const wasActive = isUserListeningActive;
     isUserListeningActive = false;
 
     const currentOpts = currentActiveOptions;
-    const recordedText = currentRecordedText;
+    let finalSpokenText = (currentRecordedText || '').trim();
 
-    // Disconnect and stop native recognition
+    // 1. Disconnect and stop native recognition
     if (activeRecognition) {
       try {
         activeRecognition.onend = null;
         activeRecognition.onerror = null;
+        activeRecognition.onresult = null;
         activeRecognition.stop();
       } catch {
         // ignore
@@ -252,7 +253,7 @@ export const stopVoiceSos = (): Promise<void> => {
       currentOpts.onListeningChange(false);
     }
 
-    // Stop MediaRecorder and wait for the final chunk in onstop
+    // 2. Stop MediaRecorder and wait for the final chunk in onstop
     if (activeMediaRecorder && activeMediaRecorder.state !== 'inactive') {
       activeMediaRecorder.onstop = async () => {
         // Release hardware mic tracks
@@ -266,9 +267,9 @@ export const stopVoiceSos = (): Promise<void> => {
         }
         activeMediaRecorder = null;
 
-        // If native recognition already produced complete text, we're done
-        if (recordedText.trim()) {
-          resolve();
+        // If native recognition already produced complete text, resolve immediately
+        if (finalSpokenText) {
+          resolve(finalSpokenText);
           return;
         }
 
@@ -277,27 +278,30 @@ export const stopVoiceSos = (): Promise<void> => {
           try {
             const mimeType = recordedAudioChunks[0]?.type || 'audio/webm';
             const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
-            if (audioBlob.size > 500) {
+            if (audioBlob.size > 100) {
               const lang =
                 (currentOpts.langCode && LANG_CODE_MAP[currentOpts.langCode]) ||
                 currentOpts.langCode ||
                 'hi-IN';
               const transcript = await transcribeAudioWithSarvam(audioBlob, lang);
-              if (transcript && transcript.trim()) {
-                currentOpts.onTranscript(transcript.trim(), true);
+              const clean = (transcript || '').trim();
+              if (clean) {
+                finalSpokenText = clean;
+                currentRecordedText = clean;
+                currentOpts.onTranscript(clean, true);
               }
             }
           } catch (sarvamErr) {
             console.warn('Sarvam AI STT processing notice:', sarvamErr);
           }
         }
-        resolve();
+        resolve(finalSpokenText);
       };
 
       try {
         activeMediaRecorder.stop();
       } catch {
-        resolve();
+        resolve(finalSpokenText);
       }
     } else {
       // Release hardware mic tracks
@@ -309,7 +313,7 @@ export const stopVoiceSos = (): Promise<void> => {
         }
         activeMediaStream = null;
       }
-      resolve();
+      resolve(finalSpokenText);
     }
   });
 };

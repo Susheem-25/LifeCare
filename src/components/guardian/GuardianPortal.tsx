@@ -110,19 +110,13 @@ export const GuardianPortal: React.FC = () => {
       }
       setIsListening(false);
       setIsAnalyzing(true);
-      await stopVoiceSos();
+      const spoken = await stopVoiceSos();
 
-      // Ensure spoken words are shown and triaged
-      const captured = currentTranscriptRef.current.trim() || emergencyBrief.trim();
-      if (captured.length >= 3) {
-        setEmergencyBrief(captured);
-        await handleAnalyzeProblem(captured);
-      } else {
-        const fallback = voiceLanguage === 'hi-IN'
-          ? 'सीने में बहुत तेज दर्द और सांस लेने में भारीपन महसूस हो रहा है'
-          : 'Severe crushing chest pain radiating to left arm and shortness of breath';
-        setEmergencyBrief(fallback);
-        await handleAnalyzeProblem(fallback);
+      // Ensure EXACT spoken words are shown and triaged, never dummy data
+      const actualSpoken = (spoken || currentTranscriptRef.current || emergencyBrief).trim();
+      if (actualSpoken) {
+        setEmergencyBrief(actualSpoken);
+        await handleAnalyzeProblem(actualSpoken);
       }
       setIsAnalyzing(false);
       return;

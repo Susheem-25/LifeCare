@@ -84,16 +84,13 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
     if (isListening) {
       setIsListening(false);
       setIsProcessingVoice(true);
-      await stopVoiceSos();
+      const spokenText = await stopVoiceSos();
 
-      // Show what was spoken and populate structured form
-      const captured = transcript.trim();
-      if (captured) {
-        setFormData(parseSpokenRegistration(captured));
-      } else {
-        const sample = DEMO_VOICE_PRESETS[0].text;
-        setTranscript(sample);
-        setFormData(parseSpokenRegistration(sample));
+      // Show the EXACT data the user just spoke and populate the structured form
+      const cleanSpoken = (spokenText || transcript).trim();
+      if (cleanSpoken) {
+        setTranscript(cleanSpoken);
+        setFormData(parseSpokenRegistration(cleanSpoken));
       }
       setIsProcessingVoice(false);
       return;
