@@ -201,13 +201,15 @@ export const BookingConfirmedModal: React.FC<Props> = ({ onClose }) => {
             </span>
           </div>
           <div className="text-xs text-slate-700 flex flex-wrap items-center gap-2">
-            <span>Name: <strong className="text-slate-900">{activeBooking.patientName}</strong></span>
+            <span>Patient Ref: <strong className="font-mono text-slate-900">{activeBooking.patientUniqueId}</strong></span>
+            <span>•</span>
+            <span>Record ID: <strong className="font-mono text-slate-900">{selectedAbhaProfile?.uniqueRecordId || 'UID-MED-3921'}</strong></span>
             <span>•</span>
             <span>ABHA ID: <strong className="font-mono text-slate-900">{selectedAbhaProfile?.abhaId || '91-4820-9182-3921'}</strong></span>
             <span>•</span>
             <span className="text-red-600 font-semibold flex items-center gap-1">
               <Droplet className="w-3 h-3 text-red-600" />
-              <span>{selectedAbhaProfile?.bloodGroup || 'O +ve'}</span>
+              <span>{selectedAbhaProfile?.bloodGroup || 'B+ (Positive)'}</span>
             </span>
           </div>
         </div>

@@ -1302,7 +1302,7 @@ export const HospitalPortal: React.FC = () => {
                 <div className="bg-emerald-50/60 border border-emerald-200 p-3 rounded-2xl flex items-center justify-between text-xs">
                   <div className="flex items-center space-x-2 text-emerald-900 font-bold">
                     <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Zero-Knowledge Shield: PII Masked to Prevent Data Breach</span>
+                    <span>Zero-Knowledge Shield: Identity-Decoupled Clinical Record</span>
                   </div>
                   <span className="text-[10px] font-mono text-emerald-700 bg-white border border-emerald-300 px-2 py-0.5 rounded font-bold shrink-0">
                     100% Breach Immune
@@ -1312,10 +1312,13 @@ export const HospitalPortal: React.FC = () => {
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                   <div>
                     <div className="text-base font-extrabold text-slate-900 font-mono">
-                      {selectedPatient.inTransitPaperwork.abhaDetails.fullName}
+                      Record ID: {selectedPatient.inTransitPaperwork.abhaDetails.uniqueRecordId || 'UID-MED-3921'}
                     </div>
                     <div className="text-slate-500 font-mono text-[11px] mt-0.5">
-                      Phone: <strong className="text-slate-700">{selectedPatient.inTransitPaperwork.abhaDetails.phoneNumber}</strong> • DOB: <span className="text-slate-400">Omitted for Breach Protection</span>
+                      Patient Ref: <strong className="text-slate-700">{selectedPatient.patientUniqueId}</strong> • ABHA ID: <strong className="text-slate-700">{selectedPatient.inTransitPaperwork.abhaDetails.abhaId}</strong>
+                    </div>
+                    <div className="text-emerald-700 font-medium text-[10px] mt-0.5">
+                      ✓ Personal identifiers (Name, DOB, Phone) excluded from ingestion for breach security
                     </div>
                   </div>
 
@@ -1324,7 +1327,7 @@ export const HospitalPortal: React.FC = () => {
                       Blood: {selectedPatient.inTransitPaperwork.abhaDetails.bloodGroup}
                     </span>
                     <span className="bg-slate-200 text-slate-800 px-2.5 py-1 rounded-lg font-bold">
-                      Age ~{selectedPatient.inTransitPaperwork.abhaDetails.age}y {selectedPatient.inTransitPaperwork.abhaDetails.gender}
+                      {selectedPatient.inTransitPaperwork.abhaDetails.pmjayEligible ? 'PM-JAY Cleared' : 'Insured'}
                     </span>
                   </div>
                 </div>

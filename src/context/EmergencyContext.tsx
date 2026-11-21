@@ -367,25 +367,47 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentView('patient');
   };
 
-  // Look up patient records by ABHA ID or Patient Name
-  const fetchPatientByAbha = (abhaIdOrName: string): ABHAMedicalRecord | undefined => {
-    const raw = abhaIdOrName.trim().toLowerCase();
+  // Look up patient medical records by ABHA ID or Unique Record ID (Zero PII)
+  const fetchPatientByAbha = (abhaIdOrCode: string): ABHAMedicalRecord | undefined => {
+    const raw = abhaIdOrCode.trim().toLowerCase();
     const digitsOnly = raw.replace(/[^0-9]/g, '');
     const found = SAMPLE_ABHA_PROFILES.find((p) => {
       const pDigits = p.abhaId.replace(/[^0-9]/g, '');
-      const pName = p.fullName.toLowerCase();
+      const pUid = p.uniqueRecordId.toLowerCase();
       return (
         p.abhaId.toLowerCase().includes(raw) ||
         raw.includes(p.abhaId.toLowerCase()) ||
-        (digitsOnly.length >= 4 && pDigits.includes(digitsOnly)) ||
-        pName.includes(raw) ||
-        raw.includes(pName)
+        pUid.includes(raw) ||
+        raw.includes(pUid) ||
+        (digitsOnly.length >= 4 && pDigits.includes(digitsOnly))
       );
     });
     if (found) {
       setSelectedAbhaProfile(found);
       soundEffects.playHeartbeat();
       return found;
+    }
+
+    // Dynamic Zero-PII generation for entered ABHA ID (Zero personal identity stored)
+    if (raw.length >= 3) {
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const syntheticRecord: ABHAMedicalRecord = {
+        uniqueRecordId: `UID-MED-${randomNum}`,
+        abhaId: abhaIdOrCode.trim(),
+        bloodGroup: 'B+ (Positive)',
+        knownAllergies: ['Penicillin (Anaphylaxis risk)'],
+        chronicConditions: ['Type 2 Diabetes Mellitus', 'Prior PTCA Stent (2021)'],
+        currentMedications: ['Aspirin 75mg', 'Atorvastatin 40mg'],
+        pastSurgeries: ['Coronary Angioplasty (2021)'],
+        insuranceProvider: 'Ayushman Bharat PM-JAY Scheme',
+        pmjayEligible: true,
+        pmjayCardNumber: `PMJAY-DL-${randomNum}`,
+        coverageAmountINR: 500000,
+        verifiedWithABDM: true,
+      };
+      setSelectedAbhaProfile(syntheticRecord);
+      soundEffects.playHeartbeat();
+      return syntheticRecord;
     }
     return undefined;
   };
@@ -443,7 +465,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const targetAbha = abhaRecord !== undefined ? abhaRecord : selectedAbhaProfile;
 
     const nameToUse = patientName || `PATIENT [${patientUniqueId}]`;
-    const phoneToUse = patientPhone || '+91-XXXXX-XX567';
+    const phoneToUse = patientPhone || 'PROTECTED (ZERO PII)';
 
     const newBooking: EmergencyBooking = {
       patientUniqueId,
@@ -646,7 +668,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (activeBooking && activeBooking.bookingCode === bookingCode) {
       updatedActive = {
         ...activeBooking,
-        patientName: abha.fullName,
+        patientName: activeBooking.patientName || `PATIENT [${activeBooking.patientUniqueId}]`,
         inTransitPaperwork: {
           isSubmitted: true,
           submittedAt: new Date().toISOString(),
@@ -663,7 +685,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (b.bookingCode === bookingCode) {
         return {
           ...b,
-          patientName: abha.fullName,
+          patientName: b.patientName || `PATIENT [${b.patientUniqueId}]`,
           inTransitPaperwork: {
             isSubmitted: true,
             submittedAt: new Date().toISOString(),

@@ -214,7 +214,7 @@ export const EmergencySearch: React.FC = () => {
                 {activeBooking.hospitalName}
               </h3>
               <p className="text-xs text-slate-600">
-                Patient: <strong className="text-slate-900">{activeBooking.patientName}</strong> ({activeBooking.patientUniqueId}) • On-Duty Specialist: <strong className="text-slate-800">{activeBooking.assignedDoctor.name}</strong>
+                Patient Ref: <strong className="font-mono text-slate-900">{activeBooking.patientUniqueId}</strong> • On-Duty Specialist: <strong className="text-slate-800">{activeBooking.assignedDoctor.name}</strong>
               </p>
             </div>
           </div>

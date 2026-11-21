@@ -401,18 +401,9 @@ export const PRESET_EMERGENCIES = [
 
 export const SAMPLE_ABHA_PROFILES: ABHAMedicalRecord[] = [
   {
+    uniqueRecordId: 'UID-MED-3921',
     abhaId: '91-4820-9182-3921',
-    fullName: 'R**** S**** (Confidential PII Masked)',
-    age: 54,
-    gender: 'MALE',
     bloodGroup: 'B+ (Positive)',
-    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    phoneNumber: '+91-XXXXX-XX567',
-    emergencyContact: {
-      name: 'Family Guardian (Masked)',
-      relation: 'Spouse',
-      phone: '+91-XXXXX-XX568',
-    },
     knownAllergies: ['Penicillin (Anaphylaxis risk)', 'Sulfa Drugs'],
     chronicConditions: ['Type 2 Diabetes Mellitus', 'Hypertension (Stage 2)', 'Prior PTCA Stent (2021)'],
     currentMedications: ['Aspirin 75mg', 'Atorvastatin 40mg', 'Metformin 500mg BD', 'Telmisartan 40mg'],
@@ -424,18 +415,9 @@ export const SAMPLE_ABHA_PROFILES: ABHAMedicalRecord[] = [
     verifiedWithABDM: true,
   },
   {
+    uniqueRecordId: 'UID-MED-7814',
     abhaId: '21-8840-3912-7814',
-    fullName: 'P**** M**** (Confidential PII Masked)',
-    age: 29,
-    gender: 'FEMALE',
     bloodGroup: 'O- (Universal Donor)',
-    photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    phoneNumber: '+91-XXXXX-XX771',
-    emergencyContact: {
-      name: 'Family Guardian (Masked)',
-      relation: 'Father',
-      phone: '+91-XXXXX-XX772',
-    },
     knownAllergies: ['Ibuprofen / NSAIDs (Severe bronchospasm)'],
     chronicConditions: ['Bronchial Asthma (Moderate persistent)'],
     currentMedications: ['Budesonide + Formoterol inhaler 200mcg', 'Montelukast 10mg'],
@@ -446,18 +428,9 @@ export const SAMPLE_ABHA_PROFILES: ABHAMedicalRecord[] = [
     verifiedWithABDM: true,
   },
   {
+    uniqueRecordId: 'UID-MED-9023',
     abhaId: '88-1290-7731-9023',
-    fullName: 'H**** S**** (Confidential PII Masked)',
-    age: 62,
-    gender: 'MALE',
     bloodGroup: 'A+ (Positive)',
-    photoUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-    phoneNumber: '+91-XXXXX-XX432',
-    emergencyContact: {
-      name: 'Family Guardian (Masked)',
-      relation: 'Son',
-      phone: '+91-XXXXX-XX439',
-    },
     knownAllergies: ['Contrast Dye (Moderate urticaria)', 'Codeine'],
     chronicConditions: ['Ischemic Heart Disease', 'Mild Chronic Kidney Disease (Stage 2)'],
     currentMedications: ['Clopidogrel 75mg', 'Bisoprolol 2.5mg', 'Torsemide 10mg'],
@@ -474,7 +447,7 @@ export const DEFAULT_ACTIVE_BOOKING: EmergencyBooking = {
   patientUniqueId: 'PAT-2026-8941',
   bookingCode: 'AMB-7492',
   patientName: 'PATIENT [PAT-2026-8941]',
-  patientPhone: '+91-XXXXX-XX567',
+  patientPhone: 'PROTECTED (ZERO PII)',
   emergencyBrief: 'Acute Coronary Syndrome (Suspected STEMI / Myocardial Infarction)',
   aiAnalysis: {
     detectedCondition: 'Acute Coronary Syndrome (Suspected STEMI)',

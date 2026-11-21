@@ -136,19 +136,19 @@ export const AbhaIntakeModal: React.FC<Props> = ({
 
           {/* Quick Demo Profile Chips */}
           <div className="flex items-center flex-wrap gap-1.5 pt-0.5">
-            <span className="text-xs text-slate-400 font-medium mr-1">Demo ABHA:</span>
+            <span className="text-xs text-slate-400 font-medium mr-1">Demo Records:</span>
             {SAMPLE_ABHA_PROFILES.map((p) => (
               <button
                 key={p.abhaId}
                 type="button"
                 onClick={() => handleSelectPreset(p)}
-                className={`px-2.5 py-1 rounded-lg border text-xs transition cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer ${
                   selectedRecord?.abhaId === p.abhaId
                     ? 'bg-emerald-50 border-emerald-300 text-emerald-800 font-semibold'
                     : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-600'
                 }`}
               >
-                {p.fullName} ({p.bloodGroup.split(' ')[0]})
+                {p.uniqueRecordId} ({p.bloodGroup.split(' ')[0]})
               </button>
             ))}
           </div>
@@ -158,12 +158,12 @@ export const AbhaIntakeModal: React.FC<Props> = ({
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5 animate-fadeIn">
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
-                    {selectedRecord.fullName.charAt(0)}
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs font-mono">
+                    UID
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900">{selectedRecord.fullName}</div>
-                    <div className="text-slate-500 font-mono text-[11px]">{selectedRecord.abhaId} • {selectedRecord.age}y/{selectedRecord.gender.charAt(0)}</div>
+                    <div className="font-bold text-slate-900 font-mono text-xs">{selectedRecord.uniqueRecordId}</div>
+                    <div className="text-slate-500 font-mono text-[11px]">{selectedRecord.abhaId} • Zero PII Protected</div>
                   </div>
                 </div>
                 <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] px-2 py-0.5 rounded font-semibold flex items-center gap-1">

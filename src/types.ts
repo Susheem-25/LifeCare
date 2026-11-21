@@ -97,18 +97,9 @@ export interface PatientVitals {
 }
 
 export interface ABHAMedicalRecord {
+  uniqueRecordId: string; // Anonymous generated Unique ID (e.g. UID-MED-3921) to decouple identity from clinical data
   abhaId: string;
-  fullName: string;
-  age: number;
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
   bloodGroup: string;
-  photoUrl: string;
-  phoneNumber: string;
-  emergencyContact: {
-    name: string;
-    relation: string;
-    phone: string;
-  };
   knownAllergies: string[];
   chronicConditions: string[];
   currentMedications: string[];
@@ -118,6 +109,17 @@ export interface ABHAMedicalRecord {
   pmjayCardNumber?: string;
   coverageAmountINR: number;
   verifiedWithABDM: boolean; // ABDM Sandbox v3
+  // Optional legacy fields strictly omitted in Zero-PII mode
+  fullName?: string;
+  age?: number;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  phoneNumber?: string;
+  emergencyContact?: {
+    name: string;
+    relation: string;
+    phone: string;
+  };
+  photoUrl?: string;
 }
 
 export interface EmergencyBooking {

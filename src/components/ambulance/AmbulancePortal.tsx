@@ -508,13 +508,15 @@ export const AmbulancePortal: React.FC = () => {
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
-                      {ambAbhaProfile.fullName.charAt(0)}
+                    <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs font-mono">
+                      UID
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 text-sm">{ambAbhaProfile.fullName}</div>
+                      <div className="font-bold text-slate-900 text-sm font-mono">
+                        Record ID: {ambAbhaProfile.uniqueRecordId || 'UID-MED-3921'}
+                      </div>
                       <div className="text-slate-500 font-mono text-xs">
-                        ABHA: <strong>{ambAbhaProfile.abhaId}</strong> • {ambAbhaProfile.age}y / {ambAbhaProfile.gender}
+                        ABHA: <strong>{ambAbhaProfile.abhaId}</strong> • <span className="text-emerald-700 font-semibold">Zero PII (Breach Protected)</span>
                       </div>
                     </div>
                   </div>

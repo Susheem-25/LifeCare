@@ -37,14 +37,14 @@ export const HospitalMatchList: React.FC = () => {
 
   const handleConfirmWithAbha = (abha: ABHAMedicalRecord) => {
     if (!selectedHospitalForBooking) return;
-    bookHospitalBed(selectedHospitalForBooking.id, abha.fullName, abha.phoneNumber, abha);
+    bookHospitalBed(selectedHospitalForBooking.id, undefined, 'PROTECTED (ZERO PII)', abha);
     setIsAbhaModalOpen(false);
     setIsModalOpen(true);
   };
 
   const handleProceedWithoutAbha = () => {
     if (!selectedHospitalForBooking) return;
-    bookHospitalBed(selectedHospitalForBooking.id, 'Emergency Patient', '+91-98104-55678', null);
+    bookHospitalBed(selectedHospitalForBooking.id, undefined, 'PROTECTED (ZERO PII)', null);
     setIsAbhaModalOpen(false);
     setIsModalOpen(true);
   };
