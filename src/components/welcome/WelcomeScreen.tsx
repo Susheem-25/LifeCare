@@ -126,7 +126,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
               </li>
               <li className="flex items-center space-x-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                <span>DigiLocker ABHA medical history fetch</span>
+                <span>Atomic hospital bed reservation & direct 108 dialer</span>
               </li>
             </ul>
           </div>
@@ -328,7 +328,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
               <span>National Healthcare Grid Integration</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Powered by Sarvam AI Indic Speech, Neo4j Graph Resource Engine, and ABDM DigiLocker
+              Powered by Sarvam AI Indic Speech and Neo4j Graph Resource Engine
             </p>
           </div>
 
@@ -381,10 +381,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
           <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
             <div className="flex items-center space-x-1.5 text-purple-600 font-bold font-mono text-[11px]">
               <FileCheck className="w-3.5 h-3.5" />
-              <span>ABHA & DigiLocker</span>
+              <span>Voice-to-QR Intake</span>
             </div>
             <div className="text-slate-900 font-extrabold text-sm">0 Sec Intake</div>
-            <p className="text-[11px] text-slate-500">Pre-admit records & PM-JAY verification</p>
+            <p className="text-[11px] text-slate-500">Autonomous reception intake & triage</p>
           </div>
         </div>
       </div>

@@ -397,7 +397,7 @@ export const HospitalPortal: React.FC = () => {
                   Patient Management Directory
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Segregated by transit & admission lifecycle. Click any patient to view comprehensive ABHA DigiLocker health records.
+                  Segregated by transit & admission lifecycle. Click any patient to view comprehensive clinical health records and triage details.
                 </p>
               </div>
 

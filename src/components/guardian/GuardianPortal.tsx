@@ -16,14 +16,11 @@ import {
   Loader2,
   AlertCircle,
   Radio,
-  ShieldCheck,
-  Droplet,
-  AlertTriangle,
   QrCode,
   Languages,
   PhoneCall
 } from 'lucide-react';
-import { PRESET_EMERGENCIES, SAMPLE_ABHA_PROFILES } from '../../data/mockData';
+import { PRESET_EMERGENCIES } from '../../data/mockData';
 import { sanitizeText, sanitizeIdentifier } from '../../utils/security';
 import { 
   speakTextWithSarvam, 
@@ -32,7 +29,7 @@ import {
 } from '../../services/sarvamAiService';
 import { startVoiceSos, stopVoiceSos } from '../../utils/speechService';
 import { LiveRouteMap } from '../common/LiveRouteMap';
-import type { Hospital, AITriageAnalysis, ABHAMedicalRecord } from '../../types';
+import type { Hospital, AITriageAnalysis } from '../../types';
 
 // Utility to immediately open device phone dialer and call ambulance 108
 const triggerAmbulanceCall = () => {
@@ -61,7 +58,6 @@ export const GuardianPortal: React.FC = () => {
     currentTriage,
     searchEmergency,
     bookHospitalBed,
-    fetchPatientByAbha,
     userLocation,
     requestLiveLocation,
     setIsVoiceQrModalOpen
@@ -104,11 +100,6 @@ export const GuardianPortal: React.FC = () => {
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [generatedPatientId, setGeneratedPatientId] = useState<string | null>(null);
   const [isGraphProcessing, setIsGraphProcessing] = useState<boolean>(false);
-
-  // ABHA DigiLocker State
-  const [abhaInput, setAbhaInput] = useState<string>('');
-  const [fetchedAbha, setFetchedAbha] = useState<ABHAMedicalRecord | null>(null);
-  const [isFetchingAbha, setIsFetchingAbha] = useState<boolean>(false);
 
   // Confirmed booking
   const [completedRegistration, setCompletedRegistration] = useState(activeBooking);
@@ -305,20 +296,6 @@ export const GuardianPortal: React.FC = () => {
     }, 600);
   };
 
-  // Fetch ABHA ID via DigiLocker (Zero PII - Only Clinical Medical Details)
-  const handleFetchAbha = (customId?: string) => {
-    const target = (customId || abhaInput).trim();
-    if (!target) return;
-    setIsFetchingAbha(true);
-    setTimeout(() => {
-      const found = fetchPatientByAbha(target);
-      if (found) {
-        setFetchedAbha(found);
-      }
-      setIsFetchingAbha(false);
-    }, 450);
-  };
-
   // Finalize Emergency Dispatch & Save to Hospital Database as Incoming Patient
   const handleConfirmReservation = () => {
     if (!selectedHospital) return;
@@ -326,8 +303,7 @@ export const GuardianPortal: React.FC = () => {
     const booking = bookHospitalBed(
       selectedHospital.id,
       generatedPatientId ? `PATIENT [${generatedPatientId}]` : 'PATIENT [PAT-2026-4821]',
-      'PROTECTED (ZERO PII)',
-      fetchedAbha
+      'PROTECTED (ZERO PII)'
     );
 
     if (generatedPatientId) {
@@ -933,158 +909,20 @@ export const GuardianPortal: React.FC = () => {
                 </div>
               </div>
 
-              {/* ABHA ID via DigiLocker (Positioned right below Patient ID) */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-700">
-                    Fetch Medical History via ABHA ID (DigiLocker):
-                  </span>
-                  <span className="text-[10px] font-mono text-blue-700 font-bold">
-                    ABDM Verified
-                  </span>
+              {/* Confirmed Lock Summary */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2.5">
+                <div className="flex items-center justify-between text-slate-700 font-bold">
+                  <span>Hospital Allocated:</span>
+                  <span className="text-slate-900 font-extrabold">{selectedHospital.name}</span>
                 </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={abhaInput}
-                    onChange={(e) => setAbhaInput(sanitizeIdentifier(e.target.value, 24))}
-                    placeholder="Enter 14-digit ABHA ID (e.g. 91-4820-9182-3921)"
-                    className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-semibold"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleFetchAbha()}
-                    disabled={isFetchingAbha || !abhaInput.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
-                  >
-                    {isFetchingAbha ? 'Fetching...' : 'Fetch via DigiLocker'}
-                  </button>
+                <div className="flex items-center justify-between text-slate-700">
+                  <span>Emergency ER Bay:</span>
+                  <span className="text-emerald-700 font-mono font-bold">Trauma Bay #03 (Reserved)</span>
                 </div>
-
-                {/* Quick ABDM Test Pills */}
-                {!fetchedAbha && (
-                  <div className="flex items-center flex-wrap gap-1.5 text-[11px] text-slate-500">
-                    <span className="font-semibold text-slate-400">Quick Test:</span>
-                    {SAMPLE_ABHA_PROFILES.map((p) => (
-                      <button
-                        key={p.uniqueRecordId}
-                        type="button"
-                        onClick={() => {
-                          setAbhaInput(p.abhaId);
-                          handleFetchAbha(p.abhaId);
-                        }}
-                        className="bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 px-2 py-0.5 rounded-md font-mono border border-slate-200 transition cursor-pointer"
-                      >
-                        {p.abhaId}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Fetched Summary with Zero-Knowledge Shield & Unique Medical ID */}
-                {fetchedAbha && (
-                  <div className="bg-emerald-50/50 border-2 border-emerald-200 rounded-2xl p-4 text-xs space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-emerald-100">
-                      <div className="flex items-center space-x-1.5 text-emerald-800 font-extrabold text-[11px] uppercase tracking-wide">
-                        <Lock className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Zero-PII DigiLocker Medical Ingestion</span>
-                      </div>
-                      <span className="text-[10px] font-mono text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-md font-bold">
-                        100% Data Breach Immune
-                      </span>
-                    </div>
-
-                    {/* Unique Medical Record ID & Patient ID mapping */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <div className="bg-white p-2.5 rounded-xl border border-emerald-200">
-                        <div className="text-[10px] font-mono uppercase text-slate-400 font-semibold">
-                          Generated Medical Record ID:
-                        </div>
-                        <div className="font-extrabold text-emerald-800 font-mono text-sm mt-0.5">
-                          {fetchedAbha.uniqueRecordId || 'UID-MED-3921'}
-                        </div>
-                      </div>
-
-                      <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <div className="text-[10px] font-mono uppercase text-slate-400 font-semibold">
-                          Mapped Patient ID:
-                        </div>
-                        <div className="font-extrabold text-slate-900 font-mono text-sm mt-0.5">
-                          {generatedPatientId || 'PAT-2026-4821'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Zero-PII Policy Notice */}
-                    <div className="bg-emerald-100/60 text-emerald-900 text-[11px] px-3 py-1.5 rounded-lg font-medium flex items-center space-x-1.5">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>
-                        <strong>Identity Masked:</strong> Patient Name, DOB, and Phone Number are excluded from ingestion. Medical details are securely mapped only to Unique ID <strong>{fetchedAbha.uniqueRecordId || 'UID-MED-3921'}</strong>.
-                      </span>
-                    </div>
-
-                    {/* DigiLocker E2EE Transmission Badge */}
-                    <div className="bg-slate-900 text-white p-2.5 rounded-xl flex items-center justify-between text-[11px] font-mono">
-                      <div className="flex items-center space-x-2">
-                        <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>DigiLocker End-to-End Encryption: <strong className="text-emerald-400">AES-GCM-256</strong></span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 hidden sm:inline">Transferred securely to ER bay</span>
-                    </div>
-
-                    {/* Clinical Details */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
-                      <div className="bg-white p-2 rounded-lg border border-slate-200">
-                        <span className="text-slate-400 block font-semibold text-[10px] uppercase">Blood Group</span>
-                        <strong className="text-red-600 font-bold text-xs flex items-center gap-1 mt-0.5">
-                          <Droplet className="w-3 h-3 text-red-500" />
-                          {fetchedAbha.bloodGroup}
-                        </strong>
-                      </div>
-
-                      <div className="bg-white p-2 rounded-lg border border-slate-200">
-                        <span className="text-slate-400 block font-semibold text-[10px] uppercase">Drug Allergies</span>
-                        <strong className="text-amber-700 font-bold text-xs flex items-center gap-1 mt-0.5 truncate">
-                          <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />
-                          {fetchedAbha.knownAllergies.join(', ') || 'None'}
-                        </strong>
-                      </div>
-
-                      <div className="bg-white p-2 rounded-lg border border-slate-200">
-                        <span className="text-slate-400 block font-semibold text-[10px] uppercase">Cashless Scheme</span>
-                        <strong className="text-emerald-700 font-bold text-xs block mt-0.5">
-                          {fetchedAbha.pmjayEligible ? 'PM-JAY ₹5L Cleared' : 'Standard Insurance'}
-                        </strong>
-                      </div>
-                    </div>
-
-                    {/* Chronic Conditions & Active Medications */}
-                    <div className="space-y-1.5 pt-1 text-[11px]">
-                      <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-slate-400 font-mono text-[10px] uppercase block font-semibold">
-                          Chronic Medical Conditions:
-                        </span>
-                        <span className="text-slate-800 font-medium">
-                          {fetchedAbha.chronicConditions.join(', ') || 'None reported'}
-                        </span>
-                      </div>
-
-                      <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-slate-400 font-mono text-[10px] uppercase block font-semibold">
-                          Current Medications & Surgeries:
-                        </span>
-                        <span className="text-slate-800 font-medium">
-                          {fetchedAbha.currentMedications.join(', ')} • {fetchedAbha.pastSurgeries.join(', ')}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="text-[10px] text-slate-500 pt-1">
-                      🛡️ <strong>Breach Immunity:</strong> In the event of any data breach, patient identity remains 100% safe. Personal identifiers (Name, DOB, Phone) do not exist in this database.
-                    </div>
-                  </div>
-                )}
+                <div className="flex items-center justify-between text-slate-700">
+                  <span>Atomic Graph Status:</span>
+                  <span className="text-purple-700 font-mono font-bold">Neo4j Locked (&lt;9ms)</span>
+                </div>
               </div>
 
               {/* Confirm & Save Button */}
