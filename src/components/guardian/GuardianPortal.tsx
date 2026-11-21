@@ -57,7 +57,7 @@ export const GuardianPortal: React.FC = () => {
   const [trackError, setTrackError] = useState<string>('');
 
   // Register Mode State
-  const [emergencyBrief, setEmergencyBrief] = useState<string>('Severe crushing chest pain radiating to left arm and jaw, profuse cold sweating.');
+  const [emergencyBrief, setEmergencyBrief] = useState<string>('');
   const [isListening, setIsListening] = useState<boolean>(false);
   const [voiceNotice, setVoiceNotice] = useState<string>('');
   const [isSpeakingTts, setIsSpeakingTts] = useState<boolean>(false);
@@ -70,8 +70,8 @@ export const GuardianPortal: React.FC = () => {
   const [isGraphProcessing, setIsGraphProcessing] = useState<boolean>(false);
 
   // ABHA DigiLocker State
-  const [abhaInput, setAbhaInput] = useState<string>('91-4820-9182-3921');
-  const [fetchedAbha, setFetchedAbha] = useState<ABHAMedicalRecord | null>(SAMPLE_ABHA_PROFILES[0]);
+  const [abhaInput, setAbhaInput] = useState<string>('');
+  const [fetchedAbha, setFetchedAbha] = useState<ABHAMedicalRecord | null>(null);
   const [isFetchingAbha, setIsFetchingAbha] = useState<boolean>(false);
 
   // Confirmed booking
@@ -80,19 +80,11 @@ export const GuardianPortal: React.FC = () => {
   // Sync tracked booking when activeBooking updates
   useEffect(() => {
     if (activeBooking) {
+      // oxlint-disable-next-line react/set-state-in-effect
       setTrackedBooking(activeBooking);
       setTrackPatientIdInput(activeBooking.patientUniqueId);
     }
   }, [activeBooking]);
-
-  // Initial triage analysis
-  useEffect(() => {
-    if (emergencyBrief && !triageAnalysis) {
-      const res = searchEmergency(emergencyBrief);
-      setTriageAnalysis(res);
-    }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Voice SOS toggle (Speech-to-Text)
   const handleToggleVoiceInput = () => {
@@ -216,28 +208,14 @@ export const GuardianPortal: React.FC = () => {
   };
 
   // Fetch ABHA ID via DigiLocker (Zero PII - Only Clinical Medical Details)
-  const handleFetchAbha = () => {
+  const handleFetchAbha = (customId?: string) => {
+    const target = (customId || abhaInput).trim();
+    if (!target) return;
     setIsFetchingAbha(true);
     setTimeout(() => {
-      const found = fetchPatientByAbha(abhaInput);
+      const found = fetchPatientByAbha(target);
       if (found) {
         setFetchedAbha(found);
-      } else {
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        setFetchedAbha({
-          uniqueRecordId: `UID-MED-${randomNum}`,
-          abhaId: abhaInput || '91-4820-9182-3921',
-          bloodGroup: 'B+ (Positive)',
-          knownAllergies: ['Penicillin (Anaphylaxis risk)'],
-          chronicConditions: ['Type 2 Diabetes Mellitus', 'Prior PTCA Stent (2021)'],
-          currentMedications: ['Aspirin 75mg', 'Atorvastatin 40mg'],
-          pastSurgeries: ['Coronary Angioplasty (2021)'],
-          insuranceProvider: 'Ayushman Bharat PM-JAY Scheme',
-          pmjayEligible: true,
-          pmjayCardNumber: `PMJAY-DL-${randomNum}`,
-          coverageAmountINR: 500000,
-          verifiedWithABDM: true,
-        });
       }
       setIsFetchingAbha(false);
     }, 450);
@@ -775,18 +753,38 @@ export const GuardianPortal: React.FC = () => {
                     type="text"
                     value={abhaInput}
                     onChange={(e) => setAbhaInput(sanitizeIdentifier(e.target.value, 24))}
-                    placeholder="Enter ABHA ID (e.g. 91-4820-9182-3921)"
+                    placeholder="Enter 14-digit ABHA ID (e.g. 91-4820-9182-3921)"
                     className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-semibold"
                   />
                   <button
                     type="button"
-                    onClick={handleFetchAbha}
-                    disabled={isFetchingAbha}
+                    onClick={() => handleFetchAbha()}
+                    disabled={isFetchingAbha || !abhaInput.trim()}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
                   >
                     {isFetchingAbha ? 'Fetching...' : 'Fetch via DigiLocker'}
                   </button>
                 </div>
+
+                {/* Quick ABDM Test Pills */}
+                {!fetchedAbha && (
+                  <div className="flex items-center flex-wrap gap-1.5 text-[11px] text-slate-500">
+                    <span className="font-semibold text-slate-400">Quick Test:</span>
+                    {SAMPLE_ABHA_PROFILES.map((p) => (
+                      <button
+                        key={p.uniqueRecordId}
+                        type="button"
+                        onClick={() => {
+                          setAbhaInput(p.abhaId);
+                          handleFetchAbha(p.abhaId);
+                        }}
+                        className="bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 px-2 py-0.5 rounded-md font-mono border border-slate-200 transition cursor-pointer"
+                      >
+                        {p.abhaId}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Fetched Summary with Zero-Knowledge Shield & Unique Medical ID */}
                 {fetchedAbha && (

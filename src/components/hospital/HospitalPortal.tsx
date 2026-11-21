@@ -43,14 +43,15 @@ export const HospitalPortal: React.FC = () => {
     admitPatient,
     dischargePatient,
     admitVoiceQrPatient,
-    loginWithGoogle
+    loginWithGoogle,
+    currentUser
   } = useEmergency();
 
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
 
   // Authentication State
-  const [hospCodeInput, setHospCodeInput] = useState<string>('AIIMS-DELHI');
-  const [passwordInput, setPasswordInput] = useState<string>('aiims123');
+  const [hospCodeInput, setHospCodeInput] = useState<string>(currentUser?.uniqueRoleId || '');
+  const [passwordInput, setPasswordInput] = useState<string>('');
   const [loginError, setLoginError] = useState<string>('');
 
   // Main Tabs: 'patients' | 'beds' | 'doctors' | 'facilities'
@@ -68,7 +69,7 @@ export const HospitalPortal: React.FC = () => {
   const [docSpec, setDocSpec] = useState<string>('Interventional Cardiology & Electrophysiology');
   const [docQual, setDocQual] = useState<string>('MD, DM (Cardiology)');
   const [docExp, setDocExp] = useState<number>(10);
-  const [docPhone, setDocPhone] = useState<string>('+91-98110-12345');
+  const [docPhone, setDocPhone] = useState<string>('');
   const [docInitialStatus, setDocInitialStatus] = useState<Doctor['status']>('AVAILABLE_AND_FREE');
 
   // Add Machine Modal State

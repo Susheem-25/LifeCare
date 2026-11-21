@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
-import { 
-  Ambulance, 
-  Search, 
-  Navigation, 
-  ExternalLink, 
-  Lock, 
-  LogOut, 
+import {
+  Ambulance,
+  Search,
+  Navigation,
+  ExternalLink,
+  Lock,
+  LogOut,
   ArrowRight,
   QrCode,
   Sparkles
@@ -26,12 +26,13 @@ export const DriverPortal: React.FC = () => {
     linkAmbulanceToBooking,
     updateAmbulanceStatus,
     setIsVoiceQrModalOpen,
-    loginWithGoogle
+    loginWithGoogle,
+    currentUser
   } = useEmergency();
 
   // Login credentials state
-  const [driverIdInput, setDriverIdInput] = useState<string>('DRV-101');
-  const [driverPinInput, setDriverPinInput] = useState<string>('1234');
+  const [driverIdInput, setDriverIdInput] = useState<string>(currentUser?.uniqueRoleId || '');
+  const [driverPinInput, setDriverPinInput] = useState<string>('');
   const [loginError, setLoginError] = useState<string>('');
 
   // Patient ID Prompt State
@@ -88,9 +89,9 @@ export const DriverPortal: React.FC = () => {
   // Google Maps navigation link
   const googleMapsUrl = selectedMission
     ? getGoogleMapsNavigationUrl(
-        { lat: selectedMission.patientPickupCoords.lat, lng: selectedMission.patientPickupCoords.lng },
-        { lat: selectedMission.hospitalCoords.lat, lng: selectedMission.hospitalCoords.lng }
-      )
+      { lat: selectedMission.patientPickupCoords.lat, lng: selectedMission.patientPickupCoords.lng },
+      { lat: selectedMission.hospitalCoords.lat, lng: selectedMission.hospitalCoords.lng }
+    )
     : '#';
 
   // 1. IF NOT LOGGED IN: Driver Login Screen
@@ -298,20 +299,26 @@ export const DriverPortal: React.FC = () => {
         {/* Available Dispatch Queue Pills */}
         <div className="flex items-center flex-wrap gap-2 text-xs pt-1">
           <span className="text-[11px] font-bold text-slate-500 uppercase">Active Dispatches:</span>
-          {(allBookings.length > 0 ? allBookings : [{ patientUniqueId: 'PAT-2026-8941' }]).map((b) => (
-            <button
-              key={b.patientUniqueId}
-              type="button"
-              onClick={() => {
-                setPatientIdInput(b.patientUniqueId);
-                const linked = linkAmbulanceToBooking(b.patientUniqueId, loggedDriver);
-                if (linked) setSelectedMission(linked);
-              }}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono px-3 py-1 rounded-xl text-xs border border-slate-200 transition cursor-pointer"
-            >
-              {b.patientUniqueId}
-            </button>
-          ))}
+          {allBookings.length > 0 ? (
+            allBookings.map((b) => (
+              <button
+                key={b.patientUniqueId}
+                type="button"
+                onClick={() => {
+                  setPatientIdInput(b.patientUniqueId);
+                  const linked = linkAmbulanceToBooking(b.patientUniqueId, loggedDriver);
+                  if (linked) setSelectedMission(linked);
+                }}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono px-3 py-1 rounded-xl text-xs border border-slate-200 transition cursor-pointer"
+              >
+                {b.patientUniqueId}
+              </button>
+            ))
+          ) : (
+            <span className="text-slate-400 italic text-[11px]">
+              No pending emergency dispatches. New dispatches from citizen triage will appear here in real time.
+            </span>
+          )}
         </div>
       </div>
 
@@ -353,11 +360,10 @@ export const DriverPortal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleStatusUpdate('AMBULANCE_EN_ROUTE_PICKUP')}
-                className={`p-2.5 rounded-xl font-bold transition border cursor-pointer ${
-                  transitStatus === 'AMBULANCE_EN_ROUTE_PICKUP'
+                className={`p-2.5 rounded-xl font-bold transition border cursor-pointer ${transitStatus === 'AMBULANCE_EN_ROUTE_PICKUP'
                     ? 'bg-red-600 text-white border-red-600 shadow-xs'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 1. En Route Pickup
               </button>
@@ -365,11 +371,10 @@ export const DriverPortal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleStatusUpdate('PATIENT_PICKED_UP')}
-                className={`p-2.5 rounded-xl font-bold transition border cursor-pointer ${
-                  transitStatus === 'PATIENT_PICKED_UP'
+                className={`p-2.5 rounded-xl font-bold transition border cursor-pointer ${transitStatus === 'PATIENT_PICKED_UP'
                     ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 2. Patient Picked Up
               </button>
@@ -377,11 +382,10 @@ export const DriverPortal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleStatusUpdate('IN_TRANSIT_TO_HOSPITAL')}
-                className={`p-2.5 rounded-xl font-bold transition border cursor-pointer ${
-                  transitStatus === 'IN_TRANSIT_TO_HOSPITAL'
+                className={`p-2.5 rounded-xl font-bold transition border cursor-pointer ${transitStatus === 'IN_TRANSIT_TO_HOSPITAL'
                     ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 3. En Route to ER Bay
               </button>
@@ -389,11 +393,10 @@ export const DriverPortal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleStatusUpdate('ARRIVED_ER')}
-                className={`p-2.5 rounded-xl font-bold transition border cursor-pointer ${
-                  transitStatus === 'ARRIVED_ER'
+                className={`p-2.5 rounded-xl font-bold transition border cursor-pointer ${transitStatus === 'ARRIVED_ER'
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 4. Arrived at Hospital ER
               </button>

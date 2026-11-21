@@ -47,15 +47,22 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
 
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
 
-  // Stop camera on unmount or close
+  // Stop or start camera on open/close
   useEffect(() => {
-    return () => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        startCameraScanner().catch(() => {});
+      }, 350);
+      return () => clearTimeout(timer);
+    } else {
       if (html5QrCodeRef.current) {
         html5QrCodeRef.current.stop().catch(() => {});
         html5QrCodeRef.current = null;
       }
-    };
-  }, []);
+      setScannerActive(false);
+    }
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

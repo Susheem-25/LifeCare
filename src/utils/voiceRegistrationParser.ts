@@ -69,7 +69,7 @@ export function parseSpokenRegistration(
   const complaintMatch = clean.match(/(?:chief\s+complaint|complaint|suffering\s+from|symptoms?|having|शिकायत|तकलीफ|समस्या|problem)\s*(?:is|of|with)?\s*([^.\n,;]{4,100})/i);
   if (complaintMatch && complaintMatch[1]?.trim()) {
     chiefComplaint = complaintMatch[1].trim();
-  } else if (!chiefComplaint) {
+  } else if (!chiefComplaint && clean) {
     // Look for clinical symptom keywords
     if (/chest\s*pain|heart\s*attack|stemi|angina/i.test(lower)) {
       chiefComplaint = 'Acute severe chest pain radiating to left arm (Suspected STEMI)';
@@ -82,7 +82,7 @@ export function parseSpokenRegistration(
     } else if (/stroke|paralysis|slurred\s*speech|लकवा/i.test(lower)) {
       chiefComplaint = 'Acute stroke symptoms / Hemiparesis';
     } else {
-      chiefComplaint = clean.slice(0, 80) || 'Acute emergency requiring immediate ER resuscitation';
+      chiefComplaint = clean.slice(0, 80);
     }
   }
 
@@ -91,12 +91,11 @@ export function parseSpokenRegistration(
   const allergyMatch = clean.match(/(?:allerg(?:y|ies|ic)|एलर्जी)\s*(?:to|is|are)?\s*([^.\n,;]{2,60})/i);
   if (allergyMatch && allergyMatch[1]?.trim()) {
     allergies = allergyMatch[1].trim();
-  } else if (!allergies) {
-    if (/penicillin/i.test(lower)) allergies = 'Penicillin (Severe anaphylaxis risk)';
+  } else if (!allergies && clean) {
+    if (/penicillin/i.test(lower)) allergies = 'Penicillin';
     else if (/sulfa/i.test(lower)) allergies = 'Sulfa Drugs';
     else if (/nsaid|ibuprofen/i.test(lower)) allergies = 'NSAIDs / Ibuprofen';
     else if (/no\s*allerg/i.test(lower)) allergies = 'No known drug allergies (NKDA)';
-    else allergies = 'None reported';
   }
 
   // 7. Current Medications extraction
@@ -104,15 +103,13 @@ export function parseSpokenRegistration(
   const medMatch = clean.match(/(?:taking|medications?|medicines?|drugs?|दवा|दवाइयां)\s*(?:is|are)?\s*([^.\n;]{3,80})/i);
   if (medMatch && medMatch[1]?.trim()) {
     currentMedications = medMatch[1].trim();
-  } else if (!currentMedications) {
+  } else if (!currentMedications && clean) {
     if (/aspirin|atorvastatin|statin/i.test(lower)) {
-      currentMedications = 'Aspirin 75mg, Atorvastatin 40mg';
+      currentMedications = 'Aspirin, Atorvastatin';
     } else if (/inhaler|budesonide/i.test(lower)) {
-      currentMedications = 'Budesonide + Formoterol Inhaler';
+      currentMedications = 'Inhaler (Budesonide)';
     } else if (/insulin|metformin/i.test(lower)) {
-      currentMedications = 'Metformin 500mg, Glimepiride 1mg';
-    } else {
-      currentMedications = 'None currently';
+      currentMedications = 'Metformin';
     }
   }
 
@@ -121,15 +118,13 @@ export function parseSpokenRegistration(
   const historyMatch = clean.match(/(?:history\s+of|past\s+medical\s+history|medical\s+history|पुरानी\s+बीमारी|history)\s*(?:is|of)?\s*([^.\n;]{3,80})/i);
   if (historyMatch && historyMatch[1]?.trim()) {
     medicalHistory = historyMatch[1].trim();
-  } else if (!medicalHistory) {
+  } else if (!medicalHistory && clean) {
     if (/diabetes|hypertension|stent|angioplasty|heart\s*disease/i.test(lower)) {
-      medicalHistory = 'Type 2 Diabetes, Hypertension, Prior PTCA Stent (2021)';
+      medicalHistory = 'Diabetes, Hypertension, Prior Stent';
     } else if (/asthma|copd/i.test(lower)) {
-      medicalHistory = 'Bronchial Asthma (Moderate persistent)';
+      medicalHistory = 'Bronchial Asthma';
     } else if (/kidney|renal/i.test(lower)) {
-      medicalHistory = 'Chronic Kidney Disease (Stage 2)';
-    } else {
-      medicalHistory = 'No prior chronic conditions recorded';
+      medicalHistory = 'Chronic Kidney Disease';
     }
   }
 
@@ -139,8 +134,6 @@ export function parseSpokenRegistration(
                      clean.match(/\b([6-9]\d{9})\b/);
   if (phoneMatch) {
     guardianPhone = phoneMatch[2] ? `+91-${phoneMatch[2]}` : `+91-${phoneMatch[1]}`;
-  } else if (!guardianPhone) {
-    guardianPhone = '+91-98104-55678';
   }
 
   // 10. Optional ABHA ID extraction
@@ -152,8 +145,8 @@ export function parseSpokenRegistration(
 
   return {
     patientId,
-    fullName: fullName || 'Emergency Patient',
-    age: age || '52',
+    fullName: fullName || '',
+    age: age || '',
     gender,
     bloodGroup,
     chiefComplaint,

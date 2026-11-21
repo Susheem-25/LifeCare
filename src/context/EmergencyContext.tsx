@@ -118,7 +118,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     else if (role === 'hospital') setCurrentView('hospital');
   };
 
-  const [selectedAbhaProfile, setSelectedAbhaProfile] = useState<ABHAMedicalRecord | null>(SAMPLE_ABHA_PROFILES[0]);
+  const [selectedAbhaProfile, setSelectedAbhaProfile] = useState<ABHAMedicalRecord | null>(null);
   const [searchTriageMode, setSearchTriageMode] = useState<'standard' | 'sarvam' | 'neo4j'>('standard');
 
   // Firebase Authentication & Role-based Unique ID Profile State

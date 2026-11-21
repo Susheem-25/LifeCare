@@ -57,7 +57,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
   onClose,
   initialTranscript = '',
 }) => {
-  const [transcript, setTranscript] = useState(initialTranscript || DEMO_VOICE_PRESETS[0].text);
+  const [transcript, setTranscript] = useState(initialTranscript || '');
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -65,7 +65,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
 
   // Structured form state
   const [formData, setFormData] = useState<PatientVoiceRegistration>(() =>
-    parseSpokenRegistration(initialTranscript || DEMO_VOICE_PRESETS[0].text)
+    parseSpokenRegistration(initialTranscript || '')
   );
 
   // Sync form data whenever transcript changes

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
-import { SAMPLE_ABHA_PROFILES } from '../../data/mockData';
 import {
   Ambulance,
   Navigation,
@@ -31,12 +30,13 @@ export const AmbulancePortal: React.FC = () => {
     updateAmbulanceStatus,
     submitInTransitPaperwork,
     fetchPatientByAbha,
-    setIsVoiceQrModalOpen
+    setIsVoiceQrModalOpen,
+    currentUser
   } = useEmergency();
 
   // Driver Login credentials state
-  const [driverIdInput, setDriverIdInput] = useState<string>('DRV-101');
-  const [driverPinInput, setDriverPinInput] = useState<string>('1234');
+  const [driverIdInput, setDriverIdInput] = useState<string>(currentUser?.uniqueRoleId || '');
+  const [driverPinInput, setDriverPinInput] = useState<string>('');
   const [driverLoginError, setDriverLoginError] = useState<string>('');
 
   // Lookup state
@@ -45,9 +45,9 @@ export const AmbulancePortal: React.FC = () => {
   const [tripStatus, setTripStatus] = useState<string>(activeBooking?.status || 'IN_TRANSIT_TO_HOSPITAL');
 
   // In-Ambulance ABHA Paperwork State (Step 4 of LifeCare)
-  const currentAbha = selectedBooking?.inTransitPaperwork?.abhaDetails || SAMPLE_ABHA_PROFILES[0];
-  const [ambAbhaInput, setAmbAbhaInput] = useState<string>(currentAbha?.abhaId || '91-4820-9182-3921');
-  const [ambAbhaProfile, setAmbAbhaProfile] = useState(currentAbha);
+  const currentAbha = selectedBooking?.inTransitPaperwork?.abhaDetails || null;
+  const [ambAbhaInput, setAmbAbhaInput] = useState<string>(currentAbha?.abhaId || '');
+  const [ambAbhaProfile, setAmbAbhaProfile] = useState<typeof currentAbha>(currentAbha);
   const [digitalConsent, setDigitalConsent] = useState<boolean>(true);
   const [paperworkSaved, setPaperworkSaved] = useState<boolean>(selectedBooking?.inTransitPaperwork?.isSubmitted ?? true);
   const [paperworkSuccessMsg, setPaperworkSuccessMsg] = useState<string>('');
