@@ -13,7 +13,9 @@ import {
   Zap, 
   Compass, 
   Sparkles,
-  Loader2
+  Loader2,
+  AlertCircle,
+  Radio
 } from 'lucide-react';
 import { PRESET_EMERGENCIES, SAMPLE_ABHA_PROFILES } from '../../data/mockData';
 import { 
@@ -51,6 +53,7 @@ export const GuardianPortal: React.FC = () => {
   // Register Mode State
   const [emergencyBrief, setEmergencyBrief] = useState<string>('Severe crushing chest pain radiating to left arm and jaw, profuse cold sweating.');
   const [isListening, setIsListening] = useState<boolean>(false);
+  const [voiceNotice, setVoiceNotice] = useState<string>('');
   const [isSpeakingTts, setIsSpeakingTts] = useState<boolean>(false);
   const [triageAnalysis, setTriageAnalysis] = useState<AITriageAnalysis | null>(currentTriage);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -93,24 +96,29 @@ export const GuardianPortal: React.FC = () => {
       return;
     }
 
+    setVoiceNotice('');
+
     const started = startVoiceSos({
       langCode: 'hi-IN',
       onTranscript: (text, isFinal) => {
         setEmergencyBrief(text);
         if (isFinal) {
           handleAnalyzeProblem(text);
+          setIsListening(false);
         }
       },
       onListeningChange: (listening) => {
         setIsListening(listening);
       },
-      onError: () => {
+      onError: (err) => {
         setIsListening(false);
+        setVoiceNotice(err || 'Microphone error. Please speak louder or select a sample emergency.');
       },
     });
 
     if (!started) {
       setIsListening(false);
+      setVoiceNotice('Microphone access is not supported or blocked in this browser. You can click "Simulate Voice SOS" below or type.');
     }
   };
 
@@ -258,7 +266,7 @@ export const GuardianPortal: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 animate-fadeIn pb-16 px-3 sm:px-4">
+    <div className="w-full space-y-6 animate-fadeIn pb-16 px-1 sm:px-2">
       {/* Clean Top Navigation Bar */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
@@ -477,6 +485,57 @@ export const GuardianPortal: React.FC = () => {
               </div>
             </div>
 
+            {/* Active Voice SOS Listening State */}
+            {isListening && (
+              <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs animate-pulse">
+                <div className="flex items-center space-x-3">
+                  <span className="relative flex h-3.5 w-3.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600"></span>
+                  </span>
+                  <div>
+                    <div className="font-extrabold text-red-900 text-sm flex items-center space-x-1.5">
+                      <Radio className="w-4 h-4 text-red-600 animate-pulse" />
+                      <span>Microphone Active — Listening to your voice...</span>
+                    </div>
+                    <div className="text-red-700 text-xs">
+                      Speak your emergency symptoms clearly in Hindi or English (e.g. "सीने में तेज दर्द हो रहा है" or "Severe chest pain").
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleToggleVoiceInput}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-xs cursor-pointer shrink-0"
+                >
+                  Stop & Triage Now
+                </button>
+              </div>
+            )}
+
+            {/* Voice Notice or Mic Blocked Alert with 1-Click Sample */}
+            {voiceNotice && (
+              <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs text-amber-900">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>{voiceNotice}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const sample = 'Severe crushing chest pain radiating to left arm and jaw, profuse cold sweating.';
+                    setEmergencyBrief(sample);
+                    handleAnalyzeProblem(sample);
+                    setVoiceNotice('');
+                  }}
+                  className="bg-amber-700 hover:bg-amber-800 text-white px-3.5 py-1.5 rounded-xl font-bold text-[11px] shrink-0 cursor-pointer shadow-2xs"
+                >
+                  Simulate Voice SOS
+                </button>
+              </div>
+            )}
+
             {/* Input Text Area */}
             <div className="space-y-2.5">
               <textarea
@@ -557,7 +616,7 @@ export const GuardianPortal: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-2.5 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
               {eligibleHospitals.slice(0, 3).map((hosp, idx) => {
                 const isSelected = selectedHospital?.id === hosp.id;
                 const freeDoc = hosp.doctors.find((d) => d.status === 'AVAILABLE_AND_FREE' || d.status === 'FREE');
@@ -566,27 +625,37 @@ export const GuardianPortal: React.FC = () => {
                   <div
                     key={hosp.id}
                     onClick={() => handleSelectHospital(hosp)}
-                    className={`p-3.5 rounded-xl border-2 transition cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                    className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between gap-3 ${
                       isSelected
-                        ? 'border-emerald-600 bg-emerald-50/40 shadow-xs'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                        ? 'border-emerald-600 bg-emerald-50/50 shadow-md ring-2 ring-emerald-600/20'
+                        : 'border-slate-200 hover:border-slate-300 bg-white hover:shadow-xs'
                     }`}
                   >
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center space-x-2">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="font-extrabold text-slate-900 text-sm leading-snug">{hosp.name}</span>
                         {idx === 0 && (
-                          <span className="bg-red-600 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded">
+                          <span className="bg-red-600 text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shrink-0">
                             #1 NEAREST
                           </span>
                         )}
-                        <h3 className="font-extrabold text-slate-900 text-sm">{hosp.name}</h3>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span className="font-mono text-slate-700 font-bold">{hosp.distanceKm} km • {hosp.transitTimeMins} min</span>
+
+                      <div className="text-xs text-slate-500 font-mono flex items-center space-x-2">
+                        <strong className="text-slate-800">{hosp.distanceKm} km</strong>
                         <span>•</span>
-                        <span className="text-emerald-700 font-bold">{hosp.beds.icuFree} ICU Beds</span>
-                        <span>•</span>
-                        <span>Doctor: {freeDoc?.name.split(' ')[1] || 'Specialist'}</span>
+                        <strong className="text-amber-700">{hosp.transitTimeMins} mins</strong>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
+                        <div className="flex items-center justify-between">
+                          <span>ICU Trauma Beds:</span>
+                          <strong className="text-emerald-700 font-mono font-bold">{hosp.beds.icuFree} Free</strong>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Emergency Doctor:</span>
+                          <strong className="text-slate-800">{freeDoc?.name.split(' ')[1] || 'Specialist'}</strong>
+                        </div>
                       </div>
                     </div>
 
@@ -596,13 +665,13 @@ export const GuardianPortal: React.FC = () => {
                         e.stopPropagation();
                         handleSelectHospital(hosp);
                       }}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
+                      className={`w-full py-2.5 rounded-xl text-xs font-bold transition cursor-pointer text-center ${
                         isSelected
                           ? 'bg-emerald-600 text-white shadow-xs'
                           : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
                       }`}
                     >
-                      {isSelected ? 'Hospital Selected' : 'Choose Hospital'}
+                      {isSelected ? '✓ Hospital Selected' : 'Choose Hospital'}
                     </button>
                   </div>
                 );

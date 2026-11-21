@@ -72,7 +72,7 @@ export const startVoiceSos = (options: VoiceSosOptions): boolean => {
 
   if (!SpeechRec) {
     if (options.onError) {
-      options.onError('Browser Speech Recognition not supported. Falling back to simulated voice.');
+      options.onError('Browser Speech Recognition not supported in this browser. Please use Chrome/Edge or click sample voice.');
     }
     return false;
   }
@@ -89,9 +89,9 @@ export const startVoiceSos = (options: VoiceSosOptions): boolean => {
 
   try {
     const recognition = new SpeechRec();
-    const mappedLang = (options.langCode && LANG_CODE_MAP[options.langCode]) || 'hi-IN';
+    const mappedLang = (options.langCode && LANG_CODE_MAP[options.langCode]) || options.langCode || 'hi-IN';
     recognition.lang = mappedLang;
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 

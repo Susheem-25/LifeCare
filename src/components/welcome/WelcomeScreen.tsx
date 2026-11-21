@@ -27,7 +27,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
   const totalFreeBeds = hospitals.reduce((acc, h) => acc + h.beds.icuFree + h.beds.emergencyFree, 0);
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-10 py-6 sm:py-10 animate-fadeIn">
+    <div className="w-full space-y-10 py-6 sm:py-10 animate-fadeIn px-1 sm:px-2">
       {/* Hero Welcome Header */}
       <div className="text-center space-y-4 max-w-3xl mx-auto px-4">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-semibold shadow-2xs">

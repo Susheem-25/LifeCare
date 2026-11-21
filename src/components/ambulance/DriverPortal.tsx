@@ -185,7 +185,7 @@ export const DriverPortal: React.FC = () => {
 
   // 2. IF LOGGED IN: Driver Cockpit with Patient ID prompt & Live Map Navigation
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 animate-fadeIn pb-12 px-4">
+    <div className="w-full space-y-6 animate-fadeIn pb-12 px-1 sm:px-2">
       {/* Driver Header Profile */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
