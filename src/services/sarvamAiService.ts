@@ -145,7 +145,12 @@ export async function transcribeAudioWithSarvam(
     throw new Error('Sarvam API key not configured');
   }
 
-  const mappedLang = langCode.includes('-') ? langCode : `${langCode}-IN`;
+  const mappedLang =
+    langCode === 'unknown'
+      ? 'unknown'
+      : langCode.includes('-')
+      ? langCode
+      : `${langCode}-IN`;
 
   const formData = new FormData();
   formData.append('file', audioBlob, 'emergency_voice.wav');
@@ -188,7 +193,7 @@ export async function analyzeProblemWithSarvam(brief: string): Promise<AITriageA
           'api-subscription-key': apiKey,
         },
         body: JSON.stringify({
-          model: 'sarvam-2b',
+          model: 'sarvam-105b-conversations',
           messages: [
             {
               role: 'system',

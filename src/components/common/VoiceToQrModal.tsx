@@ -103,7 +103,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
     setMicNotice(null);
     setAudioVolume(0);
     const success = await startVoiceSos({
-      langCode: voiceLang,
+      langCode: voiceLang === 'hi-IN' ? 'hi-IN' : 'unknown',
       onTranscript: (spokenText) => {
         setTranscript(spokenText);
         setFormData((prev) => parseSpokenRegistration(spokenText, prev));
@@ -233,7 +233,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
               rows={3}
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}
-              placeholder="Click microphone and speak: 'Patient is Ramesh Sharma, 54 Male, severe chest pain, allergic to Penicillin...'"
+              placeholder="Click microphone and speak in English or हिन्दी (उदा: 'मरीज रमेश शर्मा, 54 साल पुरुष, छाती में तेज दर्द, पेनिसिलिन से एलर्जी...')"
               className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-2xl p-3.5 pr-28 text-xs font-medium focus:outline-none focus:border-red-500 focus:bg-white transition leading-relaxed"
             />
 

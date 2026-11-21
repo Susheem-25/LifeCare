@@ -102,7 +102,12 @@ export const EmergencySearch: React.FC = () => {
           setTimeout(() => setVoiceSuccessToast(null), 4000);
 
           // Audio confirmation via TTS
-          speakText(`Emergency triaged for ${text}`, {
+          const confirmText =
+            selectedLang === 'hi' || selectedLang === 'hi-IN'
+              ? `आपातकालीन सहायता दर्ज: ${text}`
+              : `Emergency triaged for ${text}`;
+
+          speakText(confirmText, {
             langCode: selectedLang,
             onStart: () => setIsSpeakingTts(true),
             onEnd: () => setIsSpeakingTts(false),

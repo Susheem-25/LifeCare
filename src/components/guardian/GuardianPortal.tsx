@@ -131,7 +131,7 @@ export const GuardianPortal: React.FC = () => {
     currentTranscriptRef.current = emergencyBrief;
 
     const started = await startVoiceSos({
-      langCode: voiceLanguage,
+      langCode: voiceLanguage === 'hi-IN' ? 'hi-IN' : 'unknown',
       onTranscript: (text, isFinal) => {
         currentTranscriptRef.current = text;
         setEmergencyBrief(text);
@@ -202,10 +202,15 @@ export const GuardianPortal: React.FC = () => {
     setIsAnalyzing(false);
 
     // Read back via Sarvam AI TTS
+    const ttsText =
+      voiceLanguage === 'hi-IN'
+        ? `आपातकालीन जांच: ${analysis.detectedCondition}। नजदीकी अस्पताल मैच तैयार है।`
+        : `Emergency Triage: ${analysis.detectedCondition}. Recommended: ${analysis.recommendedSpeciality[0]}. Nearest hospital matching updated.`;
+
     speakTextWithSarvam(
-      `Emergency Triage: ${analysis.detectedCondition}. Recommended: ${analysis.recommendedSpeciality[0]}. Nearest hospital matching updated.`,
+      ttsText,
       {
-        langCode: 'hi-IN',
+        langCode: voiceLanguage,
         onStart: () => setIsSpeakingTts(true),
         onEnd: () => setIsSpeakingTts(false),
         onError: () => setIsSpeakingTts(false),

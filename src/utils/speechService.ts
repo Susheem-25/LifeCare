@@ -3,13 +3,21 @@ import { transcribeAudioWithSarvam } from '../services/sarvamAiService';
 
 export const LANG_CODE_MAP: Record<string, string> = {
   hi: 'hi-IN',
+  'hi-IN': 'hi-IN',
   en: 'en-IN',
+  'en-IN': 'en-IN',
   bn: 'bn-IN',
+  'bn-IN': 'bn-IN',
   mr: 'mr-IN',
+  'mr-IN': 'mr-IN',
   ta: 'ta-IN',
+  'ta-IN': 'ta-IN',
   te: 'te-IN',
+  'te-IN': 'te-IN',
   gu: 'gu-IN',
+  'gu-IN': 'gu-IN',
   pa: 'pa-IN',
+  'pa-IN': 'pa-IN',
 };
 
 // Check if browser supports Web Speech API SpeechRecognition
@@ -476,10 +484,11 @@ export const stopVoiceSos = (): Promise<string> => {
             const wavBlob = encodeWAV(downsampled, targetSR);
 
             if (wavBlob.size > 200) {
+              const rawLang = currentOpts.langCode;
               const lang =
-                (currentOpts.langCode && LANG_CODE_MAP[currentOpts.langCode]) ||
-                currentOpts.langCode ||
-                'en-IN';
+                (rawLang && LANG_CODE_MAP[rawLang]) ||
+                rawLang ||
+                'unknown';
               const sarvamTranscript = await transcribeAudioWithSarvam(wavBlob, lang);
               const cleanSarvam = (sarvamTranscript || '').trim();
               if (cleanSarvam) {

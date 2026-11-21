@@ -8,13 +8,28 @@ import type { PatientVoiceRegistration, CompactRegistrationQRPacket } from '../t
 import { sanitizeText, sanitizeIdentifier } from './security';
 
 /**
- * Parses spoken ambulance/bystander transcript into structured registration fields
+ * Normalizes Devanagari Unicode nuktas and compound glyphs
+ */
+export function normalizeIndic(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/[\u093C]/g, '') // remove combining nukta mark
+    .replace(/\u095B/g, 'ज')  // ZA -> JA (मरीज़ -> मरीज)
+    .replace(/\u095E/g, 'फ')  // FA -> PHA
+    .replace(/\u0958/g, 'क')  // QA -> KA
+    .replace(/\u0959/g, 'ख')  // KHHA -> KHA
+    .replace(/\u095A/g, 'ग'); // GHHA -> GA
+}
+
+/**
+ * Parses spoken ambulance/bystander transcript into structured registration fields (Hindi, Hinglish & English)
  */
 export function parseSpokenRegistration(
   transcript: string,
   existing?: Partial<PatientVoiceRegistration>
 ): PatientVoiceRegistration {
-  const clean = sanitizeText(transcript || '').trim();
+  const normalized = normalizeIndic(transcript || '');
+  const clean = sanitizeText(normalized).trim();
   const lower = clean.toLowerCase();
 
   const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -23,14 +38,20 @@ export function parseSpokenRegistration(
   // 1. Full Name extraction
   let fullName = existing?.fullName || '';
   if (!fullName) {
-    const nameMatch =
-      clean.match(/(?:patient(?:\s+name)?(?:\s+is)?|name\s+is|मरीज\s+का\s+नाम|नाम\s+है|patient:?)\s*([A-Za-z\u0900-\u097F\s]{2,28}?)(?=\s*(?:,|\.|age|उम्र|years|old|gender|male|female|blood|having|with|severe|complaining|\d|$))/i);
+    const nameMatch = clean.match(
+      /(?:patient(?:\s+name)?(?:\s+is)?|name\s+is|मरी[जज़]\s*(?:का\s+नाम|है|:)?|नाम\s*(?:है|:)?|पेशेंट\s*(?:का\s+नाम|है|:)?|रोगी\s*(?:का\s+नाम|है|:)?|mareez\s*(?:ka\s+naam|hai|:)?|patient:?)\s*([A-Za-z\u0900-\u097F\s]{2,28}?)(?=\s*(?:,|\.|age|उम्र|वर्ष|साल|years|old|gender|लिंग|पुरुष|महिला|male|female|blood|रक्त|having|with|severe|complaining|\d|$))/i
+    );
     if (nameMatch && nameMatch[1]?.trim()) {
       fullName = nameMatch[1].trim();
     } else {
       // Fallback: check first 2-3 capitalized words or sample default
       const firstWords = clean.split(/[.,\n]/)[0]?.trim();
-      if (firstWords && !/\b(emergency|patient|ambulance|sos|pain|severe|chest)\b/i.test(firstWords) && firstWords.length < 30) {
+      if (
+        firstWords &&
+        !/\b(emergency|patient|ambulance|sos|pain|severe|chest)\b/i.test(firstWords) &&
+        !/(मरी|रोगी|पेशेंट|दर्द|छाती|सीने)/i.test(firstWords) &&
+        firstWords.length < 30
+      ) {
         fullName = firstWords;
       }
     }
@@ -39,47 +60,73 @@ export function parseSpokenRegistration(
   // 2. Age extraction
   let age = existing?.age || '';
   if (!age) {
-    const ageMatch = lower.match(/(?:age(?:\s+is)?|उम्र|साल|वर्ष)\s*(\d{1,3})|\b(\d{1,3})\s*(?:years?\s*old|y\/o|yr|साल|वर्ष)\b/i);
+    const ageMatch =
+      lower.match(/(?:age(?:\s+is)?|उम्र|साल|वर्ष|umra|aayu)\s*(?:is|है|:)?\s*(\d{1,3})/i) ||
+      clean.match(/(\d{1,3})\s*(?:years?\s*old|y\/o|yr|साल|वर्ष|saal)/i);
     if (ageMatch) {
-      age = ageMatch[1] || ageMatch[2] || '';
+      age = ageMatch[1] || '';
     }
   }
 
-  // 3. Gender extraction
+  // 3. Gender extraction (No \b on Devanagari characters)
   let gender: 'MALE' | 'FEMALE' | 'OTHER' = existing?.gender || 'MALE';
-  if (/\b(female|woman|lady|girl|महिला|स्त्री|औरत)\b/i.test(lower)) {
+  if (/(female|woman|lady|girl|महिला|स्त्री|औरत|लड़की)/i.test(clean)) {
     gender = 'FEMALE';
-  } else if (/\b(other|transgender|अन्य)\b/i.test(lower)) {
+  } else if (/(other|transgender|अन्य)/i.test(clean)) {
     gender = 'OTHER';
-  } else if (/\b(male|man|boy|gentleman|पुरुष|आदमी)\b/i.test(lower)) {
+  } else if (/(male|man|boy|gentleman|पुरुष|आदमी|लड़का)/i.test(clean)) {
     gender = 'MALE';
   }
 
   // 4. Blood Group extraction
   let bloodGroup = existing?.bloodGroup || 'B+ (Positive)';
-  const bloodMatch = lower.match(/\b(a|b|ab|o)\s*(\+|-|positive|negative|pos|neg)?\s*(?:positive|negative|blood|रक्त|ग्रुप)?\b/i);
+  const bloodMatch =
+    lower.match(/(?:blood(?:\s*group)?|रक्त\s*समूह|ब्लड\s*ग्रुप)?\s*\b([ab|o]{1,2})\s*(\+|-|positive|negative|pos|neg|पॉजिटिव|नेगेटिव)?/i) ||
+    clean.match(/(?:ब्लड\s*ग्रुप|रक्त\s*समूह)\s*([A-Za-z\u0900-\u097F+-]+)/i);
+
   if (bloodMatch) {
-    const type = bloodMatch[1].toUpperCase();
-    const sign = bloodMatch[2] ? (bloodMatch[2].includes('-') || bloodMatch[2].includes('neg') ? '-' : '+') : '+';
-    bloodGroup = `${type}${sign} (${sign === '+' ? 'Positive' : 'Negative'})`;
+    const rawType = (bloodMatch[1] || '').toUpperCase();
+    if (['A', 'B', 'AB', 'O'].includes(rawType)) {
+      const isNeg =
+        (bloodMatch[2] || '').includes('-') ||
+        (bloodMatch[2] || '').includes('neg') ||
+        (bloodMatch[2] || '').includes('नेगेटिव');
+      bloodGroup = isNeg ? `${rawType}- (Negative)` : `${rawType}+ (Positive)`;
+    } else if (clean.includes('बी पॉजिटिव') || clean.includes('b positive') || clean.includes('b+')) {
+      bloodGroup = 'B+ (Positive)';
+    } else if (clean.includes('ओ नेगेटिव') || clean.includes('o negative') || clean.includes('o-')) {
+      bloodGroup = 'O- (Negative)';
+    } else if (clean.includes('ओ पॉजिटिव') || clean.includes('o positive') || clean.includes('o+')) {
+      bloodGroup = 'O+ (Positive)';
+    } else if (clean.includes('ए पॉजिटिव') || clean.includes('a positive') || clean.includes('a+')) {
+      bloodGroup = 'A+ (Positive)';
+    }
+  } else if (clean.includes('बी पॉजिटिव') || clean.includes('b positive')) {
+    bloodGroup = 'B+ (Positive)';
+  } else if (clean.includes('ओ नेगेटिव') || clean.includes('o negative')) {
+    bloodGroup = 'O- (Negative)';
+  } else if (clean.includes('ओ पॉजिटिव') || clean.includes('o positive')) {
+    bloodGroup = 'O+ (Positive)';
   }
 
   // 5. Chief Complaint extraction
   let chiefComplaint = existing?.chiefComplaint || '';
-  const complaintMatch = clean.match(/(?:chief\s+complaint|complaint|suffering\s+from|symptoms?|having|शिकायत|तकलीफ|समस्या|problem)\s*(?:is|of|with)?\s*([^.\n,;]{4,100})/i);
+  const complaintMatch = clean.match(
+    /(?:chief\s+complaint|complaint|suffering\s+from|symptoms?|having|शिकायत|तकलीफ|समस्या|problem)\s*(?:is|of|with|है|:)?\s*([^.\n,;]{4,100})/i
+  );
   if (complaintMatch && complaintMatch[1]?.trim()) {
     chiefComplaint = complaintMatch[1].trim();
   } else if (!chiefComplaint && clean) {
-    // Look for clinical symptom keywords
-    if (/chest\s*pain|heart\s*attack|stemi|angina/i.test(lower)) {
+    // Look for clinical symptom keywords (English, Hindi, Hinglish)
+    if (/(chest\s*pain|heart\s*attack|stemi|angina|सीने\s*में\s*दर्द|छाती\s*में\s*दर्द|हार्ट\s*अटैक|दर्द|chhati|seene)/i.test(clean)) {
       chiefComplaint = 'Acute severe chest pain radiating to left arm (Suspected STEMI)';
-    } else if (/breath|dyspnea|asthma|wheezing|सांस/i.test(lower)) {
+    } else if (/(breath|dyspnea|asthma|wheezing|सांस\s*(?:में\s*तकलीफ|फूल|लेने\s*में)|saans|दम\s*फूल)/i.test(clean)) {
       chiefComplaint = 'Acute respiratory distress / Shortness of breath';
-    } else if (/accident|trauma|fracture|bleeding|चोट|दुर्घटना/i.test(lower)) {
+    } else if (/(accident|trauma|fracture|bleeding|चोट|दुर्घटना|एक्सीडेंट|खून|फ्रैक्चर)/i.test(clean)) {
       chiefComplaint = 'Road traffic accident / Blunt polytrauma & bleeding';
-    } else if (/unconscious|fainted|coma|बेहोश/i.test(lower)) {
+    } else if (/(unconscious|fainted|coma|बेहोश|चक्कर)/i.test(clean)) {
       chiefComplaint = 'Loss of consciousness / Syncope attack';
-    } else if (/stroke|paralysis|slurred\s*speech|लकवा/i.test(lower)) {
+    } else if (/(stroke|paralysis|slurred\s*speech|लकवा|पैरालिसिस)/i.test(clean)) {
       chiefComplaint = 'Acute stroke symptoms / Hemiparesis';
     } else {
       chiefComplaint = clean.slice(0, 80);
@@ -88,50 +135,51 @@ export function parseSpokenRegistration(
 
   // 6. Allergies extraction
   let allergies = existing?.allergies || '';
-  const allergyMatch = clean.match(/(?:allerg(?:y|ies|ic)|एलर्जी)\s*(?:to|is|are)?\s*([^.\n,;]{2,60})/i);
+  const allergyMatch = clean.match(/(?:allerg(?:y|ies|ic)|एलर्जी)\s*(?:to|is|are|से|है)?\s*([^.\n,;]{2,60})/i);
   if (allergyMatch && allergyMatch[1]?.trim()) {
     allergies = allergyMatch[1].trim();
   } else if (!allergies && clean) {
-    if (/penicillin/i.test(lower)) allergies = 'Penicillin';
-    else if (/sulfa/i.test(lower)) allergies = 'Sulfa Drugs';
-    else if (/nsaid|ibuprofen/i.test(lower)) allergies = 'NSAIDs / Ibuprofen';
-    else if (/no\s*allerg/i.test(lower)) allergies = 'No known drug allergies (NKDA)';
+    if (/(penicillin|पेनिसिलिन)/i.test(clean)) allergies = 'Penicillin';
+    else if (/(sulfa|सल्फा)/i.test(clean)) allergies = 'Sulfa Drugs';
+    else if (/(nsaid|ibuprofen|इबुप्रोफेन|दर्द\s*की\s*दवा)/i.test(clean)) allergies = 'NSAIDs / Ibuprofen';
+    else if (/(no\s*allerg|कोई\s*एलर्जी\s*नहीं|एलर्जी\s*नहीं)/i.test(clean)) allergies = 'No known drug allergies (NKDA)';
   }
 
   // 7. Current Medications extraction
   let currentMedications = existing?.currentMedications || '';
-  const medMatch = clean.match(/(?:taking|medications?|medicines?|drugs?|दवा|दवाइयां)\s*(?:is|are)?\s*([^.\n;]{3,80})/i);
+  const medMatch = clean.match(/(?:taking|medications?|medicines?|drugs?|दवा|दवाइयां)\s*(?:is|are|खा\s*रहे|ले\s*रहे)?\s*([^.\n;]{3,80})/i);
   if (medMatch && medMatch[1]?.trim()) {
     currentMedications = medMatch[1].trim();
   } else if (!currentMedications && clean) {
-    if (/aspirin|atorvastatin|statin/i.test(lower)) {
+    if (/(aspirin|atorvastatin|statin|एस्पिरिन)/i.test(clean)) {
       currentMedications = 'Aspirin, Atorvastatin';
-    } else if (/inhaler|budesonide/i.test(lower)) {
+    } else if (/(inhaler|budesonide|इन्हेलर)/i.test(clean)) {
       currentMedications = 'Inhaler (Budesonide)';
-    } else if (/insulin|metformin/i.test(lower)) {
+    } else if (/(insulin|metformin|इंसुलिन|शुगर\s*की\s*दवा)/i.test(clean)) {
       currentMedications = 'Metformin';
     }
   }
 
   // 8. Past Medical History extraction
   let medicalHistory = existing?.medicalHistory || '';
-  const historyMatch = clean.match(/(?:history\s+of|past\s+medical\s+history|medical\s+history|पुरानी\s+बीमारी|history)\s*(?:is|of)?\s*([^.\n;]{3,80})/i);
+  const historyMatch = clean.match(/(?:history\s+of|past\s+medical\s+history|medical\s+history|पुरानी\s+बीमारी|history)\s*(?:is|of|है)?\s*([^.\n;]{3,80})/i);
   if (historyMatch && historyMatch[1]?.trim()) {
     medicalHistory = historyMatch[1].trim();
   } else if (!medicalHistory && clean) {
-    if (/diabetes|hypertension|stent|angioplasty|heart\s*disease/i.test(lower)) {
+    if (/(diabetes|hypertension|stent|angioplasty|heart\s*disease|शुगर|बीपी|स्टेंट)/i.test(clean)) {
       medicalHistory = 'Diabetes, Hypertension, Prior Stent';
-    } else if (/asthma|copd/i.test(lower)) {
+    } else if (/(asthma|copd|दमा)/i.test(clean)) {
       medicalHistory = 'Bronchial Asthma';
-    } else if (/kidney|renal/i.test(lower)) {
+    } else if (/(kidney|renal|किडनी)/i.test(clean)) {
       medicalHistory = 'Chronic Kidney Disease';
     }
   }
 
   // 9. Guardian Phone Number extraction
   let guardianPhone = existing?.guardianPhone || '';
-  const phoneMatch = clean.match(/(?:phone|mobile|contact|फोन|नंबर)\s*(?:number|is|:)?\s*(\+?91[-\s]?)?([6-9]\d{9})/i) ||
-                     clean.match(/\b([6-9]\d{9})\b/);
+  const phoneMatch =
+    clean.match(/(?:phone|mobile|contact|फोन|नंबर|मोबाइल)\s*(?:number|is|है|:)?\s*(\+?91[-\s]?)?([6-9]\d{9})/i) ||
+    clean.match(/\b([6-9]\d{9})\b/);
   if (phoneMatch) {
     guardianPhone = phoneMatch[2] ? `+91-${phoneMatch[2]}` : `+91-${phoneMatch[1]}`;
   }

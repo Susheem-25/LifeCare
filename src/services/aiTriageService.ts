@@ -1,7 +1,14 @@
 import { AITriageAnalysis, Hospital } from '../types';
 
 export function analyzeEmergencyBrief(text: string): AITriageAnalysis {
-  const query = text.toLowerCase();
+  const normalized = (text || '')
+    .replace(/[\u093C]/g, '')
+    .replace(/\u095B/g, 'ज')
+    .replace(/\u095E/g, 'फ')
+    .replace(/\u0958/g, 'क')
+    .replace(/\u0959/g, 'ख')
+    .replace(/\u095A/g, 'ग');
+  const query = normalized.toLowerCase();
 
   // 1. CARDIAC / HEART ATTACK (English + Indic Multi-Language via Bhashini)
   if (
