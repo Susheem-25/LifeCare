@@ -97,8 +97,10 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
         setIsListening(listening);
       },
       onError: (msg) => {
-        setMicNotice(msg);
         setIsListening(false);
+        if (msg && !msg.toLowerCase().includes('network')) {
+          setMicNotice(msg);
+        }
       },
     });
 

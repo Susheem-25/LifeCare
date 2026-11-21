@@ -21,7 +21,7 @@ export const hasGoogleMapsApiKey = (): boolean => Boolean(getGoogleMapsApiKey())
 
 export interface SarvamTtsOptions {
   langCode?: string;
-  speaker?: 'meera' | 'pavithra' | 'maitreyi' | 'arvind' | 'amol' | 'amartya';
+  speaker?: 'priya' | 'aditya' | 'ishita' | 'kavya' | 'anushka' | 'rahul' | 'simran';
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (err: unknown) => void;
@@ -65,13 +65,13 @@ export async function speakTextWithSarvam(
         body: JSON.stringify({
           inputs: [text.slice(0, 500)],
           target_language_code: lang.includes('-') ? lang : `${lang}-IN`,
-          speaker: options?.speaker || 'meera',
+          speaker: options?.speaker || 'priya',
           pitch: 0,
           pace: 1.05,
           loudness: 1.5,
           speech_sample_rate: 22050,
           enable_preprocessing: true,
-          model: 'bulbul:v1',
+          model: 'bulbul:v3',
         }),
       });
 

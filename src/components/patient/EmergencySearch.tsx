@@ -131,8 +131,10 @@ export const EmergencySearch: React.FC = () => {
       },
       onError: (errMsg) => {
         console.warn('Voice SOS Notice:', errMsg);
-        setVoiceNotice(errMsg);
-        setTimeout(() => setVoiceNotice(null), 5000);
+        if (errMsg && !errMsg.toLowerCase().includes('network')) {
+          setVoiceNotice(errMsg);
+          setTimeout(() => setVoiceNotice(null), 5000);
+        }
         triggerSimulatedVoiceFallback();
       },
     });

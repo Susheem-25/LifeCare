@@ -160,13 +160,14 @@ export const GuardianPortal: React.FC = () => {
           clearTimeout(silenceTimerRef.current);
           silenceTimerRef.current = null;
         }
-        setVoiceNotice(err || 'Microphone error. Please speak louder or select a sample emergency.');
+        if (err && !err.toLowerCase().includes('network')) {
+          setVoiceNotice(err);
+        }
       },
     });
 
     if (!started) {
       setIsListening(false);
-      setVoiceNotice('Microphone access is not available or blocked in this browser. You can click a sample emergency below or type.');
     }
   };
 
