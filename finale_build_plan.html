@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>LifeCare - Step Zero: Product Audit and Finale Build Plan</title>
+  <title>LifeCare - Finale Build Plan</title>
   <style>
     @page {
       size: A4 portrait;
-      margin: 10mm 12mm;
+      margin: 8mm 11mm;
     }
     * {
       box-sizing: border-box;
@@ -17,314 +17,301 @@
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      color: #0f172a;
+      color: #1e293b;
       background: #ffffff;
-      line-height: 1.35;
-      font-size: 9.5pt;
+      line-height: 1.32;
+      font-size: 8.8pt;
     }
-    .header-bar {
-      border-bottom: 2px solid #dc2626;
+    .header-table {
+      width: 100%;
+      border-bottom: 2px solid #0f172a;
       padding-bottom: 6px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+      margin-bottom: 8px;
     }
-    .title-group h1 {
-      font-size: 16pt;
-      font-weight: 900;
-      color: #991b1b;
-      letter-spacing: -0.5px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .project-title {
+      font-size: 15pt;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.4px;
     }
-    .title-group .sub-title {
+    .project-subtitle {
       font-size: 8.5pt;
-      font-weight: 700;
-      color: #475569;
+      font-weight: 600;
+      color: #64748b;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       margin-top: 1px;
     }
-    .meta-badges {
+    .header-meta {
       text-align: right;
-      font-size: 7.5pt;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      color: #64748b;
+      font-size: 7.8pt;
+      color: #475569;
+      line-height: 1.35;
     }
-    .badge-pill {
-      display: inline-block;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-weight: 700;
+    .header-meta strong {
       color: #0f172a;
-      margin-bottom: 2px;
     }
-    .section-block {
-      margin-bottom: 8.5px;
+    .section-wrap {
+      margin-bottom: 7.5px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      padding: 6px 9px;
       background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 7px 10px;
       page-break-inside: avoid;
     }
-    .section-header {
+    .section-title-bar {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 4px;
-      border-bottom: 1px solid #f1f5f9;
+      justify-content: space-between;
+      border-bottom: 1px solid #e2e8f0;
       padding-bottom: 3px;
+      margin-bottom: 5px;
     }
-    .sec-num {
-      background: #dc2626;
-      color: #ffffff;
-      font-size: 7.5pt;
+    .section-title {
+      font-size: 9.2pt;
       font-weight: 800;
-      width: 17px;
-      height: 17px;
-      border-radius: 50%;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .badge-number {
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 7.2pt;
+      font-weight: 800;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
     }
-    .sec-title {
-      font-size: 9.5pt;
-      font-weight: 800;
-      color: #1e293b;
-      letter-spacing: -0.2px;
-    }
-    .sec-tag {
-      margin-left: auto;
-      font-size: 7pt;
-      font-family: ui-monospace, monospace;
-      background: #ecfdf5;
-      color: #047857;
-      border: 1px solid #a7f3d0;
-      padding: 1px 5px;
-      border-radius: 3px;
+    .section-tag {
+      font-size: 6.8pt;
       font-weight: 700;
+      text-transform: uppercase;
+      background: #f1f5f9;
+      color: #334155;
+      padding: 1.5px 5px;
+      border-radius: 3px;
+      border: 1px solid #cbd5e1;
     }
-    .grid-2col {
+    .two-col {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 7px;
     }
-    .grid-3col {
+    .three-col {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 6px;
     }
-    .card-mini {
+    .sub-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 4px;
-      padding: 4px 7px;
+      padding: 4px 6px;
     }
-    .card-mini strong {
+    .sub-card strong {
       display: block;
       color: #0f172a;
       font-size: 8pt;
-      margin-bottom: 1px;
+      margin-bottom: 1.5px;
     }
-    .card-mini p, .card-mini ul {
-      font-size: 7.8pt;
+    .sub-card p {
+      font-size: 7.6pt;
       color: #334155;
+      line-height: 1.28;
     }
-    ul.tight-list {
+    ul.item-list {
       list-style-type: none;
       padding-left: 0;
     }
-    ul.tight-list li {
+    ul.item-list li {
       position: relative;
-      padding-left: 11px;
+      padding-left: 10px;
       margin-bottom: 2px;
-      font-size: 8pt;
+      font-size: 7.6pt;
       color: #334155;
+      line-height: 1.26;
     }
-    ul.tight-list li::before {
-      content: "•";
+    ul.item-list li::before {
+      content: "▪";
       position: absolute;
-      left: 2px;
-      color: #dc2626;
-      font-weight: bold;
+      left: 1px;
+      color: #0284c7;
+      font-size: 7.5pt;
     }
-    ul.tight-list li strong {
+    ul.item-list li strong {
       color: #0f172a;
     }
-    .status-badge {
-      display: inline-block;
-      font-size: 6.8pt;
-      font-weight: 800;
-      padding: 1px 4px;
-      border-radius: 3px;
-      margin-right: 3px;
-      text-transform: uppercase;
+    .dod-container {
+      background: #f8fafc;
+      border-left: 3.5px solid #0284c7;
+      border-radius: 4px;
+      padding: 5px 8px;
     }
-    .status-working {
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #86efac;
+    .dod-text {
+      font-size: 8.3pt;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.34;
     }
-    .status-mock {
-      background: #fef3c7;
-      color: #b45309;
-      border: 1px solid #fde68a;
-    }
-    .dod-box {
-      background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
-      border: 1.5px solid #fecdd3;
-      border-radius: 6px;
-      padding: 7px 10px;
-    }
-    .dod-quote {
-      font-size: 8.5pt;
-      font-weight: 700;
-      color: #881337;
-      font-style: italic;
-      line-height: 1.35;
-    }
-    .footer-note {
-      margin-top: 6px;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 4px;
+    .footer-bar {
+      margin-top: 5px;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 3px;
       display: flex;
       justify-content: space-between;
-      font-size: 7pt;
+      font-size: 6.8pt;
       color: #64748b;
-      font-family: ui-monospace, monospace;
     }
   </style>
 </head>
 <body>
 
   <!-- HEADER -->
-  <div class="header-bar">
-    <div class="title-group">
-      <h1>LifeCare: Zero-Wait Emergency Healthcare OS</h1>
-      <div class="sub-title">Step Zero: Product Audit and Finale Build Plan &bull; Deliverable 1</div>
-    </div>
-    <div class="meta-badges">
-      <div class="badge-pill">DEADLINE: 4:00 PM | 21 NOV</div><br>
-      <span>Target Finale: 12:00 PM | 22 Nov 2026</span>
-    </div>
-  </div>
+  <table class="header-table">
+    <tr>
+      <td style="vertical-align: bottom;">
+        <div class="project-title">LifeCare: Zero-Wait Emergency Healthcare Operating System</div>
+        <div class="project-subtitle">Step Zero: Product Audit and Finale Build Plan &bull; Deliverable 1</div>
+      </td>
+      <td class="header-meta" style="vertical-align: bottom;">
+        <strong>Author:</strong> Susheem Kumar Maurya<br>
+        <strong>Deadline:</strong> 4:00 PM, 21 Nov 2026 &bull; <strong>Finale:</strong> 12:00 PM, 22 Nov 2026<br>
+        <strong>Target Stack:</strong> Firebase (Auth, Firestore, Hosting) &bull; Sarvam AI &bull; Neo4j AuraDB &bull; ABDM/DigiLocker
+      </td>
+    </tr>
+  </table>
 
   <!-- QUESTION 1: WHERE YOU ARE -->
-  <div class="section-block">
-    <div class="section-header">
-      <span class="sec-num">1</span>
-      <span class="sec-title">Where We Are: Current Prototype State Audit</span>
-      <span class="sec-tag">FUNCTIONAL BASELINE</span>
+  <div class="section-wrap">
+    <div class="section-title-bar">
+      <div class="section-title">
+        <span class="badge-number">1</span>
+        <span>Where We Are: Current Prototype State Audit</span>
+      </div>
+      <span class="section-tag">Status as of 4:00 PM, 21 Nov</span>
     </div>
-    <div class="grid-2col">
-      <div class="card-mini" style="border-left: 3px solid #16a34a;">
-        <strong style="color: #15803d;"><span class="status-badge status-working">Working Today</span>Live & Operational in Codebase</strong>
-        <ul class="tight-list">
-          <li><strong>Indic Voice SOS & Speech Fallback:</strong> Real-time microphone capture with continuous speech recognition and Sarvam AI Indic synthesis.</li>
-          <li><strong>Autonomous AI Clinical Triage:</strong> ESI 1–5 level scoring, ICD-10 diagnostic estimation, golden-hour window calculation, and immediate first-aid instructions.</li>
-          <li><strong>Live GPS & Dynamic Hospital Ranking:</strong> Auto-requested browser GPS with Haversine distance, travel time, and equipment matching.</li>
-          <li><strong>Direct Turn-by-Turn Routing:</strong> Pre-filled Google Maps navigation intent card (origin coordinates &rarr; emergency ER trauma bay).</li>
-          <li><strong>ABDM v3 & Zero-PII DigiLocker Fetch:</strong> Strict ingestion of medical history (blood group, allergies, conditions, PM-JAY ₹5L cashless) mapped solely to <code>UID-MED-XXXX</code> and <code>PAT-2026-XXXX</code> (Zero Name/DOB/Phone to guarantee 100% breach immunity).</li>
+    <div class="two-col">
+      <div class="sub-card" style="border-left: 2.5px solid #16a34a;">
+        <strong style="color: #166534;">Working Today in Prototype</strong>
+        <ul class="item-list">
+          <li><strong>Indic Voice SOS Engine:</strong> Continuous voice capture with hands-free audio fallback and Sarvam AI synthesis to guide callers in high panic.</li>
+          <li><strong>Clinical AI Triage:</strong> Immediate computation of ESI Level (1–5), provisional ICD-10 codification, golden-hour survival countdown, and automated first-aid prompts.</li>
+          <li><strong>Live GPS & Universal Maps Routing:</strong> Automatic browser GPS detection computing Haversine distance and deep-linking directly to Google Maps navigation with pre-filled origin and hospital trauma bay.</li>
+          <li><strong>Zero-PII DigiLocker Medical Ingestion:</strong> Safe retrieval of critical clinical metrics (blood group, allergies, conditions, active medications, surgeries, PM-JAY status) mapped to anonymous <code>UID-MED-XXXX</code> and <code>PAT-2026-XXXX</code>. Full name, phone, and DOB are omitted to guarantee 100% data breach safety.</li>
+          <li><strong>Synchronized Roles:</strong> Interactive bystander, paramedic, and ER portals.</li>
         </ul>
       </div>
-      <div class="card-mini" style="border-left: 3px solid #d97706;">
-        <strong style="color: #b45309;"><span class="status-badge status-mock">Mocked / Missing</span>Current Gaps to Finalize</strong>
-        <ul class="tight-list">
-          <li><strong>Neo4j Graph Locking:</strong> Multi-resource bay & doctor atomic locks are currently validated via simulated client-side state machine (<9ms latency target).</li>
-          <li><strong>ABDM National Gateway:</strong> Health Information Exchange records use curated FHIR JSON payloads rather than live government sandbox tokens.</li>
-          <li><strong>Live Telemetry Pipe:</strong> Paramedic-to-ER vitals sync uses bidirectional localStorage events rather than dedicated WebSockets.</li>
-          <li><strong>Hardware Telemetry:</strong> Missing live Bluetooth/BLE Arduino Uno Q sensor streams (pulse oximeter & ECG) directly feeding the Paramedic Cockpit.</li>
+      <div class="sub-card" style="border-left: 2.5px solid #d97706;">
+        <strong style="color: #92400e;">Currently Mocked, Hardcoded or In-Progress</strong>
+        <ul class="item-list">
+          <li><strong>Authentication & Storage:</strong> User sessions currently use client-side state; Google Login via Firebase Auth and Cloud Firestore persistence are in deployment.</li>
+          <li><strong>Neo4j Resource Locking:</strong> Atomic multi-entity reservations are validated through local ACID state simulation (<9ms target) rather than a live remote Bolt connection.</li>
+          <li><strong>DigiLocker Gateway:</strong> Medical profiles utilize verified sandbox FHIR payloads rather than live government DigiLocker production OAuth credentials.</li>
+          <li><strong>Pure-Software Paramedic Telemetry:</strong> Paramedic-to-ER vitals sync operates over bidirectional reactive hooks; moving to live Firestore Realtime listeners (zero hardware required).</li>
         </ul>
       </div>
     </div>
   </div>
 
   <!-- QUESTION 2: WHERE YOU WILL BE -->
-  <div class="section-block">
-    <div class="section-header">
-      <span class="sec-num">2</span>
-      <span class="sec-title">Where We Will Be: Target State by 12:00 PM, 22 November</span>
-      <span class="sec-tag">FINALE COMMITMENTS</span>
+  <div class="section-wrap">
+    <div class="section-title-bar">
+      <div class="section-title">
+        <span class="badge-number">2</span>
+        <span>Where We Will Be: Target State by 12:00 PM, 22 November</span>
+      </div>
+      <span class="section-tag">Finale Commitments</span>
     </div>
-    <div class="grid-3col">
-      <div class="card-mini">
-        <strong>1. Live Neo4j AuraDB Atomic Lock</strong>
-        <p>Production Bolt driver executing atomic Cypher queries across hospital nodes, ICU trauma bays, and specialist rosters to mathematically prevent double-booking collisions.</p>
+    <div class="three-col">
+      <div class="sub-card">
+        <strong>1. Firebase Hosting & Google Auth</strong>
+        <p>Production hosting on Firebase. Role-based Google Sign-In for Guardians, Drivers, and Hospital Staff with auto-generated unique IDs (<code>GRD-XXXX</code>, <code>DRV-XXXX</code>, <code>HSP-XXXX</code>) and partitioned Firestore collections.</p>
       </div>
-      <div class="card-mini">
-        <strong>2. Deepened Sarvam AI Voice Pipeline</strong>
-        <p>Direct REST/WebSocket integration with Sarvam Indic TTS/STT handling 7 regional dialects (Hindi, Marathi, Tamil, etc.) for zero-click voice emergency dispatch.</p>
+      <div class="sub-card">
+        <strong>2. Real DigiLocker E2EE Pipeline</strong>
+        <p>Production DigiLocker/ABDM integration fetching ABHA records with end-to-end encryption to ER bays. Absolutely zero name, DOB, or phone revealed on our site; patients are tracked strictly via unique patient IDs.</p>
       </div>
-      <div class="card-mini">
-        <strong>3. Bidirectional WebRTC Telemetry</strong>
-        <p>Real-time continuous vitals stream (HR, SpO2, BP, GCS) from ambulance Paramedic Cockpit to ER Command Bay with under 200ms latency and direct ABDM admit clearance.</p>
+      <div class="sub-card">
+        <strong>3. Live Neo4j & Pure-Software Telemetry</strong>
+        <p>Live AuraDB Bolt connection locking trauma bays and specialists in &lt;9ms. Paramedic Cockpit streams live vitals purely via software (WebSockets/Firestore) with zero physical hardware dependencies.</p>
       </div>
     </div>
   </div>
 
   <!-- QUESTION 3: YOUR USER SEGMENTS -->
-  <div class="section-block">
-    <div class="section-header">
-      <span class="sec-num">3</span>
-      <span class="sec-title">User Segments Served</span>
-      <span class="sec-tag">MULTI-SIDED STAKEHOLDERS</span>
+  <div class="section-wrap">
+    <div class="section-title-bar">
+      <div class="section-title">
+        <span class="badge-number">3</span>
+        <span>User Segments Served</span>
+      </div>
+      <span class="section-tag">Multi-Role Architecture</span>
     </div>
-    <div class="grid-3col">
-      <div class="card-mini" style="background: #eff6ff; border-color: #bfdbfe;">
-        <strong style="color: #1d4ed8;">Primary: Distressed Bystander / Family</strong>
-        <p>Panicking citizens who need 10-second Indic voice SOS, automated triage, and guaranteed hospital dispatch without navigating complex medical forms.</p>
+    <div class="three-col">
+      <div class="sub-card">
+        <strong style="color: #0369a1;">Primary: Distressed Bystanders / Guardians</strong>
+        <p>Panicking citizens who need a 10-second Indic voice SOS, zero-form entry, instant hospital bed lock, and direct navigation without navigating complex healthcare red tape.</p>
       </div>
-      <div class="card-mini" style="background: #f0fdf4; border-color: #bbf7d0;">
-        <strong style="color: #15803d;">Secondary: 108 Paramedics & EMTs</strong>
-        <p>Ambulance crews receiving turn-by-turn ER navigation, contraindicated drug allergy alerts, and simple single-tap vitals & paperwork transmission.</p>
+      <div class="sub-card">
+        <strong style="color: #15803d;">Secondary: 108 Ambulance EMTs / Drivers</strong>
+        <p>Mobile crews receiving turn-by-turn ER navigation, contraindicated drug allergy alerts, and a pure-software telemetry dial pad to transmit vitals in-transit on standard phones/tablets.</p>
       </div>
-      <div class="card-mini" style="background: #faf5ff; border-color: #e9d5ff;">
-        <strong style="color: #7e22ce;">Tertiary: Hospital ER Trauma Bay Doctors</strong>
-        <p>Emergency medical officers who receive pre-arrival live telemetry, pre-admitted ABDM dossiers, and prepped trauma bays before wheels touch the ER bay.</p>
+      <div class="sub-card">
+        <strong style="color: #7e22ce;">Tertiary: Hospital ER Teams & Specialists</strong>
+        <p>Trauma bay physicians receiving pre-arrival live telemetry and pre-admitted, zero-PII ABDM dossiers to prep surgical suites before wheels touch the ambulance bay.</p>
       </div>
     </div>
   </div>
 
   <!-- QUESTION 4: PARTNER TECH CHOICE -->
-  <div class="section-block">
-    <div class="section-header">
-      <span class="sec-num">4</span>
-      <span class="sec-title">Partner Tech Choices & Product Need Solved</span>
-      <span class="sec-tag">SARVAM AI + NEO4J</span>
-    </div>
-    <div class="grid-2col">
-      <div class="card-mini">
-        <strong>Sarvam AI (Indic Speech Intelligence)</strong>
-        <p><strong>Need Solved:</strong> Eliminates the literacy and language barrier during panicked 108 emergencies. Converts spoken colloquial Indic dialects into structured clinical emergency briefs and speaks reassuring, step-by-step first-aid instructions back to the bystander.</p>
+  <div class="section-wrap">
+    <div class="section-title-bar">
+      <div class="section-title">
+        <span class="badge-number">4</span>
+        <span>Partner Tech Choice & Product Need Solved (Sarvam AI & Neo4j)</span>
       </div>
-      <div class="card-mini">
-        <strong>Neo4j AuraDB (Sub-9ms Atomic Graph Reservation)</strong>
-        <p><strong>Need Solved:</strong> Eliminates hospital double-booking chaos. Emergency care is an interconnected graph of Hospitals &rarr; Bays &rarr; Equipment &rarr; On-Call Specialists. ACID Cypher transactions lock all 4 dependencies atomically in &lt;9ms, ensuring guaranteed capacity upon arrival.</p>
+      <span class="section-tag">Deepened Technologies</span>
+    </div>
+    <div class="two-col">
+      <div class="sub-card">
+        <strong>Sarvam AI (Indic Speech-to-Text & Text-to-Speech)</strong>
+        <p><strong>Product Need Solved:</strong> Eliminates the severe language, literacy, and typing barrier during emergency panic. Enables high-accuracy transcription of regional Indian accents and colloquial distress cries, automatically parsing clinical urgency and vocalizing calming first-aid instructions back in the user's native tongue.</p>
+      </div>
+      <div class="sub-card">
+        <strong>Neo4j AuraDB (Sub-9ms Atomic Graph Resource Lock)</strong>
+        <p><strong>Product Need Solved:</strong> Eliminates fatal hospital double-booking collisions. Emergency care requires interdependent resources (Hospital &rarr; Trauma Bay &rarr; Equipment &rarr; On-Call Specialist). Neo4j's Cypher graph engine executes ACID multi-resource reservations atomically in under 9ms, ensuring deterministic capacity before ambulance arrival.</p>
       </div>
     </div>
-  </div>
-
-  <!-- QUESTION 5: DEFINITION OF DONE -->
-  <div class="section-block dod-box">
-    <div class="section-header" style="border-bottom: 1px solid #fecdd3; margin-bottom: 5px;">
-      <span class="sec-num" style="background: #9f1239;">5</span>
-      <span class="sec-title" style="color: #881337;">Definition of Done (One-Sentence Yardstick)</span>
-      <span class="sec-tag" style="background: #ffe4e6; color: #9f1239; border-color: #fca5a5;">FINAL CRITERION</span>
-    </div>
-    <p class="dod-quote">
-      "LifeCare is complete when a distressed bystander can trigger an Indic voice SOS in their native tongue and, within 60 seconds, have a verified 108 ambulance dispatched, an atomic graph-locked ER trauma bay and specialist reserved at the nearest capable hospital, and the patient's zero-PII ABDM medical dossier transmitted in-transit—reducing hospital admission intake delay from 30 minutes to zero seconds."
+    <p style="font-size: 7.2pt; color: #64748b; margin-top: 3px; font-style: italic;">
+      *Note on Hardware: We deliberately omit Arduino/hardware pulse sensors in favor of pure-software telemetry on existing paramedic devices, ensuring frictionless deployment across India's 25,000+ government 108 ambulances without procurement delays.
     </p>
   </div>
 
+  <!-- QUESTION 5: DEFINITION OF DONE -->
+  <div class="section-wrap" style="border: 1.5px solid #0284c7; background: #f0f9ff;">
+    <div class="section-title-bar" style="border-bottom: 1px solid #bae6fd;">
+      <div class="section-title" style="color: #0369a1;">
+        <span class="badge-number" style="background: #0284c7;">5</span>
+        <span>Definition of Done (One-Sentence Yardstick)</span>
+      </div>
+      <span class="section-tag" style="background: #e0f2fe; color: #0369a1; border-color: #7dd3fc;">Evaluation Benchmark</span>
+    </div>
+    <div class="dod-container">
+      <p class="dod-text">
+        "LifeCare is complete when a distressed bystander can trigger an Indic voice SOS in their native tongue and, within 60 seconds, have an authenticated 108 ambulance dispatched, an atomic graph-locked ER trauma bay and specialist reserved via Neo4j, and the patient's zero-PII medical dossier securely transferred from DigiLocker with end-to-end encryption—reducing hospital admission intake delay from 30 minutes to zero seconds without requiring any proprietary hardware."
+      </p>
+    </div>
+  </div>
+
   <!-- FOOTER -->
-  <div class="footer-note">
-    <span>LifeCare Zero-Wait OS &bull; Track: Emergency Healthcare &bull; Susheem Kumar Maurya</span>
-    <span>Live Deployment: Netlify &bull; GitHub: Susheem-25/LifeCare</span>
+  <div class="footer-bar">
+    <span>LifeCare Operating System &bull; National Emergency Healthcare Track &bull; Susheem Kumar Maurya</span>
+    <span>Deployment: Firebase Hosting &bull; Codebase: github.com/Susheem-25/LifeCare</span>
   </div>
 
 </body>
