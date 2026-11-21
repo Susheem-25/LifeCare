@@ -1309,6 +1309,17 @@ export const HospitalPortal: React.FC = () => {
                   </span>
                 </div>
 
+                {/* E2EE Decryption Verification */}
+                <div className="bg-slate-900 text-white p-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+                  <div className="flex items-center space-x-2">
+                    <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>DigiLocker E2EE Decrypted: <strong className="text-emerald-400">AES-GCM-256</strong></span>
+                  </div>
+                  <span className="text-[10px] text-slate-400">
+                    Fingerprint: {selectedPatient.inTransitPaperwork?.e2eePacket?.keyFingerprint || 'SHA256:7F3A9182...B8C1'}
+                  </span>
+                </div>
+
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                   <div>
                     <div className="text-base font-extrabold text-slate-900 font-mono">

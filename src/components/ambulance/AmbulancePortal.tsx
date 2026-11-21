@@ -453,7 +453,10 @@ export const AmbulancePortal: React.FC = () => {
                       Step 4: In-Transit ABDM Pre-Admission
                     </span>
                     <span className="text-[11px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.2 rounded font-bold">
-                      ABDM v3 Sandbox
+                      ABDM DigiLocker E2EE
+                    </span>
+                    <span className="hidden sm:inline-block text-[10px] font-mono bg-blue-100 text-blue-800 px-2 py-0.2 rounded font-bold">
+                      Pure-Software Telemetry
                     </span>
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5">

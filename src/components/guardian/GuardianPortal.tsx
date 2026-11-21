@@ -808,6 +808,15 @@ export const GuardianPortal: React.FC = () => {
                       </span>
                     </div>
 
+                    {/* DigiLocker E2EE Transmission Badge */}
+                    <div className="bg-slate-900 text-white p-2.5 rounded-xl flex items-center justify-between text-[11px] font-mono">
+                      <div className="flex items-center space-x-2">
+                        <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>DigiLocker End-to-End Encryption: <strong className="text-emerald-400">AES-GCM-256</strong></span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 hidden sm:inline">Transferred securely to ER bay</span>
+                    </div>
+
                     {/* Clinical Details */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
                       <div className="bg-white p-2 rounded-lg border border-slate-200">

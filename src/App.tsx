@@ -6,6 +6,7 @@ import { GuardianPortal } from './components/guardian/GuardianPortal';
 import { DriverPortal } from './components/ambulance/DriverPortal';
 import { HospitalPortal } from './components/hospital/HospitalPortal';
 import { HackFrontTrackModal } from './components/tracks/HackFrontTrackModal';
+import { GoogleAuthModal } from './components/auth/GoogleAuthModal';
 import {
   HeartPulse,
   Sparkles,
@@ -17,7 +18,7 @@ import {
 } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
-  const { currentRole, setCurrentRole, activeBooking } = useEmergency();
+  const { currentRole, setCurrentRole, activeBooking, isAuthModalOpen, setIsAuthModalOpen } = useEmergency();
   const [isTrackModalOpen, setIsTrackModalOpen] = useState<boolean>(false);
 
   return (
@@ -197,6 +198,12 @@ const MainAppContent: React.FC = () => {
           else if (view === 'hospital') setCurrentRole('hospital');
           setIsTrackModalOpen(false);
         }}
+      />
+
+      {/* Firebase Google Authentication Modal */}
+      <GoogleAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </div>
   );

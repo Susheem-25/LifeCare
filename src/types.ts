@@ -5,6 +5,18 @@ export type ESILevel = 1 | 2 | 3 | 4 | 5;
 
 export type AppRole = 'welcome' | 'guardian' | 'driver' | 'hospital';
 
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  role: AppRole;
+  uniqueRoleId: string; // e.g. GRD-4821, DRV-8941, HSP-1092
+  authProvider: 'google.com' | 'demo';
+  createdAt: string;
+  lastLoginAt: string;
+}
+
 export interface Doctor {
   id: string;
   name: string;
@@ -167,6 +179,14 @@ export interface EmergencyBooking {
     initialVitals?: PatientVitals;
     digitalConsentSigned: boolean;
     preAdmitRegistrationNumber?: string;
+    e2eePacket?: {
+      packetId: string;
+      ciphertext: string;
+      iv: string;
+      algorithm: 'AES-GCM-256';
+      keyFingerprint: string;
+      encryptedAt: string;
+    };
   };
   securitySignature?: string;
   tokenExpiryTimestamp?: number;

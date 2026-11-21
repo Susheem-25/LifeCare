@@ -1,10 +1,20 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole } from '../types';
+import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole, UserProfile } from '../types';
 import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, SAMPLE_DRIVERS } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
 import { soundEffects } from '../utils/audio';
 import confetti from 'canvas-confetti';
+import {
+  signInWithGoogle,
+  signOutUser,
+  getSavedUserProfile,
+  onAuthStateSubscription,
+  syncBookingToFirestore,
+  subscribeToFirestoreBookings,
+  syncVitalsToFirestore,
+} from '../services/firebase';
+import { generateSessionKey, encryptMedicalRecord } from '../services/cryptoService';
 
 export type AppView = 'patient' | 'ambulance' | 'hospital';
 
@@ -18,6 +28,11 @@ interface EmergencyContextType {
   loggedHospital: Hospital | null;
   loggedDriver: DriverAccount | null;
   selectedAbhaProfile: ABHAMedicalRecord | null;
+  currentUser: UserProfile | null;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+  loginWithGoogle: (role: AppRole) => Promise<UserProfile>;
+  logoutUser: () => Promise<void>;
   searchTriageMode: 'standard' | 'sarvam' | 'neo4j';
   setSearchTriageMode: (mode: 'standard' | 'sarvam' | 'neo4j') => void;
   navigateToTrack: (track: 'neo4j' | 'sarvam' | 'arduino' | 'general') => void;
@@ -102,6 +117,44 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const [selectedAbhaProfile, setSelectedAbhaProfile] = useState<ABHAMedicalRecord | null>(SAMPLE_ABHA_PROFILES[0]);
   const [searchTriageMode, setSearchTriageMode] = useState<'standard' | 'sarvam' | 'neo4j'>('standard');
+
+  // Firebase Authentication & Role-based Unique ID Profile State
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getSavedUserProfile());
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Listen to Firebase Auth state
+    const unsubAuth = onAuthStateSubscription((user) => {
+      if (user) {
+        setCurrentUser(user);
+      }
+    });
+
+    // Listen to real-time Cloud Firestore emergency missions
+    const unsubCloud = subscribeToFirestoreBookings((cloudBookings) => {
+      if (cloudBookings && cloudBookings.length > 0) {
+        setAllBookings(cloudBookings);
+        if (cloudBookings[0]) setActiveBooking(cloudBookings[0]);
+      }
+    });
+
+    return () => {
+      unsubAuth();
+      unsubCloud();
+    };
+  }, []);
+
+  const loginWithGoogle = async (role: AppRole): Promise<UserProfile> => {
+    const user = await signInWithGoogle(role);
+    setCurrentUser(user);
+    setCurrentRole(role);
+    return user;
+  };
+
+  const logoutUser = async (): Promise<void> => {
+    await signOutUser();
+    setCurrentUser(null);
+  };
 
   // Real-time live user GPS location (automatically requested on app start)
   const [userLocation, setUserLocation] = useState<{
@@ -527,6 +580,14 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     if (targetAbha) {
       setSelectedAbhaProfile(targetAbha);
+      generateSessionKey()
+        .then((key) => encryptMedicalRecord(targetAbha, patientUniqueId, key))
+        .then((packet) => {
+          newBooking.inTransitPaperwork.e2eePacket = packet;
+          saveActive(newBooking);
+          syncBookingToFirestore(newBooking);
+        })
+        .catch((err) => console.warn('[E2EE Encrypt]', err));
     }
 
     const updatedHospitals = hospitals.map((h) => {
@@ -547,6 +608,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     saveActive(newBooking);
     const updatedBookings = [newBooking, ...allBookings.filter(b => b.bookingCode !== newBooking.bookingCode)];
     saveAll(updatedBookings);
+    syncBookingToFirestore(newBooking);
     broadcastState(newBooking, updatedBookings, updatedHospitals);
 
     soundEffects.playSuccessChime();
@@ -701,6 +763,24 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     saveAll(updatedList);
     broadcastState(updatedActive, updatedList, hospitals);
+    if (updatedActive) {
+      syncBookingToFirestore(updatedActive);
+    }
+
+    if (abha && updatedActive) {
+      const activeObj = updatedActive;
+      generateSessionKey()
+        .then((key) => encryptMedicalRecord(abha, activeBooking?.patientUniqueId || 'PAT-2026-8941', key))
+        .then((packet) => {
+          if (activeObj.inTransitPaperwork) {
+            activeObj.inTransitPaperwork.e2eePacket = packet;
+            saveActive(activeObj);
+            syncBookingToFirestore(activeObj);
+          }
+        })
+        .catch((err) => console.warn('[E2EE Encrypt]', err));
+    }
+
     soundEffects.playSuccessChime();
   };
 
@@ -721,18 +801,22 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     let updatedActive = activeBooking;
     if (activeBooking && activeBooking.bookingCode.toUpperCase() === codeClean) {
       const currentV = activeBooking.inTransitPaperwork?.initialVitals || defaultVitals;
+      const mergedVitals = {
+        ...currentV,
+        ...vitalsUpdate,
+        recordedAt: new Date().toISOString(),
+      };
       updatedActive = {
         ...activeBooking,
         inTransitPaperwork: {
           ...activeBooking.inTransitPaperwork,
-          initialVitals: {
-            ...currentV,
-            ...vitalsUpdate,
-            recordedAt: new Date().toISOString(),
-          },
+          initialVitals: mergedVitals,
+          isSubmitted: true,
+          digitalConsentSigned: true,
         },
       };
       saveActive(updatedActive);
+      syncVitalsToFirestore(codeClean, mergedVitals);
     }
 
     const updatedList = allBookings.map((b) => {
@@ -960,6 +1044,11 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         loggedHospital,
         loggedDriver,
         selectedAbhaProfile,
+        currentUser,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        loginWithGoogle,
+        logoutUser,
         searchTriageMode,
         setSearchTriageMode,
         navigateToTrack,

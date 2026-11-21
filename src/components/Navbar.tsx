@@ -8,7 +8,8 @@ import {
   PhoneCall,
   Lock,
   Presentation,
-  ArrowLeft
+  ArrowLeft,
+  User
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -22,7 +23,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
     activeBooking,
     resetEmergencyState,
     loggedHospital,
-    loggedDriver
+    loggedDriver,
+    currentUser,
+    setIsAuthModalOpen
   } = useEmergency();
 
   return (
@@ -121,6 +124,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
 
           {/* Right Action Buttons */}
           <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            {/* Google Authentication & Role Unique ID Pill */}
+            <button
+              type="button"
+              onClick={() => setIsAuthModalOpen(true)}
+              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-mono text-slate-700 font-bold transition cursor-pointer shadow-2xs"
+              title="Firebase Google Authentication & Unique Role ID"
+            >
+              {currentUser?.photoURL ? (
+                <img src={currentUser.photoURL} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
+              ) : (
+                <User className="w-3.5 h-3.5 text-blue-600" />
+              )}
+              <span className="hidden xs:inline">
+                {currentUser?.uniqueRoleId || 'Google Login'}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            </button>
+
             {/* Active Patient ID Pill */}
             {activeBooking?.patientUniqueId && (
               <button
