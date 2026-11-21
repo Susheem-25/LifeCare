@@ -442,8 +442,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Determine target ABHA profile
     const targetAbha = abhaRecord !== undefined ? abhaRecord : selectedAbhaProfile;
 
-    const nameToUse = patientName || targetAbha?.fullName || 'Emergency Patient';
-    const phoneToUse = patientPhone || targetAbha?.phoneNumber || '+91-98104-55678';
+    const nameToUse = patientName || `PATIENT [${patientUniqueId}]`;
+    const phoneToUse = patientPhone || '+91-XXXXX-XX567';
 
     const newBooking: EmergencyBooking = {
       patientUniqueId,
