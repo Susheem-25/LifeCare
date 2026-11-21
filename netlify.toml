@@ -15,7 +15,7 @@
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(self), geolocation=(self), payment=(), usb=(), display-capture=(), accelerometer=(), gyroscope=(), magnetometer=(), interest-cohort=()"
+    Permissions-Policy = "camera=(self), microphone=(self), geolocation=(self), payment=(), usb=(), display-capture=(), accelerometer=(), gyroscope=(), magnetometer=(), interest-cohort=()"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Cross-Origin-Opener-Policy = "same-origin"
     Cross-Origin-Resource-Policy = "same-origin"
