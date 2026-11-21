@@ -9,8 +9,6 @@ import {
   signInWithGoogle,
   signOutUser,
   getSavedUserProfile,
-  persistUserProfile,
-  generateUniqueRoleId,
   onAuthStateSubscription,
   syncBookingToFirestore,
   subscribeToFirestoreBookings,
@@ -110,6 +108,13 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const setCurrentRole = (role: AppRole) => {
+    // Strict Role-Based Access Control (RBAC):
+    // If logged in, users CANNOT access portals of other roles
+    if (currentUser && role !== 'welcome' && role !== currentUser.role) {
+      console.warn(`[RBAC] Access denied: Authenticated as ${currentUser.role}, cannot access ${role}`);
+      return;
+    }
+
     setCurrentRoleState(role);
     try {
       localStorage.setItem(STORAGE_KEY_ROLE, role);
@@ -265,51 +270,13 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const loginWithGoogle = async (role: AppRole): Promise<UserProfile> => {
-    // If user is already authenticated with Google, adapt session cleanly without opening redundant popups
+    // If user is already authenticated with Google, enforce RBAC role lock
     if (currentUser && currentUser.uid) {
-      const assignedId = currentUser.uniqueRoleId.startsWith(
-        role === 'guardian' ? 'GRD' : role === 'driver' ? 'DRV' : 'HSP'
-      )
-        ? currentUser.uniqueRoleId
-        : generateUniqueRoleId(role);
-
-      const updatedProfile: UserProfile = {
-        ...currentUser,
-        role,
-        uniqueRoleId: assignedId,
-        lastLoginAt: new Date().toISOString(),
-      };
-      persistUserProfile(updatedProfile);
-      setCurrentUser(updatedProfile);
-      setCurrentRole(role);
-
-      if (role === 'driver' && !loggedDriver) {
-        const autoDriver: DriverAccount = {
-          driverId: assignedId.startsWith('DRV') ? assignedId : `DRV-${assignedId.replace(/\D/g, '').slice(-4) || '101'}`,
-          pin: '1234',
-          driverName: updatedProfile.displayName || '108 Paramedic Lead',
-          phone: '+91-98101-08108',
-          vehicleNumber: 'DL-01-AMB-402',
-          vehicleType: 'Advanced Cardiac Life Support (ACLS)',
-        };
-        setLoggedDriver(autoDriver);
-        try {
-          localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(autoDriver));
-        } catch {
-          // ignore
-        }
+      if (currentUser.role !== role) {
+        console.warn(`[RBAC] User is authenticated as ${currentUser.role}. Must sign out before accessing ${role}.`);
+        return currentUser;
       }
-
-      if (role === 'hospital' && !loggedHospitalId && hospitals.length > 0) {
-        setLoggedHospitalId(hospitals[0].id);
-        try {
-          localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, hospitals[0].id);
-        } catch {
-          // ignore
-        }
-      }
-
-      return updatedProfile;
+      return currentUser;
     }
 
     const user = await signInWithGoogle(role);
@@ -384,6 +351,21 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [currentUser, hospitals, loggedDriver, loggedHospitalId]);
 
+  // Synchronize and strictly enforce RBAC: ensure logged-in user can never be on an unauthorized portal
+  useEffect(() => {
+    if (currentUser && currentRole !== 'welcome' && currentRole !== currentUser.role) {
+      setCurrentRoleState(currentUser.role);
+      try {
+        localStorage.setItem(STORAGE_KEY_ROLE, currentUser.role);
+      } catch {
+        // ignore
+      }
+      if (currentUser.role === 'guardian') setCurrentView('patient');
+      else if (currentUser.role === 'driver') setCurrentView('ambulance');
+      else if (currentUser.role === 'hospital') setCurrentView('hospital');
+    }
+  }, [currentUser, currentRole]);
+
   const logoutUser = async (): Promise<void> => {
     await signOutUser();
     setCurrentUser(null);
@@ -395,6 +377,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } catch {
       // ignore
     }
+    setCurrentRole('welcome');
   };
 
   // Active booking from localStorage or pristine null (zero-booking start)

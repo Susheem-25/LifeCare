@@ -35,8 +35,7 @@ export const EmergencySearch: React.FC = () => {
   const { 
     searchEmergency, 
     currentTriage, 
-    activeBooking,
-    setCurrentView
+    activeBooking
   } = useEmergency();
 
   const [selectedLang, setSelectedLang] = useState<string>('hi');
@@ -207,23 +206,6 @@ export const EmergencySearch: React.FC = () => {
                 Patient Ref: <strong className="font-mono text-slate-900">{activeBooking.patientUniqueId}</strong> • On-Duty Specialist: <strong className="text-slate-800">{activeBooking.assignedDoctor.name}</strong>
               </p>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-            <button
-              type="button"
-              onClick={() => setCurrentView('ambulance')}
-              className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold text-xs cursor-pointer shadow-2xs transition"
-            >
-              Paramedic Cockpit &rarr;
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrentView('hospital')}
-              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-xs transition"
-            >
-              ER Command &rarr;
-            </button>
           </div>
         </div>
       )}

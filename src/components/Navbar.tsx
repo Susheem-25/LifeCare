@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   User
 } from 'lucide-react';
-import type { AppRole } from '../types';
 
 export const Navbar: React.FC = () => {
   const {
@@ -17,15 +16,9 @@ export const Navbar: React.FC = () => {
     setCurrentRole,
     activeBooking,
     resetEmergencyState,
-    loggedHospital,
-    loggedDriver,
     currentUser,
     setIsAuthModalOpen
   } = useEmergency();
-
-  const handleNavRoleClick = (role: AppRole) => {
-    setCurrentRole(role);
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-2xl border-b border-slate-200/80 shadow-xs">
@@ -58,65 +51,57 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Center Role Navigation Switcher (Desktop) */}
-          <nav className="hidden sm:flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-            {currentRole !== 'welcome' && (
+          {/* Center Navigation / Role Indicator (Desktop) - No unauthorized cross-role switcher on normal pages */}
+          <nav className="hidden sm:flex items-center space-x-2 text-xs">
+            {currentRole !== 'welcome' ? (
+              <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setCurrentRole('welcome')}
+                  className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white transition cursor-pointer font-bold text-xs"
+                  title="Back to Welcome Portal"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Home</span>
+                </button>
+                <span className="text-slate-300">•</span>
+                {currentRole === 'guardian' && (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-xs shadow-xs">
+                    <HeartPulse className="w-3.5 h-3.5 text-white" />
+                    <span>Guardian Portal</span>
+                  </div>
+                )}
+                {currentRole === 'driver' && (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs shadow-xs">
+                    <Ambulance className="w-3.5 h-3.5 text-white" />
+                    <span>108 Driver Cockpit</span>
+                  </div>
+                )}
+                {currentRole === 'hospital' && (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-xs">
+                    <Building2 className="w-3.5 h-3.5 text-white" />
+                    <span>Hospital ER Command</span>
+                  </div>
+                )}
+              </div>
+            ) : currentUser ? (
               <button
                 type="button"
-                onClick={() => setCurrentRole('welcome')}
-                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-white transition cursor-pointer font-bold text-xs"
-                title="Back to Welcome Portal"
+                onClick={() => setCurrentRole(currentUser.role)}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl font-bold text-xs text-white transition shadow-xs cursor-pointer ${
+                  currentUser.role === 'guardian'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : currentUser.role === 'driver'
+                    ? 'bg-amber-600 hover:bg-amber-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Home</span>
+                {currentUser.role === 'guardian' && <HeartPulse className="w-3.5 h-3.5" />}
+                {currentUser.role === 'driver' && <Ambulance className="w-3.5 h-3.5" />}
+                {currentUser.role === 'hospital' && <Building2 className="w-3.5 h-3.5" />}
+                <span>Enter {currentUser.role === 'guardian' ? 'Guardian Portal' : currentUser.role === 'driver' ? 'Driver Cockpit' : 'Hospital Command'}</span>
               </button>
-            )}
-
-            {/* Guardian Portal */}
-            <button
-              type="button"
-              onClick={() => handleNavRoleClick('guardian')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
-                currentRole === 'guardian'
-                  ? 'bg-red-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-              }`}
-            >
-              <HeartPulse className={`w-3.5 h-3.5 ${currentRole === 'guardian' ? 'text-white' : 'text-red-600'}`} />
-              <span>Guardian</span>
-            </button>
-
-            {/* Driver Portal */}
-            <button
-              type="button"
-              onClick={() => handleNavRoleClick('driver')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
-                currentRole === 'driver'
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-              }`}
-            >
-              <Ambulance className="w-3.5 h-3.5" />
-              <span>
-                {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Driver'}
-              </span>
-            </button>
-
-            {/* Hospital Portal */}
-            <button
-              type="button"
-              onClick={() => handleNavRoleClick('hospital')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
-                currentRole === 'hospital'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>
-                {loggedHospital ? loggedHospital.hospitalCode : 'Hospital'}
-              </span>
-            </button>
+            ) : null}
           </nav>
 
           {/* Right Action Buttons */}
@@ -141,15 +126,13 @@ export const Navbar: React.FC = () => {
 
             {/* Active Patient ID Pill */}
             {activeBooking?.patientUniqueId && (
-              <button
-                type="button"
-                onClick={() => setCurrentRole('guardian')}
-                className="hidden md:inline-flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold transition cursor-pointer"
+              <div
+                className="hidden md:inline-flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold"
                 title="Active patient mission"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                 <span>ID: {activeBooking.patientUniqueId}</span>
-              </button>
+              </div>
             )}
 
             <a
@@ -180,47 +163,41 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Tab Bar (Visible on mobile <sm) */}
-        <div className="sm:hidden pb-2.5 pt-0.5">
-          <nav className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 w-full gap-1 shadow-2xs text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => setCurrentRole('welcome')}
-              className={`flex-1 py-1.5 rounded-lg transition text-center ${
-                currentRole === 'welcome' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-600'
-              }`}
-            >
-              Home
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavRoleClick('guardian')}
-              className={`flex-1 py-1.5 rounded-lg transition text-center ${
-                currentRole === 'guardian' ? 'bg-red-600 text-white shadow-xs' : 'text-slate-600'
-              }`}
-            >
-              Guardian
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavRoleClick('driver')}
-              className={`flex-1 py-1.5 rounded-lg transition text-center ${
-                currentRole === 'driver' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600'
-              }`}
-            >
-              Driver
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavRoleClick('hospital')}
-              className={`flex-1 py-1.5 rounded-lg transition text-center ${
-                currentRole === 'hospital' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600'
-              }`}
-            >
-              Hospital
-            </button>
-          </nav>
-        </div>
+        {/* Mobile Navigation Bar - Single active portal indicator, no unauthorized switcher */}
+        {currentRole !== 'welcome' && (
+          <div className="sm:hidden pb-2.5 pt-0.5">
+            <div className="flex items-center justify-between bg-slate-100 p-1.5 rounded-xl border border-slate-200 w-full gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => setCurrentRole('welcome')}
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-white text-slate-700 font-bold shadow-xs hover:bg-slate-50 transition cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Home</span>
+              </button>
+              <div
+                className={`px-3 py-1.5 rounded-lg text-white font-bold flex items-center space-x-1.5 shadow-xs ${
+                  currentRole === 'guardian'
+                    ? 'bg-red-600'
+                    : currentRole === 'driver'
+                    ? 'bg-amber-600'
+                    : 'bg-emerald-600'
+                }`}
+              >
+                {currentRole === 'guardian' && <HeartPulse className="w-3.5 h-3.5 text-white" />}
+                {currentRole === 'driver' && <Ambulance className="w-3.5 h-3.5 text-white" />}
+                {currentRole === 'hospital' && <Building2 className="w-3.5 h-3.5 text-white" />}
+                <span>
+                  {currentRole === 'guardian'
+                    ? 'Guardian'
+                    : currentRole === 'driver'
+                    ? '108 Driver'
+                    : 'Hospital'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

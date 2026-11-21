@@ -11,6 +11,7 @@ import {
   HeartPulse,
   Sparkles,
   ShieldCheck,
+  ShieldAlert,
   PhoneCall,
   Zap,
   Activity
@@ -21,6 +22,7 @@ const MainAppContent: React.FC = () => {
     currentRole, 
     setCurrentRole, 
     activeBooking, 
+    currentUser,
     isAuthModalOpen, 
     setIsAuthModalOpen,
     isVoiceQrModalOpen,
@@ -48,39 +50,63 @@ const MainAppContent: React.FC = () => {
         )}
 
         {/* ========================================================
-            PAGE 2: GUARDIAN PORTAL
+            RBAC Access Denied Fallback
+            ======================================================== */}
+        {currentUser && currentRole !== 'welcome' && currentRole !== currentUser.role && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-3xl p-8 text-center space-y-4 max-w-lg mx-auto my-12 shadow-sm animate-fadeIn">
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">Access Restricted</h2>
+            <p className="text-sm text-slate-600">
+              You are authenticated as <strong className="capitalize text-slate-900">{currentUser.role}</strong> ({currentUser.uniqueRoleId}). You do not have permission to access the {currentRole} portal.
+            </p>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setCurrentRole(currentUser.role)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                Return to {currentUser.role === 'guardian' ? 'Guardian Portal' : currentUser.role === 'driver' ? 'Driver Cockpit' : 'Hospital Portal'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            PAGE 2: GUARDIAN PORTAL (Guarded by RBAC)
             Options: Track Patient or Register a New Patient
             ======================================================== */}
-        {currentRole === 'guardian' && (
+        {currentRole === 'guardian' && (!currentUser || currentUser.role === 'guardian') && (
           <div className="animate-fadeIn">
             <GuardianPortal />
           </div>
         )}
 
         {/* ========================================================
-            PAGE 3: DRIVER PORTAL
+            PAGE 3: DRIVER PORTAL (Guarded by RBAC)
             Login with Driver ID -> Enter Patient ID -> Live Navigation Map
             ======================================================== */}
-        {currentRole === 'driver' && (
+        {currentRole === 'driver' && (!currentUser || currentUser.role === 'driver') && (
           <div className="animate-fadeIn">
             <DriverPortal />
           </div>
         )}
 
         {/* ========================================================
-            PAGE 4: HOSPITAL PORTAL
+            PAGE 4: HOSPITAL PORTAL (Guarded by RBAC)
             Login with Hospital ID -> Editable Beds, Doctors, Machines,
             and Segregated Patient Directory (Incoming, Admitted, Discharged)
             ======================================================== */}
-        {currentRole === 'hospital' && (
+        {currentRole === 'hospital' && (!currentUser || currentUser.role === 'hospital') && (
           <div className="animate-fadeIn">
             <HospitalPortal />
           </div>
         )}
       </main>
 
-      {/* Floating Active Emergency Quick Mission Bar */}
-      {activeBooking && currentRole !== 'guardian' && (
+      {/* Floating Active Emergency Quick Mission Bar (Only on Welcome screen, no cross-role portal links) */}
+      {activeBooking && currentRole === 'welcome' && (
         <aside aria-label="Active emergency mission" className="sticky bottom-4 z-40 max-w-2xl mx-auto px-3 sm:px-4 w-full">
           <div className="bg-white/95 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 shadow-xl border-2 border-emerald-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
             <div className="flex items-center space-x-2.5">
@@ -100,10 +126,19 @@ const MainAppContent: React.FC = () => {
 
             <div className="flex items-center space-x-2 text-xs w-full sm:w-auto">
               <button
-                onClick={() => setCurrentRole('guardian')}
-                className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl font-bold transition cursor-pointer bg-red-600 text-white shadow-xs"
+                type="button"
+                onClick={() => {
+                  if (currentUser?.role === 'driver') {
+                    setCurrentRole('driver');
+                  } else if (currentUser?.role === 'hospital') {
+                    setCurrentRole('hospital');
+                  } else {
+                    setCurrentRole('guardian');
+                  }
+                }}
+                className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl font-bold transition cursor-pointer bg-red-600 hover:bg-red-700 text-white shadow-xs"
               >
-                Track Live Route
+                Go to Mission
               </button>
             </div>
           </div>

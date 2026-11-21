@@ -126,54 +126,23 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({ isOpen, onClos
               </div>
             </div>
 
-            {/* Switch Role Quick Actions */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-700 block">
-                Switch Role & Update Unique ID:
-              </span>
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => handleSignIn('guardian')}
-                  className={`p-2.5 rounded-xl border text-center transition cursor-pointer ${
-                    currentUser.role === 'guardian'
-                      ? 'bg-red-50 border-red-300 text-red-700 font-bold'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-600'
-                  }`}
-                >
-                  <User className="w-4 h-4 mx-auto mb-1 text-red-600" />
-                  <span className="text-[11px] block">Guardian</span>
-                  <span className="text-[9px] font-mono text-slate-400">GRD-XXXX</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleSignIn('driver')}
-                  className={`p-2.5 rounded-xl border text-center transition cursor-pointer ${
-                    currentUser.role === 'driver'
-                      ? 'bg-amber-50 border-amber-300 text-amber-700 font-bold'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-600'
-                  }`}
-                >
-                  <Ambulance className="w-4 h-4 mx-auto mb-1 text-amber-600" />
-                  <span className="text-[11px] block">Driver/EMT</span>
-                  <span className="text-[9px] font-mono text-slate-400">DRV-XXXX</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleSignIn('hospital')}
-                  className={`p-2.5 rounded-xl border text-center transition cursor-pointer ${
-                    currentUser.role === 'hospital'
-                      ? 'bg-emerald-50 border-emerald-300 text-emerald-700 font-bold'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-600'
-                  }`}
-                >
-                  <Building2 className="w-4 h-4 mx-auto mb-1 text-emerald-600" />
-                  <span className="text-[11px] block">Hospital ER</span>
-                  <span className="text-[9px] font-mono text-slate-400">HSP-XXXX</span>
-                </button>
+            {/* Active Role Status & Strict RBAC Info */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">Authorized Role:</span>
+                <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
+                  currentUser.role === 'guardian'
+                    ? 'bg-red-50 text-red-700 border-red-200'
+                    : currentUser.role === 'driver'
+                    ? 'bg-amber-50 text-amber-800 border-amber-200'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                }`}>
+                  {currentUser.role === 'guardian' ? 'Citizen Guardian' : currentUser.role === 'driver' ? '108 Paramedic Driver' : 'Hospital ER Command'}
+                </span>
               </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Role access is strictly isolated. You cannot access driver or hospital portals while authenticated as a guardian, and vice versa. To switch roles, sign out first.
+              </p>
             </div>
 
             {/* Sign Out Button */}

@@ -85,9 +85,27 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
         </p>
       </div>
 
-      {/* Role Selection Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
+      {/* Authenticated Role Status Banner */}
+      {currentUser && (
+        <div className="max-w-xl mx-auto px-4 -mb-4">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center space-x-2.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="text-slate-800 font-medium">
+                Authenticated as <strong className="text-slate-900">{currentUser.displayName}</strong> ({currentUser.uniqueRoleId})
+              </span>
+            </div>
+            <span className="text-[10px] font-mono font-bold bg-white border border-emerald-300 text-emerald-800 px-2.5 py-0.5 rounded-full capitalize shrink-0">
+              {currentUser.role} Account
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Role Selection Cards Grid - Strictly isolated by authenticated role */}
+      <div className={currentUser ? "max-w-xl mx-auto px-4" : "grid grid-cols-1 md:grid-cols-3 gap-6 px-4"}>
         {/* Card 1: Guardian */}
+        {(!currentUser || currentUser.role === 'guardian') && (
         <div 
           onClick={() => handleSelectRole('guardian')}
           className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-red-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
@@ -148,23 +166,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                 <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
                 <span>{currentUser?.role === 'guardian' ? currentUser.uniqueRoleId : 'Citizen Emergency Grid'}</span>
               </span>
-              <button
-                type="button"
-                onClick={(e) => handleExplicitGoogleSignIn('guardian', e)}
-                className="text-red-600 hover:underline font-bold inline-flex items-center"
-              >
-                {authenticatingRole === 'guardian' ? (
-                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                ) : (
-                  <GoogleIcon className="w-3 h-3 mr-1" />
-                )}
-                <span>{currentUser ? 'Switch ID' : 'Sign with Google'}</span>
-              </button>
+              {currentUser ? (
+                <span className="text-emerald-700 font-bold inline-flex items-center">
+                  <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
+                  <span>Authorized</span>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => handleExplicitGoogleSignIn('guardian', e)}
+                  className="text-red-600 hover:underline font-bold inline-flex items-center"
+                >
+                  {authenticatingRole === 'guardian' ? (
+                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                  ) : (
+                    <GoogleIcon className="w-3 h-3 mr-1" />
+                  )}
+                  <span>Sign with Google</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
+        )}
 
         {/* Card 2: Driver */}
+        {(!currentUser || currentUser.role === 'driver') && (
         <div 
           onClick={() => handleSelectRole('driver')}
           className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-amber-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
@@ -225,23 +252,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                 <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
                 <span>{currentUser?.role === 'driver' ? currentUser.uniqueRoleId : '108 Paramedic Lead'}</span>
               </span>
-              <button
-                type="button"
-                onClick={(e) => handleExplicitGoogleSignIn('driver', e)}
-                className="text-amber-700 hover:underline font-bold inline-flex items-center"
-              >
-                {authenticatingRole === 'driver' ? (
-                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                ) : (
-                  <GoogleIcon className="w-3 h-3 mr-1" />
-                )}
-                <span>{currentUser ? 'Switch ID' : 'Sign with Google'}</span>
-              </button>
+              {currentUser ? (
+                <span className="text-emerald-700 font-bold inline-flex items-center">
+                  <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
+                  <span>Authorized</span>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => handleExplicitGoogleSignIn('driver', e)}
+                  className="text-amber-700 hover:underline font-bold inline-flex items-center"
+                >
+                  {authenticatingRole === 'driver' ? (
+                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                  ) : (
+                    <GoogleIcon className="w-3 h-3 mr-1" />
+                  )}
+                  <span>Sign with Google</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
+        )}
 
         {/* Card 3: Hospital */}
+        {(!currentUser || currentUser.role === 'hospital') && (
         <div 
           onClick={() => handleSelectRole('hospital')}
           className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-emerald-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
@@ -302,21 +338,29 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                 <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
                 <span>{currentUser?.role === 'hospital' ? currentUser.uniqueRoleId : 'Hospital Command'}</span>
               </span>
-              <button
-                type="button"
-                onClick={(e) => handleExplicitGoogleSignIn('hospital', e)}
-                className="text-emerald-700 hover:underline font-bold inline-flex items-center"
-              >
-                {authenticatingRole === 'hospital' ? (
-                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                ) : (
-                  <GoogleIcon className="w-3 h-3 mr-1" />
-                )}
-                <span>{currentUser ? 'Switch ID' : 'Sign with Google'}</span>
-              </button>
+              {currentUser ? (
+                <span className="text-emerald-700 font-bold inline-flex items-center">
+                  <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
+                  <span>Authorized</span>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => handleExplicitGoogleSignIn('hospital', e)}
+                  className="text-emerald-700 hover:underline font-bold inline-flex items-center"
+                >
+                  {authenticatingRole === 'hospital' ? (
+                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                  ) : (
+                    <GoogleIcon className="w-3 h-3 mr-1" />
+                  )}
+                  <span>Sign with Google</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* Trust & Architecture Capability Banner */}
