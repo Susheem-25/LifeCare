@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Navigation, 
   ExternalLink, 
@@ -43,8 +43,17 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
 }) => {
   const [currentOrigin, setCurrentOrigin] = useState(origin);
   const [isLocating, setIsLocating] = useState<boolean>(false);
+  const [isLiveGpsActive, setIsLiveGpsActive] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [gpsNotice, setGpsNotice] = useState<string>('');
+  const [etaMins, setEtaMins] = useState<number>(initialEtaMins);
+  const [distanceKm, setDistanceKm] = useState<number>(initialDistanceKm);
+
+  // Sync with prop if it updates
+  useEffect(() => {
+    setCurrentOrigin(origin);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [origin.lat, origin.lng, origin.address]);
 
   // Primary Google Maps navigation URL with pre-filled origin (current location) and destination (hospital)
   const fullNavigationUrl = getGoogleMapsNavigationUrl(
@@ -55,9 +64,9 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
   // Direct Device GPS URL (omits origin so Google Maps automatically uses the device's real-time live GPS)
   const deviceGpsNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination.lat},${destination.lng}&travelmode=driving`;
 
-  // Detect live device GPS coordinates
+  // Detect live device GPS coordinates and calculate route from current location
   const handleDetectLiveGps = () => {
-    if (!navigator.geolocation) {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
       setGpsNotice('Geolocation is not supported by your browser.');
       return;
     }
@@ -71,20 +80,44 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
         setCurrentOrigin({
           lat: latitude,
           lng: longitude,
-          address: `Current Live GPS (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`,
+          address: `Current Live Location (${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E)`,
         });
+
+        // Calculate dynamic real-world driving distance and ETA from current GPS to destination hospital
+        const R = 6371;
+        const dLat = ((destination.lat - latitude) * Math.PI) / 180;
+        const dLng = ((destination.lng - longitude) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((latitude * Math.PI) / 180) *
+            Math.cos((destination.lat * Math.PI) / 180) *
+            Math.sin(dLng / 2) *
+            Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const dist = Math.max(0.4, Math.round(R * c * 1.35 * 10) / 10);
+        const calcEta = Math.max(2, Math.round((dist / (speedKmh || 40)) * 60));
+
+        setDistanceKm(dist);
+        setEtaMins(calcEta);
+        setIsLiveGpsActive(true);
         setIsLocating(false);
-        setGpsNotice('Current live device GPS coordinates captured!');
-        setTimeout(() => setGpsNotice(''), 3500);
+        setGpsNotice('Live GPS detected! Hospital route set from your exact current location.');
+        setTimeout(() => setGpsNotice(''), 4000);
       },
       (err) => {
         setIsLocating(false);
-        setGpsNotice(`Could not retrieve device location: ${err.message}. Using default pickup.`);
-        setTimeout(() => setGpsNotice(''), 4000);
+        setGpsNotice(`Could not retrieve device location (${err.message}). Route set to default pickup location.`);
+        setTimeout(() => setGpsNotice(''), 4500);
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
   };
+
+  // Always automatically ask for location access as soon as route card mounts
+  useEffect(() => {
+    handleDetectLiveGps();
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [destination.lat, destination.lng]);
 
   // Copy link to clipboard
   const handleCopyLink = () => {
@@ -120,12 +153,12 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
           <div className="bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-xl flex items-center space-x-1.5">
             <Clock className="w-3.5 h-3.5 text-amber-600" />
             <span>ETA:</span>
-            <strong className="text-sm font-black">{initialEtaMins} mins</strong>
+            <strong className="text-sm font-black">{etaMins} mins</strong>
           </div>
           <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-xl flex items-center space-x-1.5">
             <Compass className="w-3.5 h-3.5 text-emerald-600" />
             <span>Distance:</span>
-            <strong className="text-sm font-black">{initialDistanceKm} km</strong>
+            <strong className="text-sm font-black">{distanceKm} km</strong>
           </div>
         </div>
       </div>
@@ -228,7 +261,11 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
           className="w-full bg-red-600 hover:bg-red-700 text-white p-4 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center space-x-2.5 shadow-lg shadow-red-600/30 hover:shadow-xl transition-all duration-200 cursor-pointer text-center"
         >
           <Navigation className="w-5 h-5 text-white" />
-          <span>Open in Google Maps App (Turn-by-Turn Navigation)</span>
+          <span>
+            {isLiveGpsActive
+              ? `Open Google Maps (Live Route from Current Location)`
+              : `Open in Google Maps App (Route to ${(destination.name || 'Hospital').split(' ')[0]})`}
+          </span>
           <ExternalLink className="w-4 h-4 text-white/80" />
         </a>
 

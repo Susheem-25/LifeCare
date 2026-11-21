@@ -33,7 +33,9 @@ export const GuardianPortal: React.FC = () => {
     currentTriage,
     searchEmergency,
     bookHospitalBed,
-    fetchPatientByAbha
+    fetchPatientByAbha,
+    userLocation,
+    requestLiveLocation
   } = useEmergency();
 
   // Mode: 'track' | 'register'
@@ -301,6 +303,38 @@ export const GuardianPortal: React.FC = () => {
         </div>
       </div>
 
+      {/* Live GPS Current Location Status Banner */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl px-4 py-3 shadow-2xs flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center space-x-2">
+          <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span className="text-slate-600 font-medium truncate">
+            {userLocation.isLiveGps ? (
+              <span>Live GPS Active: <strong className="text-emerald-700 font-mono">{userLocation.address}</strong></span>
+            ) : (
+              <span>Current Location: <strong className="text-slate-800 font-mono">{userLocation.address}</strong></span>
+            )}
+          </span>
+        </div>
+
+        <div className="flex items-center space-x-2 shrink-0">
+          <span className="text-[11px] font-mono text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 hidden sm:inline">
+            Routes set from current location
+          </span>
+          {!userLocation.isLiveGps && (
+            <button
+              type="button"
+              onClick={requestLiveLocation}
+              className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] rounded-lg border border-blue-200 transition cursor-pointer"
+            >
+              Refresh GPS
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* ========================================================
           FLOW 1: TRACK PATIENT
           ======================================================== */}
@@ -512,14 +546,14 @@ export const GuardianPortal: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base sm:text-lg font-extrabold text-slate-900">
-                  Recommended Nearest Hospitals
+                  Recommended Nearest Hospitals (from Current Location)
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Verified available beds, doctors on duty, and ready facilities.
+                  Verified available beds, doctors on duty, and ready facilities measured from your live location.
                 </p>
               </div>
               <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold">
-                Realtime Distance Checked
+                Realtime GPS Distance Measured
               </span>
             </div>
 

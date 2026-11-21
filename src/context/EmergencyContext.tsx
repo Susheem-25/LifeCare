@@ -49,6 +49,8 @@ interface EmergencyContextType {
   admitPatient: (bookingCode: string) => void;
   dischargePatient: (bookingCode: string) => void;
   setPatientStatus: (bookingCode: string, status: EmergencyBooking['status']) => void;
+  userLocation: { lat: number; lng: number; address: string; isLiveGps: boolean };
+  requestLiveLocation: () => void;
   resetEmergencyState: () => void;
 }
 
@@ -100,6 +102,78 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const [selectedAbhaProfile, setSelectedAbhaProfile] = useState<ABHAMedicalRecord | null>(SAMPLE_ABHA_PROFILES[0]);
   const [searchTriageMode, setSearchTriageMode] = useState<'standard' | 'sarvam' | 'neo4j'>('standard');
+
+  // Real-time live user GPS location (automatically requested on app start)
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+    address: string;
+    isLiveGps: boolean;
+  }>({
+    lat: 28.5420,
+    lng: 77.2350,
+    address: 'Greater Kailash Part 1, New Delhi',
+    isLiveGps: false,
+  });
+
+  // Automatically recalculate distances from live user coordinates to all hospitals
+  const recalculateHospitalDistances = (lat: number, lng: number) => {
+    setHospitals((prev) => {
+      const updated = prev.map((h) => {
+        const R = 6371; // km
+        const dLat = ((h.latitude - lat) * Math.PI) / 180;
+        const dLng = ((h.longitude - lng) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat * Math.PI) / 180) *
+            Math.cos((h.latitude * Math.PI) / 180) *
+            Math.sin(dLng / 2) *
+            Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distanceKm = Math.max(0.5, Math.round(R * c * 1.35 * 10) / 10);
+        const transitTimeMins = Math.max(2, Math.round((distanceKm / 40) * 60));
+        return {
+          ...h,
+          distanceKm,
+          transitTimeMins,
+        };
+      });
+      try {
+        localStorage.setItem(STORAGE_KEY_HOSPITALS, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+      return updated;
+    });
+  };
+
+  // Request browser/device location access immediately
+  const requestLiveLocation = () => {
+    if (typeof window !== 'undefined' && 'navigator' in window && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setUserLocation({
+            lat: latitude,
+            lng: longitude,
+            address: `Current Live Location (${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E)`,
+            isLiveGps: true,
+          });
+          recalculateHospitalDistances(latitude, longitude);
+        },
+        (err) => {
+          console.warn('Geolocation access not granted or unavailable:', err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    }
+  };
+
+  // Automatically ask for location access as soon as application mounts
+  useEffect(() => {
+    requestLiveLocation();
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const navigateToTrack = (track: 'neo4j' | 'sarvam' | 'arduino' | 'general') => {
     if (track === 'neo4j') {
@@ -387,9 +461,9 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         lng: hosp.longitude,
       },
       patientPickupCoords: {
-        lat: 28.5500,
-        lng: 77.2200,
-        address: 'B-44, Greater Kailash Part 1, New Delhi',
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+        address: userLocation.address,
       },
       assignedDoctor: freeDoctor,
       reservedBay: 'Trauma Bay #03 (Cath Lab 2)',
@@ -895,6 +969,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         admitPatient,
         dischargePatient,
         setPatientStatus,
+        userLocation,
+        requestLiveLocation,
         resetEmergencyState,
       }}
     >
