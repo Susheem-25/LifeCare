@@ -71,40 +71,20 @@ export const EmergencySearch: React.FC = () => {
     handleSearch(preset.brief);
   };
 
-  // Simulated Voice Fallback with Text-to-Speech audio readout
-  const triggerSimulatedVoiceFallback = () => {
-    setIsListening(true);
-    const simulatedVoice = currentLang.samplePrompt;
-    let i = 0;
-    setBrief('');
-
-    // Speak prompt aloud using SpeechSynthesis
-    speakText(simulatedVoice, {
-      langCode: selectedLang,
-      onStart: () => setIsSpeakingTts(true),
-      onEnd: () => setIsSpeakingTts(false),
-      onError: () => setIsSpeakingTts(false),
-    });
-
-    const interval = setInterval(() => {
-      setBrief(simulatedVoice.substring(0, i + 2));
-      i += 2;
-      if (i >= simulatedVoice.length) {
-        clearInterval(interval);
-        setIsListening(false);
-        handleSearch(simulatedVoice);
-      }
-    }, 20);
-  };
-
-  // Real-time Voice SOS via Web Speech API (with Bhashini STT emulation fallback)
+  // Real-time Voice SOS via Web Speech API (with Sarvam AI STT)
   const handleVoiceSosToggle = async () => {
     if (isListening) {
       setIsListening(false);
       const spoken = await stopVoiceSos();
-      if (spoken && spoken.trim()) {
-        setBrief(spoken.trim());
-        handleSearch(spoken.trim());
+      const clean = (spoken || brief).trim();
+      if (clean) {
+        setBrief(clean);
+        handleSearch(clean);
+        setVoiceSuccessToast(`Voice captured: "${clean.slice(0, 45)}..."`);
+        setTimeout(() => setVoiceSuccessToast(null), 4000);
+      } else {
+        setVoiceNotice('No speech detected. Please speak clearly into your mic or click a sample below.');
+        setTimeout(() => setVoiceNotice(null), 5000);
       }
       return;
     }
@@ -139,12 +119,11 @@ export const EmergencySearch: React.FC = () => {
           setVoiceNotice(errMsg);
           setTimeout(() => setVoiceNotice(null), 5000);
         }
-        triggerSimulatedVoiceFallback();
       },
     });
 
     if (!started) {
-      triggerSimulatedVoiceFallback();
+      setIsListening(false);
     }
   };
 

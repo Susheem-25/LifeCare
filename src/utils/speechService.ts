@@ -58,6 +58,10 @@ interface SpeechRecognitionEvent {
 let activeRecognition: SpeechRecognitionInstance | null = null;
 let activeMediaStream: MediaStream | null = null;
 let activeMediaRecorder: MediaRecorder | null = null;
+let activeAudioContext: AudioContext | null = null;
+let activeScriptProcessor: ScriptProcessorNode | null = null;
+let activeSourceNode: MediaStreamAudioSourceNode | null = null;
+let recordedPcmChunks: Float32Array[] = [];
 let recordedAudioChunks: Blob[] = [];
 let isUserListeningActive = false;
 let currentActiveOptions: VoiceSosOptions | null = null;
@@ -68,6 +72,88 @@ export interface VoiceSosOptions {
   onTranscript: (text: string, isFinal: boolean) => void;
   onListeningChange: (listening: boolean) => void;
   onError?: (errorMessage: string) => void;
+  onVolumeChange?: (volume: number) => void;
+}
+
+/**
+ * Standard WAV (PCM 16-bit Mono) encoder
+ */
+function encodeWAV(samples: Float32Array, sampleRate: number): Blob {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  function writeString(v: DataView, offset: number, str: string) {
+    for (let i = 0; i < str.length; i++) {
+      v.setUint8(offset + i, str.charCodeAt(i));
+    }
+  }
+
+  /* RIFF identifier */
+  writeString(view, 0, 'RIFF');
+  /* file length */
+  view.setUint32(4, 36 + samples.length * 2, true);
+  /* RIFF type */
+  writeString(view, 8, 'WAVE');
+  /* format chunk identifier */
+  writeString(view, 12, 'fmt ');
+  /* format chunk length */
+  view.setUint32(16, 16, true);
+  /* sample format (raw PCM) */
+  view.setUint16(20, 1, true);
+  /* channel count (mono) */
+  view.setUint16(22, 1, true);
+  /* sample rate */
+  view.setUint32(24, sampleRate, true);
+  /* byte rate (sample rate * block align) */
+  view.setUint32(28, sampleRate * 2, true);
+  /* block align (channel count * bytes per sample) */
+  view.setUint16(32, 2, true);
+  /* bits per sample */
+  view.setUint16(34, 16, true);
+  /* data chunk identifier */
+  writeString(view, 36, 'data');
+  /* data chunk length */
+  view.setUint32(40, samples.length * 2, true);
+
+  // Write PCM samples
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++, offset += 2) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
+/**
+ * Downsample audio buffer to 16,000 Hz for optimal Sarvam AI Saaras recognition
+ */
+function downsampleBuffer(
+  buffer: Float32Array,
+  inputSampleRate: number,
+  outputSampleRate = 16000
+): Float32Array {
+  if (outputSampleRate >= inputSampleRate) {
+    return buffer;
+  }
+  const sampleRateRatio = inputSampleRate / outputSampleRate;
+  const newLength = Math.round(buffer.length / sampleRateRatio);
+  const result = new Float32Array(newLength);
+  let offsetResult = 0;
+  let offsetBuffer = 0;
+  while (offsetResult < result.length) {
+    const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+    let accum = 0;
+    let count = 0;
+    for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+      accum += buffer[i];
+      count++;
+    }
+    result[offsetResult] = count > 0 ? accum / count : 0;
+    offsetResult++;
+    offsetBuffer = nextOffsetBuffer;
+  }
+  return result;
 }
 
 export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> => {
@@ -75,18 +161,25 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
 
   currentActiveOptions = options;
   currentRecordedText = '';
+  recordedPcmChunks = [];
   recordedAudioChunks = [];
 
   // Stop any previous active recording or recognition session
   await stopVoiceSos();
 
-  // 1. Request microphone stream and KEEP it active during recording (prevents Windows Chromium audio pipeline closure)
+  // 1. Request microphone stream
   if (navigator?.mediaDevices?.getUserMedia) {
     try {
-      activeMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      activeMediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
     } catch (mediaErr: unknown) {
       const errObj = mediaErr as { name?: string; message?: string };
-      console.warn('Microphone permission check warning:', errObj);
+      console.warn('Microphone permission check notice:', errObj);
       if (errObj?.name === 'NotAllowedError' || errObj?.name === 'PermissionDeniedError') {
         if (options.onError) {
           options.onError('Microphone access blocked. Please click the camera/mic icon in the address bar to allow microphone access.');
@@ -97,7 +190,65 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
     }
   }
 
-  // 2. Start background MediaRecorder to capture audio for Sarvam AI Indic STT fallback
+  if (!activeMediaStream) {
+    options.onListeningChange(false);
+    if (options.onError) {
+      options.onError('Could not access microphone hardware. Please check your mic connection.');
+    }
+    return false;
+  }
+
+  // 2. Setup Web Audio API PCM capture for clean Sarvam AI Indic STT WAV input
+  try {
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      activeAudioContext = ctx;
+      if (ctx.state === 'suspended') {
+        await ctx.resume().catch(() => {});
+      }
+
+      const source = ctx.createMediaStreamSource(activeMediaStream);
+      activeSourceNode = source;
+
+      // 4096 buffer size gives ~10-12 callbacks/second
+      const processor = ctx.createScriptProcessor(4096, 1, 1);
+      activeScriptProcessor = processor;
+
+      processor.onaudioprocess = (e) => {
+        if (!isUserListeningActive) return;
+        const inputData = e.inputBuffer.getChannelData(0);
+        const copy = new Float32Array(inputData.length);
+        copy.set(inputData);
+        recordedPcmChunks.push(copy);
+
+        // Compute volume level (RMS)
+        let sum = 0;
+        for (let i = 0; i < inputData.length; i++) {
+          sum += inputData[i] * inputData[i];
+        }
+        const rms = Math.sqrt(sum / inputData.length);
+        const volume = Math.min(100, Math.round(rms * 450));
+        if (currentActiveOptions?.onVolumeChange) {
+          currentActiveOptions.onVolumeChange(volume);
+        }
+      };
+
+      // Mute gain node to prevent speaker feedback loop
+      const muteGain = ctx.createGain();
+      muteGain.gain.setValueAtTime(0, ctx.currentTime);
+
+      source.connect(processor);
+      processor.connect(muteGain);
+      muteGain.connect(ctx.destination);
+    }
+  } catch (audioCtxErr) {
+    console.warn('AudioContext PCM recorder setup notice:', audioCtxErr);
+  }
+
+  // 3. Start background MediaRecorder as backup
   if (typeof MediaRecorder !== 'undefined' && activeMediaStream) {
     try {
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
@@ -115,7 +266,7 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
         }
       };
 
-      recorder.start(250);
+      recorder.start(200);
       activeMediaRecorder = recorder;
     } catch (recErr) {
       console.warn('MediaRecorder buffer initialization warning:', recErr);
@@ -125,7 +276,7 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
   isUserListeningActive = true;
   options.onListeningChange(true);
 
-  // 3. Attempt native SpeechRecognition for zero-latency live streaming text
+  // 4. Attempt native SpeechRecognition for zero-latency live streaming text if available
   const SpeechRec =
     (window as unknown as { SpeechRecognition?: new () => SpeechRecognitionInstance }).SpeechRecognition ||
     (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionInstance }).webkitSpeechRecognition;
@@ -167,9 +318,6 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
         const errType = (event.error || '').toLowerCase();
         console.warn('SpeechRecognition notice:', errType);
 
-        // If error is network, no-speech, aborted, or service-not-allowed:
-        // Disconnect native recognition completely so it stops firing and doesn't loop.
-        // The background MediaRecorder + Sarvam AI will seamlessly transcribe the audio!
         if (
           errType.includes('network') || 
           errType === 'no-speech' || 
@@ -195,13 +343,9 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
           }
           return;
         }
-
-        // Never emit raw technical error strings to the user.
-        // Audio continues recording smoothly in MediaRecorder.
       };
 
       recognition.onend = () => {
-        // Recognition completed or disconnected; do NOT loop start()
         activeRecognition = null;
       };
 
@@ -209,14 +353,13 @@ export const startVoiceSos = async (options: VoiceSosOptions): Promise<boolean> 
       recognition.start();
       return true;
     } catch (recogErr) {
-      console.warn('SpeechRecognition start failed, falling back to MediaRecorder + Sarvam AI STT:', recogErr);
-      // MediaRecorder is already active, so return true
+      console.warn('Native speech recognition notice, continuing with PCM + Sarvam AI STT:', recogErr);
       return true;
     }
   }
 
-  // If SpeechRecognition not supported but media recorder active, still return true
-  if (activeMediaRecorder) {
+  // If SpeechRecognition not available but audio recording active, return true
+  if (activeAudioContext || activeMediaRecorder) {
     return true;
   }
 
@@ -251,70 +394,115 @@ export const stopVoiceSos = (): Promise<string> => {
 
     if (currentOpts) {
       currentOpts.onListeningChange(false);
+      if (currentOpts.onVolumeChange) {
+        currentOpts.onVolumeChange(0);
+      }
     }
 
-    // 2. Stop MediaRecorder and wait for the final chunk in onstop
+    // 2. Disconnect AudioContext and script processor nodes
+    if (activeScriptProcessor) {
+      try {
+        activeScriptProcessor.disconnect();
+      } catch {
+        // ignore
+      }
+      activeScriptProcessor = null;
+    }
+    if (activeSourceNode) {
+      try {
+        activeSourceNode.disconnect();
+      } catch {
+        // ignore
+      }
+      activeSourceNode = null;
+    }
+
+    const recordedPcm = [...recordedPcmChunks];
+    recordedPcmChunks = [];
+    const audioCtx = activeAudioContext;
+    activeAudioContext = null;
+
+    // 3. Stop MediaRecorder
     if (activeMediaRecorder && activeMediaRecorder.state !== 'inactive') {
-      activeMediaRecorder.onstop = async () => {
-        // Release hardware mic tracks
-        if (activeMediaStream) {
-          try {
-            activeMediaStream.getTracks().forEach((track) => track.stop());
-          } catch {
-            // ignore
-          }
-          activeMediaStream = null;
-        }
-        activeMediaRecorder = null;
-
-        // If native recognition already produced complete text, resolve immediately
-        if (finalSpokenText) {
-          resolve(finalSpokenText);
-          return;
-        }
-
-        // If we have recorded audio chunks, transcribe with Sarvam AI STT
-        if (wasActive && recordedAudioChunks.length > 0 && currentOpts) {
-          try {
-            const mimeType = recordedAudioChunks[0]?.type || 'audio/webm';
-            const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
-            if (audioBlob.size > 100) {
-              const lang =
-                (currentOpts.langCode && LANG_CODE_MAP[currentOpts.langCode]) ||
-                currentOpts.langCode ||
-                'hi-IN';
-              const transcript = await transcribeAudioWithSarvam(audioBlob, lang);
-              const clean = (transcript || '').trim();
-              if (clean) {
-                finalSpokenText = clean;
-                currentRecordedText = clean;
-                currentOpts.onTranscript(clean, true);
-              }
-            }
-          } catch (sarvamErr) {
-            console.warn('Sarvam AI STT processing notice:', sarvamErr);
-          }
-        }
-        resolve(finalSpokenText);
-      };
-
       try {
         activeMediaRecorder.stop();
       } catch {
-        resolve(finalSpokenText);
+        // ignore
       }
-    } else {
-      // Release hardware mic tracks
-      if (activeMediaStream) {
-        try {
-          activeMediaStream.getTracks().forEach((track) => track.stop());
-        } catch {
-          // ignore
-        }
-        activeMediaStream = null;
-      }
-      resolve(finalSpokenText);
+      activeMediaRecorder = null;
     }
+
+    // 4. Release hardware mic tracks
+    if (activeMediaStream) {
+      try {
+        activeMediaStream.getTracks().forEach((track) => track.stop());
+      } catch {
+        // ignore
+      }
+      activeMediaStream = null;
+    }
+
+    // Close AudioContext
+    if (audioCtx) {
+      try {
+        audioCtx.close().catch(() => {});
+      } catch {
+        // ignore
+      }
+    }
+
+    // 5. Transcribe recorded audio with Sarvam AI STT
+    const processAndTranscribe = async () => {
+      if (wasActive && recordedPcm.length > 0 && currentOpts) {
+        try {
+          // Combine PCM chunks
+          let totalSamples = 0;
+          for (const chunk of recordedPcm) {
+            totalSamples += chunk.length;
+          }
+
+          if (totalSamples > 3000) {
+            // At least ~0.2s of audio
+            const combined = new Float32Array(totalSamples);
+            let offset = 0;
+            for (const chunk of recordedPcm) {
+              combined.set(chunk, offset);
+              offset += chunk.length;
+            }
+
+            const inputSR = audioCtx?.sampleRate || 44100;
+            const targetSR = 16000;
+            const downsampled = downsampleBuffer(combined, inputSR, targetSR);
+            const wavBlob = encodeWAV(downsampled, targetSR);
+
+            if (wavBlob.size > 200) {
+              const lang =
+                (currentOpts.langCode && LANG_CODE_MAP[currentOpts.langCode]) ||
+                currentOpts.langCode ||
+                'en-IN';
+              const sarvamTranscript = await transcribeAudioWithSarvam(wavBlob, lang);
+              const cleanSarvam = (sarvamTranscript || '').trim();
+              if (cleanSarvam) {
+                finalSpokenText = cleanSarvam;
+                currentRecordedText = cleanSarvam;
+                currentOpts.onTranscript(cleanSarvam, true);
+              }
+            }
+          }
+        } catch (sarvamErr) {
+          console.warn('Sarvam AI STT transcription notice:', sarvamErr);
+        }
+      }
+
+      // If native recognition produced text and Sarvam was empty, or vice versa
+      if (!finalSpokenText && currentRecordedText) {
+        finalSpokenText = currentRecordedText.trim();
+      }
+
+      resolve(finalSpokenText);
+    };
+
+    processAndTranscribe();
   });
 };
 

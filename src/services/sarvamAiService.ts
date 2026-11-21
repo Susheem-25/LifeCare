@@ -148,7 +148,7 @@ export async function transcribeAudioWithSarvam(
   const mappedLang = langCode.includes('-') ? langCode : `${langCode}-IN`;
 
   const formData = new FormData();
-  formData.append('file', audioBlob, 'emergency_voice.webm');
+  formData.append('file', audioBlob, 'emergency_voice.wav');
   formData.append('model', 'saaras:v4');
   formData.append('language_code', mappedLang);
   formData.append('mode', 'transcribe');
@@ -162,7 +162,9 @@ export async function transcribeAudioWithSarvam(
   });
 
   if (!response.ok) {
-    throw new Error(`Sarvam STT failed: ${response.status} ${response.statusText}`);
+    const errBody = await response.text().catch(() => '');
+    console.error(`Sarvam STT failed HTTP ${response.status}:`, errBody);
+    throw new Error(`Sarvam STT failed: ${response.status} ${errBody}`);
   }
 
   const result = await response.json();

@@ -63,6 +63,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copied, setCopied] = useState(false);
   const [micNotice, setMicNotice] = useState<string | null>(null);
+  const [audioVolume, setAudioVolume] = useState(0);
 
   // Structured form state
   const [formData, setFormData] = useState<PatientVoiceRegistration>(() =>
@@ -83,6 +84,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
   const toggleListening = async () => {
     if (isListening) {
       setIsListening(false);
+      setAudioVolume(0);
       setIsProcessingVoice(true);
       const spokenText = await stopVoiceSos();
 
@@ -91,12 +93,15 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
       if (cleanSpoken) {
         setTranscript(cleanSpoken);
         setFormData(parseSpokenRegistration(cleanSpoken));
+      } else {
+        setMicNotice('No speech was detected. Please check your mic and speak clearly, or click a Quick Preset.');
       }
       setIsProcessingVoice(false);
       return;
     }
 
     setMicNotice(null);
+    setAudioVolume(0);
     const success = await startVoiceSos({
       langCode: voiceLang,
       onTranscript: (spokenText) => {
@@ -105,9 +110,14 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
       },
       onListeningChange: (listening) => {
         setIsListening(listening);
+        if (!listening) setAudioVolume(0);
+      },
+      onVolumeChange: (vol) => {
+        setAudioVolume(vol);
       },
       onError: (msg) => {
         setIsListening(false);
+        setAudioVolume(0);
         if (msg && !msg.toLowerCase().includes('network')) {
           setMicNotice(msg);
         }
@@ -116,6 +126,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
 
     if (!success) {
       setIsListening(false);
+      setAudioVolume(0);
     }
   };
 
@@ -275,17 +286,28 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
 
           {/* Live Mic HUD Status */}
           {isListening && (
-            <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-3 flex items-center justify-between text-xs text-red-900 animate-fadeIn font-mono">
-              <div className="flex items-center space-x-2.5">
+            <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-red-900 animate-fadeIn font-mono">
+              <div className="flex items-center space-x-2.5 flex-wrap">
                 <span className="w-3 h-3 rounded-full bg-red-600 animate-ping shrink-0"></span>
                 <span>
-                  <strong>Recording with Sarvam AI ({voiceLang === 'hi-IN' ? 'हिन्दी' : 'English'}):</strong> Speak patient details (Name, Age, Complaint, Allergies)...
+                  <strong>Recording with Sarvam AI ({voiceLang === 'hi-IN' ? 'हिन्दी' : 'English'}):</strong> Speak patient details...
                 </span>
+                {/* Live sound level bars */}
+                <div className="flex items-center space-x-1 ml-2">
+                  {[10, 25, 40, 55, 70, 85].map((threshold, idx) => (
+                    <span
+                      key={idx}
+                      className={`w-1 rounded-full transition-all duration-75 ${
+                        audioVolume >= threshold ? 'bg-emerald-500 h-4' : 'bg-red-200 h-1.5'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
               <button
                 type="button"
                 onClick={toggleListening}
-                className="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold cursor-pointer shrink-0 ml-2 shadow-xs transition"
+                className="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold cursor-pointer shrink-0 shadow-xs transition"
               >
                 Stop & Process Info
               </button>

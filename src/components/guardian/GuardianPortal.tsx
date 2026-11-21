@@ -65,6 +65,7 @@ export const GuardianPortal: React.FC = () => {
   const [isSpeakingTts, setIsSpeakingTts] = useState<boolean>(false);
   const [triageAnalysis, setTriageAnalysis] = useState<AITriageAnalysis | null>(currentTriage);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [audioVolume, setAudioVolume] = useState<number>(0);
 
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentTranscriptRef = useRef<string>('');
@@ -109,6 +110,7 @@ export const GuardianPortal: React.FC = () => {
         silenceTimerRef.current = null;
       }
       setIsListening(false);
+      setAudioVolume(0);
       setIsAnalyzing(true);
       const spoken = await stopVoiceSos();
 
@@ -117,12 +119,15 @@ export const GuardianPortal: React.FC = () => {
       if (actualSpoken) {
         setEmergencyBrief(actualSpoken);
         await handleAnalyzeProblem(actualSpoken);
+      } else {
+        setVoiceNotice('No speech was detected. Please speak clearly into your mic or select an emergency sample below.');
       }
       setIsAnalyzing(false);
       return;
     }
 
     setVoiceNotice('');
+    setAudioVolume(0);
     currentTranscriptRef.current = emergencyBrief;
 
     const started = await startVoiceSos({
@@ -142,24 +147,33 @@ export const GuardianPortal: React.FC = () => {
           return;
         }
 
-        // Auto-finalize after 2.5 seconds of silence if user spoke something substantial
+        // Auto-finalize after 3 seconds of silence if user spoke something substantial
         silenceTimerRef.current = setTimeout(async () => {
           setIsListening(false);
-          await stopVoiceSos();
-          if (text.trim().length >= 3) {
-            handleAnalyzeProblem(text.trim());
+          setAudioVolume(0);
+          const spoken = await stopVoiceSos();
+          const cleanText = (spoken || text).trim();
+          if (cleanText.length >= 3) {
+            handleAnalyzeProblem(cleanText);
           }
-        }, 2500);
+        }, 3000);
       },
       onListeningChange: (listening) => {
         setIsListening(listening);
-        if (!listening && silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-          silenceTimerRef.current = null;
+        if (!listening) {
+          setAudioVolume(0);
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
         }
+      },
+      onVolumeChange: (vol) => {
+        setAudioVolume(vol);
       },
       onError: (err) => {
         setIsListening(false);
+        setAudioVolume(0);
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
           silenceTimerRef.current = null;
@@ -172,6 +186,7 @@ export const GuardianPortal: React.FC = () => {
 
     if (!started) {
       setIsListening(false);
+      setAudioVolume(0);
     }
   };
 
@@ -591,18 +606,29 @@ export const GuardianPortal: React.FC = () => {
 
             {/* Active Voice SOS Listening State */}
             {isListening && (
-              <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs animate-pulse">
+              <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs animate-fadeIn">
                 <div className="flex items-center space-x-3">
                   <span className="relative flex h-3.5 w-3.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600"></span>
                   </span>
                   <div>
-                    <div className="font-extrabold text-red-900 text-sm flex items-center space-x-1.5">
+                    <div className="font-extrabold text-red-900 text-sm flex items-center space-x-1.5 flex-wrap">
                       <Radio className="w-4 h-4 text-red-600 animate-pulse" />
                       <span>
                         Microphone Active — Listening in {voiceLanguage === 'hi-IN' ? 'हिन्दी (Hindi)' : 'English (India)'}...
                       </span>
+                      {/* Live sound level bars */}
+                      <div className="flex items-center space-x-1 ml-2">
+                        {[10, 25, 40, 55, 70, 85].map((threshold, idx) => (
+                          <span
+                            key={idx}
+                            className={`w-1 rounded-full transition-all duration-75 ${
+                              audioVolume >= threshold ? 'bg-emerald-500 h-4' : 'bg-red-200 h-1.5'
+                            }`}
+                          />
+                        ))}
+                      </div>
                     </div>
                     <div className="text-red-700 text-xs mt-0.5">
                       {voiceLanguage === 'hi-IN'
@@ -615,7 +641,7 @@ export const GuardianPortal: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleToggleVoiceInput}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-xs cursor-pointer shrink-0"
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-xs cursor-pointer shrink-0 transition"
                 >
                   Stop & Triage Now
                 </button>
