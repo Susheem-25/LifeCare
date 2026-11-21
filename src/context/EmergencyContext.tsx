@@ -94,11 +94,26 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const [currentTriage, setCurrentTriage] = useState<AITriageAnalysis | null>(null);
-  const [currentView, setCurrentView] = useState<AppView>('patient');
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    try {
+      const savedUser = getSavedUserProfile();
+      if (savedUser?.role === 'driver') return 'ambulance';
+      if (savedUser?.role === 'hospital') return 'hospital';
+      if (savedUser?.role === 'guardian') return 'patient';
+    } catch {
+      // ignore
+    }
+    return 'patient';
+  });
+
   const [currentRole, setCurrentRoleState] = useState<AppRole>(() => {
     try {
+      const savedUser = getSavedUserProfile();
+      if (savedUser?.role && ['guardian', 'driver', 'hospital'].includes(savedUser.role)) {
+        return savedUser.role;
+      }
       const saved = localStorage.getItem(STORAGE_KEY_ROLE) as AppRole | null;
-      if (saved && ['welcome', 'guardian', 'driver', 'hospital'].includes(saved)) {
+      if (saved && ['guardian', 'driver', 'hospital'].includes(saved)) {
         return saved;
       }
     } catch {
@@ -109,10 +124,13 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const setCurrentRole = (role: AppRole) => {
     // Strict Role-Based Access Control (RBAC):
-    // If logged in, users CANNOT access portals of other roles
-    if (currentUser && role !== 'welcome' && role !== currentUser.role) {
-      console.warn(`[RBAC] Access denied: Authenticated as ${currentUser.role}, cannot access ${role}`);
-      return;
+    // If logged in, users CANNOT access portals of other roles or 'welcome'
+    if (currentUser) {
+      if (role !== currentUser.role) {
+        console.warn(`[RBAC] Access denied: Authenticated as ${currentUser.role}, cannot access ${role}`);
+        setCurrentRoleState(currentUser.role);
+        return;
+      }
     }
 
     setCurrentRoleState(role);
@@ -147,6 +165,17 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const unsubAuth = onAuthStateSubscription((user) => {
       if (user) {
         setCurrentUser(user);
+        if (user.role && ['guardian', 'driver', 'hospital'].includes(user.role)) {
+          setCurrentRoleState(user.role);
+          try {
+            localStorage.setItem(STORAGE_KEY_ROLE, user.role);
+          } catch {
+            // ignore
+          }
+          if (user.role === 'guardian') setCurrentView('patient');
+          else if (user.role === 'driver') setCurrentView('ambulance');
+          else if (user.role === 'hospital') setCurrentView('hospital');
+        }
       }
     });
 
@@ -278,12 +307,14 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const loginWithGoogle = async (role: AppRole): Promise<UserProfile> => {
-    // If user is already authenticated with Google, enforce RBAC role lock
+    // If user is already authenticated with Google, enforce RBAC role lock & navigate directly
     if (currentUser && currentUser.uid) {
       if (currentUser.role !== role) {
         console.warn(`[RBAC] User is authenticated as ${currentUser.role}. Must sign out before accessing ${role}.`);
+        setCurrentRole(currentUser.role);
         return currentUser;
       }
+      setCurrentRole(role);
       return currentUser;
     }
 
@@ -359,18 +390,20 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [currentUser, hospitals, loggedDriver, loggedHospitalId]);
 
-  // Synchronize and strictly enforce RBAC: ensure logged-in user can never be on an unauthorized portal
+  // Synchronize and strictly enforce RBAC: ensure logged-in user directly opens their registered portal
   useEffect(() => {
-    if (currentUser && currentRole !== 'welcome' && currentRole !== currentUser.role) {
-      setCurrentRoleState(currentUser.role);
-      try {
-        localStorage.setItem(STORAGE_KEY_ROLE, currentUser.role);
-      } catch {
-        // ignore
+    if (currentUser?.role && ['guardian', 'driver', 'hospital'].includes(currentUser.role)) {
+      if (currentRole !== currentUser.role) {
+        setCurrentRoleState(currentUser.role);
+        try {
+          localStorage.setItem(STORAGE_KEY_ROLE, currentUser.role);
+        } catch {
+          // ignore
+        }
+        if (currentUser.role === 'guardian') setCurrentView('patient');
+        else if (currentUser.role === 'driver') setCurrentView('ambulance');
+        else if (currentUser.role === 'hospital') setCurrentView('hospital');
       }
-      if (currentUser.role === 'guardian') setCurrentView('patient');
-      else if (currentUser.role === 'driver') setCurrentView('ambulance');
-      else if (currentUser.role === 'hospital') setCurrentView('hospital');
     }
   }, [currentUser, currentRole]);
 

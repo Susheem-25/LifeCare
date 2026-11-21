@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EmergencyProvider, useEmergency } from './context/EmergencyContext';
 import { Navbar } from './components/Navbar';
 import { WelcomeScreen } from './components/welcome/WelcomeScreen';
@@ -29,6 +29,15 @@ const MainAppContent: React.FC = () => {
     setIsVoiceQrModalOpen
   } = useEmergency();
 
+  // Directly navigate to registered portal if user is already authenticated
+  useEffect(() => {
+    if (currentUser?.role && ['guardian', 'driver', 'hospital'].includes(currentUser.role)) {
+      if (currentRole !== currentUser.role) {
+        setCurrentRole(currentUser.role);
+      }
+    }
+  }, [currentUser, currentRole, setCurrentRole]);
+
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col font-sans antialiased relative">
       {/* Top Application Navigation */}
@@ -38,8 +47,9 @@ const MainAppContent: React.FC = () => {
         {/* ========================================================
             PAGE 1: WELCOME SCREEN (Welcome to LifeCare - Caring for Lives)
             Role Selection: Guardian, Driver, Hospital
+            (Only shown for unauthenticated visitors)
             ======================================================== */}
-        {currentRole === 'welcome' && (
+        {currentRole === 'welcome' && !currentUser && (
           <div className="animate-fadeIn">
             <WelcomeScreen
               onSelectRole={(role) => {
@@ -105,8 +115,8 @@ const MainAppContent: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Active Emergency Quick Mission Bar (Only on Welcome screen, no cross-role portal links) */}
-      {activeBooking && currentRole === 'welcome' && (
+      {/* Floating Active Emergency Quick Mission Bar (Only on Welcome screen for unauthenticated visitors) */}
+      {activeBooking && currentRole === 'welcome' && !currentUser && (
         <aside aria-label="Active emergency mission" className="sticky bottom-4 z-40 max-w-2xl mx-auto px-3 sm:px-4 w-full">
           <div className="bg-white/95 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 shadow-xl border-2 border-emerald-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
             <div className="flex items-center space-x-2.5">
@@ -127,15 +137,7 @@ const MainAppContent: React.FC = () => {
             <div className="flex items-center space-x-2 text-xs w-full sm:w-auto">
               <button
                 type="button"
-                onClick={() => {
-                  if (currentUser?.role === 'driver') {
-                    setCurrentRole('driver');
-                  } else if (currentUser?.role === 'hospital') {
-                    setCurrentRole('hospital');
-                  } else {
-                    setCurrentRole('guardian');
-                  }
-                }}
+                onClick={() => setCurrentRole('guardian')}
                 className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl font-bold transition cursor-pointer bg-red-600 hover:bg-red-700 text-white shadow-xs"
               >
                 Go to Mission
