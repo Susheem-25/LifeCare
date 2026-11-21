@@ -18,13 +18,14 @@ import {
 import {
   getFirestore,
   doc,
+  getDoc,
   setDoc,
   collection,
   onSnapshot,
   updateDoc,
   type Firestore
 } from 'firebase/firestore';
-import type { UserProfile, AppRole, EmergencyBooking, PatientVitals } from '../types';
+import type { UserProfile, AppRole, EmergencyBooking, PatientVitals, DriverAccount, Hospital } from '../types';
 
 // Production Firebase Configuration for LifeCare (lifecare7)
 export const firebaseConfig = {
@@ -286,4 +287,119 @@ export async function syncVitalsToFirestore(
       console.warn('[Firestore] Vitals update fallback:', err);
     }
   }
+}
+
+/**
+ * Synchronize driver profile to Cloud Firestore and local persistence
+ */
+export async function syncDriverProfileToFirestore(
+  uid: string,
+  driver: DriverAccount
+): Promise<void> {
+  try {
+    localStorage.setItem(`lifecare_driver_profile_${uid}`, JSON.stringify(driver));
+    localStorage.setItem('lifecare_logged_driver_v2', JSON.stringify(driver));
+  } catch {
+    // ignore
+  }
+
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      await setDoc(doc(db, 'drivers', uid), {
+        ...driver,
+        uid,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+    } catch (err) {
+      console.warn('[Firestore] Driver write fallback:', err);
+    }
+  }
+}
+
+/**
+ * Fetch driver profile from Firestore or local storage
+ */
+export async function fetchDriverProfile(uid: string): Promise<DriverAccount | null> {
+  try {
+    const local = localStorage.getItem(`lifecare_driver_profile_${uid}`);
+    if (local) return JSON.parse(local);
+  } catch {
+    // ignore
+  }
+
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      const snap = await getDoc(doc(db, 'drivers', uid));
+      if (snap.exists()) {
+        const data = snap.data() as DriverAccount;
+        try {
+          localStorage.setItem(`lifecare_driver_profile_${uid}`, JSON.stringify(data));
+        } catch {
+          // ignore
+        }
+        return data;
+      }
+    } catch (err) {
+      console.warn('[Firestore] Fetch driver profile fallback:', err);
+    }
+  }
+  return null;
+}
+
+/**
+ * Synchronize hospital profile to Cloud Firestore and local persistence
+ */
+export async function syncHospitalProfileToFirestore(
+  uid: string,
+  hospital: Hospital
+): Promise<void> {
+  try {
+    localStorage.setItem(`lifecare_hospital_profile_${uid}`, JSON.stringify(hospital));
+    localStorage.setItem('lifecare_logged_hosp_id_v2', hospital.id);
+  } catch {
+    // ignore
+  }
+
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      await setDoc(doc(db, 'hospitals', hospital.id), {
+        ...hospital,
+        ownerUid: uid,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+    } catch (err) {
+      console.warn('[Firestore] Hospital write fallback:', err);
+    }
+  }
+}
+
+/**
+ * Fetch hospital profile for owner UID
+ */
+export async function fetchHospitalProfileByOwner(uid: string): Promise<Hospital | null> {
+  try {
+    const local = localStorage.getItem(`lifecare_hospital_profile_${uid}`);
+    if (local) return JSON.parse(local);
+  } catch {
+    // ignore
+  }
+
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      const hospDocId = `hosp_${uid.slice(0, 10)}`;
+      const snap = await getDoc(doc(db, 'hospitals', hospDocId));
+      if (snap.exists()) {
+        const data = snap.data() as Hospital;
+        try {
+          localStorage.setItem(`lifecare_hospital_profile_${uid}`, JSON.stringify(data));
+        } catch {
+          // ignore
+        }
+        return data;
+      }
+    } catch (err) {
+      console.warn('[Firestore] Fetch hospital profile fallback:', err);
+    }
+  }
+  return null;
 }

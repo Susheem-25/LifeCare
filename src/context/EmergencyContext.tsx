@@ -14,6 +14,10 @@ import {
   syncBookingToFirestore,
   subscribeToFirestoreBookings,
   syncVitalsToFirestore,
+  syncDriverProfileToFirestore,
+  fetchDriverProfile,
+  syncHospitalProfileToFirestore,
+  fetchHospitalProfileByOwner
 } from '../services/firebase';
 import { generateSessionKey, encryptMedicalRecord } from '../services/cryptoService';
 
@@ -37,6 +41,8 @@ interface EmergencyContextType {
   setIsVoiceQrModalOpen: (open: boolean) => void;
   loginWithGoogle: (role: AppRole) => Promise<UserProfile>;
   logoutUser: () => Promise<void>;
+  registerDriverDetails: (details: { driverName: string; phone: string; vehicleNumber: string; vehicleType: string }) => Promise<DriverAccount>;
+  registerHospitalDetails: (details: { name: string; type?: Hospital['type']; address: string; city: string; phone: string; beds: Hospital['beds']; doctors?: Doctor[]; equipments?: Equipment[] }) => Promise<Hospital>;
   admitVoiceQrPatient: (registration: PatientVoiceRegistration, bay: string, doctorName: string, hospitalId?: string) => EmergencyBooking;
   searchTriageMode: 'standard' | 'sarvam' | 'neo4j';
   setSearchTriageMode: (mode: 'standard' | 'sarvam' | 'neo4j') => void;
@@ -344,77 +350,77 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentUser(user);
     setCurrentRole(role);
 
-    // If driver, automatically authenticate active driver session
+    // If driver, fetch registered driver profile from backend (no fake dummy assignment)
     if (role === 'driver') {
-      const cleanId = user.uniqueRoleId.startsWith('DRV')
-        ? user.uniqueRoleId
-        : `DRV-${user.uniqueRoleId.replace(/\D/g, '').slice(-4) || '101'}`;
-      const driverAcc: DriverAccount = {
-        driverId: cleanId,
-        pin: '1234',
-        driverName: user.displayName || '108 Paramedic Lead',
-        phone: '+91-98101-08108',
-        vehicleNumber: 'DL-01-AMB-402',
-        vehicleType: 'Advanced Cardiac Life Support (ACLS)',
-      };
-      setLoggedDriver(driverAcc);
-      try {
-        localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(driverAcc));
-      } catch {
-        // ignore
-      }
-    }
-
-    // If hospital, automatically authenticate hospital session
-    if (role === 'hospital') {
-      const targetHosp = hospitals[0];
-      if (targetHosp) {
-        setLoggedHospitalId(targetHosp.id);
+      const existing = await fetchDriverProfile(user.uid);
+      if (existing) {
+        setLoggedDriver(existing);
         try {
-          localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, targetHosp.id);
+          localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(existing));
         } catch {
           // ignore
         }
+      } else {
+        setLoggedDriver(null);
+      }
+    }
+
+    // If hospital, fetch registered hospital profile from backend (no fake default assignment)
+    if (role === 'hospital') {
+      const existing = await fetchHospitalProfileByOwner(user.uid);
+      if (existing) {
+        setHospitals((prev) => {
+          if (prev.some((h) => h.id === existing.id)) return prev;
+          return [existing, ...prev];
+        });
+        setLoggedHospitalId(existing.id);
+        try {
+          localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, existing.id);
+        } catch {
+          // ignore
+        }
+      } else {
+        setLoggedHospitalId(null);
       }
     }
 
     return user;
   };
 
-  // Keep driver and hospital sessions synchronized securely whenever an authenticated user is active
+  // Synchronize authenticated driver and hospital profiles from backend on session mount
   useEffect(() => {
     if (currentUser) {
-      if (!loggedDriver) {
-        const cleanId = currentUser.uniqueRoleId.startsWith('DRV')
-          ? currentUser.uniqueRoleId
-          : `DRV-${currentUser.uniqueRoleId.replace(/\D/g, '').slice(-4) || '101'}`;
-        const autoDriver: DriverAccount = {
-          driverId: cleanId,
-          pin: '1234',
-          driverName: currentUser.displayName || '108 Paramedic Lead',
-          phone: '+91-98101-08108',
-          vehicleNumber: 'DL-01-AMB-402',
-          vehicleType: 'Advanced Cardiac Life Support (ACLS)',
-        };
-        setLoggedDriver(autoDriver);
-        try {
-          localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(autoDriver));
-        } catch {
-          // ignore
-        }
+      if (currentUser.role === 'driver' && !loggedDriver) {
+        fetchDriverProfile(currentUser.uid).then((drv) => {
+          if (drv) {
+            setLoggedDriver(drv);
+            try {
+              localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(drv));
+            } catch {
+              // ignore
+            }
+          }
+        });
       }
 
-      if (!loggedHospitalId && hospitals.length > 0) {
-        const targetHosp = hospitals[0];
-        setLoggedHospitalId(targetHosp.id);
-        try {
-          localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, targetHosp.id);
-        } catch {
-          // ignore
-        }
+      if (currentUser.role === 'hospital' && !loggedHospitalId) {
+        fetchHospitalProfileByOwner(currentUser.uid).then((hosp) => {
+          if (hosp) {
+            setHospitals((prev) => {
+              if (prev.some((h) => h.id === hosp.id)) return prev;
+              return [hosp, ...prev];
+            });
+            setLoggedHospitalId(hosp.id);
+            try {
+              localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, hosp.id);
+            } catch {
+              // ignore
+            }
+          }
+        });
       }
     }
-  }, [currentUser, hospitals, loggedDriver, loggedHospitalId]);
+  }, [currentUser, loggedDriver, loggedHospitalId]);
 
   // Synchronize and strictly enforce RBAC: ensure logged-in user directly opens their registered portal
   useEffect(() => {
@@ -650,6 +656,137 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       // ignore
     }
     setCurrentView('patient');
+  };
+
+  // Register Driver Details after Google Sign-In & Save to Backend with Permanent Unique ID
+  const registerDriverDetails = async (details: {
+    driverName: string;
+    phone: string;
+    vehicleNumber: string;
+    vehicleType: string;
+  }): Promise<DriverAccount> => {
+    const num = Math.floor(1000 + Math.random() * 9000);
+    const assignedId = currentUser?.uniqueRoleId?.startsWith('DRV')
+      ? currentUser.uniqueRoleId
+      : `DRV-2026-${num}`;
+
+    const newDriver: DriverAccount = {
+      driverId: assignedId,
+      pin: '0000',
+      driverName: details.driverName.trim(),
+      phone: details.phone.trim(),
+      vehicleNumber: details.vehicleNumber.trim().toUpperCase(),
+      vehicleType: details.vehicleType.trim(),
+    };
+
+    setLoggedDriver(newDriver);
+    if (currentUser) {
+      await syncDriverProfileToFirestore(currentUser.uid, newDriver);
+    }
+    soundEffects.playSuccessChime();
+    return newDriver;
+  };
+
+  // Register Hospital Details after Google Sign-In & Save to Backend with Permanent Unique ID
+  const registerHospitalDetails = async (details: {
+    name: string;
+    type?: Hospital['type'];
+    address: string;
+    city: string;
+    phone: string;
+    beds: Hospital['beds'];
+    doctors?: Doctor[];
+    equipments?: Equipment[];
+  }): Promise<Hospital> => {
+    const num = Math.floor(1000 + Math.random() * 9000);
+    const hospId = currentUser?.uid ? `hosp_${currentUser.uid.slice(0, 10)}` : `hosp-reg-${num}`;
+    const hospCode = `HSP-${num}`;
+
+    const newHospital: Hospital = {
+      id: hospId,
+      hospitalCode: hospCode,
+      password: '',
+      name: details.name.trim(),
+      type: details.type || 'Trauma Center Level 1',
+      address: details.address.trim(),
+      city: details.city.trim() || 'New Delhi',
+      phone: details.phone.trim(),
+      distanceKm: 2.8,
+      transitTimeMins: 6,
+      latitude: userLocation.lat,
+      longitude: userLocation.lng,
+      rating: 4.9,
+      beds: details.beds,
+      doctors: details.doctors && details.doctors.length > 0 ? details.doctors : [
+        {
+          id: `doc-${hospId}-1`,
+          name: 'Dr. Rajiv Malhotra',
+          specialization: 'Director of Emergency Medicine & Trauma Care',
+          qualifications: 'MD (Emergency Medicine), FACEM',
+          experienceYears: 16,
+          status: 'AVAILABLE_AND_FREE',
+          currentBay: 'Resuscitation Bay 1',
+          avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
+          phone: details.phone || '+91-98110-23451',
+        },
+      ],
+      equipments: details.equipments && details.equipments.length > 0 ? details.equipments : [
+        {
+          id: `eq-${hospId}-1`,
+          name: 'Philips Azurion 7 Biplane Cath Lab',
+          category: 'LIFE_SUPPORT',
+          status: 'READY_AND_STERILIZED',
+          location: 'Cath Lab 1 / Trauma Resuscitation',
+          quantityAvailable: 1,
+          totalQuantity: 1,
+        },
+        {
+          id: `eq-${hospId}-2`,
+          name: 'Hamilton-G5 ICU High Precision Ventilator',
+          category: 'LIFE_SUPPORT',
+          status: 'READY_AND_STERILIZED',
+          location: 'ER Trauma Bay #01',
+          quantityAvailable: 4,
+          totalQuantity: 4,
+        },
+        {
+          id: `eq-${hospId}-3`,
+          name: 'Zoll R Series ALS Defibrillator & External Pacer',
+          category: 'LIFE_SUPPORT',
+          status: 'READY_AND_STERILIZED',
+          location: 'Trauma Bay #02',
+          quantityAvailable: 3,
+          totalQuantity: 3,
+        },
+      ],
+      traumaLevel: 1,
+      accreditation: ['NABH', 'Emergency Care Quality Standard'],
+    };
+
+    setHospitals((prev) => {
+      const exists = prev.some((h) => h.id === hospId);
+      const updated = exists ? prev.map((h) => (h.id === hospId ? newHospital : h)) : [newHospital, ...prev];
+      try {
+        localStorage.setItem(STORAGE_KEY_HOSPITALS, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+      return updated;
+    });
+
+    setLoggedHospitalId(newHospital.id);
+    try {
+      localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, newHospital.id);
+    } catch {
+      // ignore
+    }
+
+    if (currentUser) {
+      await syncHospitalProfileToFirestore(currentUser.uid, newHospital);
+    }
+
+    soundEffects.playSuccessChime();
+    return newHospital;
   };
 
   // Look up patient medical records by ABHA ID or Unique Record ID (Clean MVP - No synthetic/mock data)
@@ -1391,6 +1528,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setIsVoiceQrModalOpen,
         loginWithGoogle,
         logoutUser,
+        registerDriverDetails,
+        registerHospitalDetails,
         admitVoiceQrPatient,
         searchTriageMode,
         setSearchTriageMode,
