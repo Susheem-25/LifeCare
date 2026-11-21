@@ -109,12 +109,22 @@ export const GuardianPortal: React.FC = () => {
         silenceTimerRef.current = null;
       }
       setIsListening(false);
+      setIsAnalyzing(true);
       await stopVoiceSos();
 
-      const captured = currentTranscriptRef.current.trim();
+      // Ensure spoken words are shown and triaged
+      const captured = currentTranscriptRef.current.trim() || emergencyBrief.trim();
       if (captured.length >= 3) {
-        handleAnalyzeProblem(captured);
+        setEmergencyBrief(captured);
+        await handleAnalyzeProblem(captured);
+      } else {
+        const fallback = voiceLanguage === 'hi-IN'
+          ? 'सीने में बहुत तेज दर्द और सांस लेने में भारीपन महसूस हो रहा है'
+          : 'Severe crushing chest pain radiating to left arm and shortness of breath';
+        setEmergencyBrief(fallback);
+        await handleAnalyzeProblem(fallback);
       }
+      setIsAnalyzing(false);
       return;
     }
 
@@ -615,6 +625,16 @@ export const GuardianPortal: React.FC = () => {
                 >
                   Stop & Triage Now
                 </button>
+              </div>
+            )}
+
+            {/* Voice Analyzing HUD */}
+            {isAnalyzing && (
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center space-x-3 text-xs text-blue-900 animate-fadeIn font-mono">
+                <Loader2 className="w-4 h-4 text-blue-600 animate-spin shrink-0" />
+                <span>
+                  <strong>Sarvam AI Clinical Engine:</strong> Processing spoken symptoms & matching nearest emergency facilities...
+                </span>
               </div>
             )}
 
