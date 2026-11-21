@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   User
 } from 'lucide-react';
+import type { AppRole } from '../types';
 
 interface NavbarProps {
   onOpenTrackModal?: () => void;
@@ -25,8 +26,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
     loggedHospital,
     loggedDriver,
     currentUser,
-    setIsAuthModalOpen
+    setIsAuthModalOpen,
+    loginWithGoogle
   } = useEmergency();
+
+  const handleNavRoleClick = (role: AppRole) => {
+    if (!currentUser || currentUser.role !== role) {
+      loginWithGoogle(role).catch(() => setCurrentRole(role));
+    } else {
+      setCurrentRole(role);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-2xl border-b border-slate-200/80 shadow-xs">
@@ -76,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             {/* Guardian Portal */}
             <button
               type="button"
-              onClick={() => setCurrentRole('guardian')}
+              onClick={() => handleNavRoleClick('guardian')}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
                 currentRole === 'guardian'
                   ? 'bg-red-600 text-white shadow-xs'
@@ -90,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             {/* Driver Portal */}
             <button
               type="button"
-              onClick={() => setCurrentRole('driver')}
+              onClick={() => handleNavRoleClick('driver')}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
                 currentRole === 'driver'
                   ? 'bg-amber-600 text-white shadow-xs'
@@ -107,7 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             {/* Hospital Portal */}
             <button
               type="button"
-              onClick={() => setCurrentRole('hospital')}
+              onClick={() => handleNavRoleClick('hospital')}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
                 currentRole === 'hospital'
                   ? 'bg-emerald-600 text-white shadow-xs'
@@ -200,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             </button>
             <button
               type="button"
-              onClick={() => setCurrentRole('guardian')}
+              onClick={() => handleNavRoleClick('guardian')}
               className={`flex-1 py-1.5 rounded-lg transition text-center ${
                 currentRole === 'guardian' ? 'bg-red-600 text-white shadow-xs' : 'text-slate-600'
               }`}
@@ -209,7 +219,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             </button>
             <button
               type="button"
-              onClick={() => setCurrentRole('driver')}
+              onClick={() => handleNavRoleClick('driver')}
               className={`flex-1 py-1.5 rounded-lg transition text-center ${
                 currentRole === 'driver' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600'
               }`}
@@ -218,7 +228,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             </button>
             <button
               type="button"
-              onClick={() => setCurrentRole('hospital')}
+              onClick={() => handleNavRoleClick('hospital')}
               className={`flex-1 py-1.5 rounded-lg transition text-center ${
                 currentRole === 'hospital' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600'
               }`}

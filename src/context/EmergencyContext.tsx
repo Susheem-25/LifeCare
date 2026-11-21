@@ -148,18 +148,6 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, []);
 
-  const loginWithGoogle = async (role: AppRole): Promise<UserProfile> => {
-    const user = await signInWithGoogle(role);
-    setCurrentUser(user);
-    setCurrentRole(role);
-    return user;
-  };
-
-  const logoutUser = async (): Promise<void> => {
-    await signOutUser();
-    setCurrentUser(null);
-  };
-
   // Real-time live user GPS location (automatically requested on app start)
   const [userLocation, setUserLocation] = useState<{
     lat: number;
@@ -272,6 +260,55 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return null;
     }
   });
+
+  const loginWithGoogle = async (role: AppRole): Promise<UserProfile> => {
+    const user = await signInWithGoogle(role);
+    setCurrentUser(user);
+    setCurrentRole(role);
+
+    // If driver, automatically authenticate active driver session
+    if (role === 'driver') {
+      const existing = SAMPLE_DRIVERS.find(d => d.driverId === user.uniqueRoleId) || {
+        ...SAMPLE_DRIVERS[0],
+        driverId: user.uniqueRoleId,
+        driverName: user.displayName || '108 Paramedic Lead',
+      };
+      setLoggedDriver(existing);
+      try {
+        localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(existing));
+      } catch {
+        // ignore
+      }
+    }
+
+    // If hospital, automatically authenticate hospital session
+    if (role === 'hospital') {
+      const targetHosp = hospitals[0];
+      if (targetHosp) {
+        setLoggedHospitalId(targetHosp.id);
+        try {
+          localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, targetHosp.id);
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    return user;
+  };
+
+  const logoutUser = async (): Promise<void> => {
+    await signOutUser();
+    setCurrentUser(null);
+    setLoggedDriver(null);
+    setLoggedHospitalId(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY_LOGGED_DRIVER);
+      localStorage.removeItem(STORAGE_KEY_LOGGED_HOSP_ID);
+    } catch {
+      // ignore
+    }
+  };
 
   // Active booking from localStorage or pristine null (zero-booking start)
   const [activeBooking, setActiveBooking] = useState<EmergencyBooking | null>(() => {

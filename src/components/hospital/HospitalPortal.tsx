@@ -42,7 +42,8 @@ export const HospitalPortal: React.FC = () => {
     removeEquipment,
     admitPatient,
     dischargePatient,
-    admitVoiceQrPatient
+    admitVoiceQrPatient,
+    loginWithGoogle
   } = useEmergency();
 
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
@@ -227,6 +228,27 @@ export const HospitalPortal: React.FC = () => {
               <ArrowRight className="w-4 h-4 text-white" />
             </button>
           </form>
+
+          {/* Fast-track Google Login */}
+          <div className="relative my-3">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] uppercase">
+              <span className="bg-white px-2 text-slate-400 font-bold">Or fast-track with Google</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => loginWithGoogle('hospital')}
+            className="w-full bg-white hover:bg-slate-50 text-slate-800 py-2.5 rounded-xl border border-slate-300 font-bold text-xs flex items-center justify-center space-x-2 transition shadow-xs cursor-pointer"
+          >
+            <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-xs">
+              <span className="text-[10px] font-black text-blue-600">G</span>
+            </div>
+            <span>Sign in with Google (ER Command ID)</span>
+          </button>
 
           {/* Quick Demo Credentials */}
           <div className="pt-3 border-t border-slate-100 space-y-2">

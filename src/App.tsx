@@ -26,7 +26,8 @@ const MainAppContent: React.FC = () => {
     isAuthModalOpen, 
     setIsAuthModalOpen,
     isVoiceQrModalOpen,
-    setIsVoiceQrModalOpen
+    setIsVoiceQrModalOpen,
+    loginWithGoogle
   } = useEmergency();
   const [isTrackModalOpen, setIsTrackModalOpen] = useState<boolean>(false);
 
@@ -43,7 +44,14 @@ const MainAppContent: React.FC = () => {
         {currentRole === 'welcome' && (
           <div className="animate-fadeIn">
             <WelcomeScreen
-              onSelectRole={(role) => setCurrentRole(role)}
+              onSelectRole={async (role) => {
+                try {
+                  await loginWithGoogle(role);
+                } catch (e) {
+                  console.error(e);
+                  setCurrentRole(role);
+                }
+              }}
               onOpenPitchModal={() => setIsTrackModalOpen(true)}
             />
           </div>
