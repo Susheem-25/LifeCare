@@ -38,6 +38,11 @@ const MainAppContent: React.FC = () => {
     }
   }, [currentUser, currentRole, setCurrentRole]);
 
+  // Effective role: Authenticated users bypass welcome screen and open their portal directly
+  const effectiveRole = (currentUser?.role && ['guardian', 'driver', 'hospital'].includes(currentUser.role))
+    ? currentUser.role
+    : currentRole;
+
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col font-sans antialiased relative">
       {/* Top Application Navigation */}
@@ -49,7 +54,7 @@ const MainAppContent: React.FC = () => {
             Role Selection: Guardian, Driver, Hospital
             (Only shown for unauthenticated visitors)
             ======================================================== */}
-        {currentRole === 'welcome' && !currentUser && (
+        {effectiveRole === 'welcome' && !currentUser && (
           <div className="animate-fadeIn">
             <WelcomeScreen
               onSelectRole={(role) => {
@@ -87,7 +92,7 @@ const MainAppContent: React.FC = () => {
             PAGE 2: GUARDIAN PORTAL (Guarded by RBAC)
             Options: Track Patient or Register a New Patient
             ======================================================== */}
-        {currentRole === 'guardian' && (!currentUser || currentUser.role === 'guardian') && (
+        {effectiveRole === 'guardian' && (!currentUser || currentUser.role === 'guardian') && (
           <div className="animate-fadeIn">
             <GuardianPortal />
           </div>
@@ -97,7 +102,7 @@ const MainAppContent: React.FC = () => {
             PAGE 3: DRIVER PORTAL (Guarded by RBAC)
             Login with Driver ID -> Enter Patient ID -> Live Navigation Map
             ======================================================== */}
-        {currentRole === 'driver' && (!currentUser || currentUser.role === 'driver') && (
+        {effectiveRole === 'driver' && (!currentUser || currentUser.role === 'driver') && (
           <div className="animate-fadeIn">
             <DriverPortal />
           </div>
@@ -108,7 +113,7 @@ const MainAppContent: React.FC = () => {
             Login with Hospital ID -> Editable Beds, Doctors, Machines,
             and Segregated Patient Directory (Incoming, Admitted, Discharged)
             ======================================================== */}
-        {currentRole === 'hospital' && (!currentUser || currentUser.role === 'hospital') && (
+        {effectiveRole === 'hospital' && (!currentUser || currentUser.role === 'hospital') && (
           <div className="animate-fadeIn">
             <HospitalPortal />
           </div>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
-import { INITIAL_HOSPITALS } from '../../data/mockData';
 import { sanitizeIdentifier } from '../../utils/security';
 import type { Doctor, Equipment } from '../../types';
 import { 
@@ -25,7 +24,6 @@ import {
   Radio
 } from 'lucide-react';
 import { ReceptionQrScannerModal } from './ReceptionQrScannerModal';
-import { LiveRouteMap } from '../common/LiveRouteMap';
 
 export const HospitalPortal: React.FC = () => {
   const { 
@@ -99,10 +97,6 @@ export const HospitalPortal: React.FC = () => {
   const dischargedPatients = hospitalBookings.filter(
     (b) => b.status === 'DISCHARGED'
   );
-
-  // Active tracked inbound ambulance on real-time radar
-  const [selectedRadarBookingCode, setSelectedRadarBookingCode] = useState<string | null>(null);
-  const activeRadarPatient = incomingPatients.find((p) => p.bookingCode === selectedRadarBookingCode) || incomingPatients[0] || null;
 
   // Handle Login
   const handleLogin = (e: React.FormEvent) => {
@@ -251,33 +245,6 @@ export const HospitalPortal: React.FC = () => {
             </div>
             <span>Sign in with Google (ER Command ID)</span>
           </button>
-
-          {/* Quick Demo Credentials */}
-          <div className="pt-3 border-t border-slate-100 space-y-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase text-center block">
-              1-Click Demo Hospital Accounts:
-            </span>
-            <div className="grid grid-cols-1 gap-2 text-xs">
-              {INITIAL_HOSPITALS.map((h) => (
-                <button
-                  key={h.id}
-                  type="button"
-                  onClick={() => {
-                    setHospCodeInput(h.hospitalCode);
-                    setPasswordInput(h.password);
-                    loginHospital(h.hospitalCode, h.password);
-                  }}
-                  className="bg-slate-50 hover:bg-slate-100 text-slate-700 p-2.5 rounded-xl border border-slate-200 text-left transition cursor-pointer flex items-center justify-between"
-                >
-                  <div>
-                    <div className="font-mono font-bold text-emerald-700 text-[11px]">{h.hospitalCode}</div>
-                    <div className="text-[10px] text-slate-500 truncate max-w-[200px]">{h.name}</div>
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-400">{h.password}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -456,38 +423,9 @@ export const HospitalPortal: React.FC = () => {
             </div>
           </div>
 
-            {/* Sub-Tab 1: INCOMING PATIENTS & REAL-TIME AMBULANCE RADAR */}
+            {/* Sub-Tab 1: INCOMING PATIENTS */}
             {patientSubTab === 'incoming' && (
-              <div className="space-y-6">
-                {/* Real-Time Inbound Ambulance Radar Card */}
-                {activeRadarPatient && loggedHospital && (
-                  <div className="space-y-2">
-                    <LiveRouteMap
-                      isHospitalView={true}
-                      patientId={activeRadarPatient.patientUniqueId}
-                      origin={{
-                        lat: activeRadarPatient.patientPickupCoords.lat,
-                        lng: activeRadarPatient.patientPickupCoords.lng,
-                        address: activeRadarPatient.patientPickupCoords.address,
-                      }}
-                      destination={{
-                        lat: loggedHospital.latitude,
-                        lng: loggedHospital.longitude,
-                        name: loggedHospital.name,
-                        address: loggedHospital.address,
-                        bay: activeRadarPatient.reservedBay,
-                      }}
-                      initialEtaMins={activeRadarPatient.ambulanceDetails.currentEtaMins}
-                      initialDistanceKm={activeRadarPatient.ambulanceDetails.distanceRemainingKm}
-                      speedKmh={activeRadarPatient.ambulanceDetails.currentSpeedKmh}
-                      vehicleNumber={activeRadarPatient.ambulanceDetails.vehicleNumber}
-                      driverName={activeRadarPatient.ambulanceDetails.driverName}
-                      driverPhone={activeRadarPatient.ambulanceDetails.driverPhone}
-                      emergencyBrief={activeRadarPatient.emergencyBrief}
-                    />
-                  </div>
-                )}
-
+              <div className="space-y-4">
                 {/* Inbound Ambulances Directory List */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-700 px-1 pt-1">
@@ -495,7 +433,7 @@ export const HospitalPortal: React.FC = () => {
                       <Radio className="w-3.5 h-3.5 text-red-600 animate-pulse" />
                       <span>Incoming Ambulances Fleet ({incomingPatients.length})</span>
                     </span>
-                    <span className="text-[11px] font-mono text-slate-400">Click Track Route to focus radar</span>
+                    <span className="text-[11px] font-mono text-slate-400">Emergency Direct Intake Queue</span>
                   </div>
 
                   {incomingPatients.length === 0 ? (
@@ -503,84 +441,53 @@ export const HospitalPortal: React.FC = () => {
                       No incoming emergency ambulances currently en route.
                     </div>
                   ) : (
-                    incomingPatients.map((patient) => {
-                      const isCurrentlyTracked = activeRadarPatient?.bookingCode === patient.bookingCode;
-                      return (
-                        <div
-                          key={patient.bookingCode}
-                          onClick={() => setSelectedRadarBookingCode(patient.bookingCode)}
-                          className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
-                            isCurrentlyTracked
-                              ? 'border-red-500 bg-red-50/40 shadow-xs ring-2 ring-red-400/20'
-                              : 'border-slate-200 hover:border-slate-300 bg-white'
-                          }`}
-                        >
-                          <div className="space-y-1.5 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-mono font-bold text-red-700 text-xs bg-red-100 px-2 py-0.5 rounded-md">
-                                {patient.patientUniqueId}
-                              </span>
-                              <span className="text-[10px] font-mono text-slate-400">
-                                Ref: {patient.bookingCode}
-                              </span>
-                              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                                ETA: {patient.ambulanceDetails.currentEtaMins} mins
-                              </span>
-                              {isCurrentlyTracked && (
-                                <span className="text-[10px] font-mono font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
-                                  <span>Active on Radar</span>
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="text-sm font-extrabold text-slate-900">
-                              {patient.emergencyBrief}
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                              <span>Allocated Bay: <strong className="text-slate-800">{patient.reservedBay}</strong></span>
-                              <span>•</span>
-                              <span>Specialist: <strong className="text-slate-800">{patient.assignedDoctor.name}</strong></span>
-                              <span>•</span>
-                              <span>Ambulance: <strong className="text-slate-800 font-mono">{patient.ambulanceDetails.vehicleNumber}</strong></span>
-                              <span>•</span>
-                              <span>Origin: <strong className="text-slate-700">{patient.patientPickupCoords.address}</strong></span>
-                            </div>
+                    incomingPatients.map((patient) => (
+                      <div
+                        key={patient.bookingCode}
+                        className="p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-300 bg-white transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                      >
+                        <div className="space-y-1.5 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-mono font-bold text-red-700 text-xs bg-red-100 px-2 py-0.5 rounded-md">
+                              {patient.patientUniqueId}
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-400">
+                              Ref: {patient.bookingCode}
+                            </span>
+                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                              ETA: {patient.ambulanceDetails.currentEtaMins} mins
+                            </span>
                           </div>
 
-                          <div className="flex items-center space-x-2 w-full md:w-auto justify-end">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedRadarBookingCode(patient.bookingCode);
-                              }}
-                              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
-                                isCurrentlyTracked
-                                  ? 'bg-red-600 text-white shadow-xs'
-                                  : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300'
-                              }`}
-                              title="Focus this ambulance route on real-time radar"
-                            >
-                              <Radio className="w-3.5 h-3.5" />
-                              <span>{isCurrentlyTracked ? 'Live on Radar' : 'Track Route'}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                admitPatient(patient.bookingCode);
-                                showToast(`Patient ${patient.patientUniqueId} admitted to ${patient.reservedBay}!`);
-                              }}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
-                            >
-                              Admit to ER Bay
-                            </button>
+                          <div className="text-sm font-extrabold text-slate-900">
+                            {patient.emergencyBrief}
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                            <span>Allocated Bay: <strong className="text-slate-800">{patient.reservedBay}</strong></span>
+                            <span>•</span>
+                            <span>Specialist: <strong className="text-slate-800">{patient.assignedDoctor.name}</strong></span>
+                            <span>•</span>
+                            <span>Ambulance: <strong className="text-slate-800 font-mono">{patient.ambulanceDetails.vehicleNumber}</strong></span>
+                            <span>•</span>
+                            <span>Origin: <strong className="text-slate-700">{patient.patientPickupCoords.address}</strong></span>
                           </div>
                         </div>
-                      );
-                    })
+
+                        <div className="flex items-center space-x-2 w-full md:w-auto justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              admitPatient(patient.bookingCode);
+                              showToast(`Patient ${patient.patientUniqueId} admitted to ${patient.reservedBay}!`);
+                            }}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                          >
+                            Admit to ER Bay
+                          </button>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>

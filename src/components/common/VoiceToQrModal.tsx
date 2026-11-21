@@ -42,24 +42,6 @@ interface VoiceToQrModalProps {
   initialTranscript?: string;
 }
 
-const DEMO_VOICE_PRESETS = [
-  {
-    label: 'Cardiac (STEMI)',
-    badge: 'Code Red',
-    text: 'Patient name is Ramesh Sharma, 54-year-old male, blood group B positive. Severe chest pain radiating to left arm. Allergic to penicillin. Taking aspirin 75mg and atorvastatin. History of angioplasty stent in 2021. Guardian phone 9810455678. ABHA ID 91-4820-9182-3921.',
-  },
-  {
-    label: 'Asthma Attack',
-    badge: 'Urgent',
-    text: 'Patient is Priya Mehra, 29-year-old female, blood group O negative. Severe shortness of breath and wheezing. Allergic to ibuprofen and NSAIDs. Taking budesonide inhaler. History of bronchial asthma. Guardian phone 9911288771.',
-  },
-  {
-    label: 'Accident Trauma',
-    badge: 'Emergency',
-    text: 'Patient is Harpreet Singh, 42-year-old male, blood group A positive. Right leg compound fracture and blunt chest trauma from road traffic collision. No known drug allergies. Guardian phone 9872165432.',
-  },
-];
-
 export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
   isOpen,
   onClose,
@@ -236,31 +218,11 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
           </button>
         </div>
 
-        {/* Section 1: Voice Intake & Presets */}
+        {/* Section 1: Voice Intake */}
         <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-mono uppercase font-bold text-slate-400">Step 1:</span>
-              <span className="text-xs font-bold text-slate-800">Speak or Paste Patient Registration Details</span>
-            </div>
-
-            {/* Quick Demo Voice Presets */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] text-slate-400 font-medium">Quick Presets:</span>
-              {DEMO_VOICE_PRESETS.map((p) => (
-                <button
-                  key={p.label}
-                  type="button"
-                  onClick={() => {
-                    setTranscript(p.text);
-                    setFormData(parseSpokenRegistration(p.text));
-                  }}
-                  className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-white text-[11px] font-bold text-slate-700 transition cursor-pointer shadow-2xs"
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-mono uppercase font-bold text-slate-400">Step 1:</span>
+            <span className="text-xs font-bold text-slate-800">Speak or Paste Patient Registration Details</span>
           </div>
 
           {/* Voice Input Box with Live Microphone Button */}
@@ -269,7 +231,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
               rows={3}
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}
-              placeholder="Click microphone and speak in English or हिन्दी (उदा: 'मरीज रमेश शर्मा, 54 साल पुरुष, छाती में तेज दर्द, पेनिसिलिन से एलर्जी...')"
+              placeholder="Click microphone and speak or paste live emergency details (in English or हिन्दी)..."
               className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-2xl p-3.5 pr-28 text-xs font-medium focus:outline-none focus:border-red-500 focus:bg-white transition leading-relaxed"
             />
 

@@ -9,7 +9,6 @@ import {
   LogOut,
   ArrowRight
 } from 'lucide-react';
-import { SAMPLE_DRIVERS } from '../../data/mockData';
 import { sanitizeIdentifier } from '../../utils/security';
 import { LiveRouteMap } from '../common/LiveRouteMap';
 import { getGoogleMapsNavigationUrl } from '../../services/sarvamAiService';
@@ -178,30 +177,6 @@ export const DriverPortal: React.FC = () => {
             </div>
             <span>Sign in with Google (108 Driver ID)</span>
           </button>
-
-          {/* Quick Demo Credentials */}
-          <div className="pt-3 border-t border-slate-100 space-y-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase text-center block">
-              1-Click Demo Driver Accounts:
-            </span>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {SAMPLE_DRIVERS.map((d) => (
-                <button
-                  key={d.driverId}
-                  type="button"
-                  onClick={() => {
-                    setDriverIdInput(d.driverId);
-                    setDriverPinInput(d.pin);
-                    loginDriver(d.driverId, d.pin);
-                  }}
-                  className="bg-slate-50 hover:bg-slate-100 text-slate-700 p-2 rounded-xl border border-slate-200 text-left transition cursor-pointer"
-                >
-                  <div className="font-mono font-bold text-amber-700 text-[11px]">{d.driverId}</div>
-                  <div className="text-[10px] text-slate-500 truncate">{d.driverName}</div>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     );

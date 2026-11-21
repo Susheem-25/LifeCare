@@ -5,7 +5,6 @@ import {
   Camera,
   CameraOff,
   QrCode,
-  Sparkles,
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
@@ -16,9 +15,7 @@ import {
 } from 'lucide-react';
 import type { PatientVoiceRegistration, Hospital } from '../../types';
 import {
-  unpackEncryptedRegistrationFromQR,
-  packEncryptedRegistrationToQR,
-  parseSpokenRegistration
+  unpackEncryptedRegistrationFromQR
 } from '../../utils/voiceRegistrationParser';
 import { sanitizeText } from '../../utils/security';
 import { soundEffects } from '../../utils/audio';
@@ -131,15 +128,12 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
     }
   };
 
-  // Handle QR intake or pasted payload
+  // Handle QR intake from pasted payload
   const handlePasteOrSimulate = async () => {
-    let payloadToProcess = pastePayload.trim();
+    const payloadToProcess = pastePayload.trim();
     if (!payloadToProcess) {
-      payloadToProcess = await packEncryptedRegistrationToQR(
-        parseSpokenRegistration(
-          'Patient name is Ramesh Sharma, 54-year-old male, blood group B positive. Severe chest pain radiating to left arm (STEMI). Allergic to penicillin. Taking aspirin 75mg and atorvastatin. History of angioplasty stent in 2021. Guardian phone +91-98104-55678. ABHA ID 91-4820-9182-3921.'
-        )
-      );
+      setScanError('Please enter or paste a valid encrypted QR code payload, or use the camera scanner.');
+      return;
     }
     await handleSuccessfulQrPayload(payloadToProcess);
   };
@@ -271,7 +265,7 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
               rows={2}
               value={pastePayload}
               onChange={(e) => setPastePayload(e.target.value)}
-              placeholder="Paste compact QR JSON payload here (e.g. { pid: 'LC-8492', fn: 'Ramesh Sharma'... })"
+              placeholder="Paste encrypted or structured QR payload here..."
               className="w-full bg-white text-slate-900 border border-slate-300 rounded-xl p-2.5 text-[11px] font-mono focus:outline-none focus:border-blue-500"
             />
 
@@ -279,10 +273,11 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
               <button
                 type="button"
                 onClick={handlePasteOrSimulate}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-3 rounded-xl transition cursor-pointer shadow-xs flex items-center justify-center space-x-1.5"
+                disabled={!pastePayload.trim()}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs py-2 px-3 rounded-xl transition cursor-pointer shadow-xs flex items-center justify-center space-x-1.5"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{pastePayload.trim() ? 'Load Pasted QR' : 'Direct QR Intake'}</span>
+                <ClipboardPaste className="w-3.5 h-3.5" />
+                <span>Load Pasted QR Payload</span>
               </button>
             </div>
           </div>

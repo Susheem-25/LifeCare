@@ -21,7 +21,6 @@ import {
   PhoneCall,
   X
 } from 'lucide-react';
-import { PRESET_EMERGENCIES } from '../../data/mockData';
 import { sanitizeText, sanitizeIdentifier } from '../../utils/security';
 import { 
   speakTextWithSarvam, 
@@ -757,32 +756,16 @@ export const GuardianPortal: React.FC = () => {
                 className="w-full bg-slate-50 text-slate-900 p-3 rounded-xl border border-slate-300 focus:border-red-500 focus:outline-none text-xs leading-relaxed"
               />
 
-              {/* Quick Preset Chips & Analyze Action */}
-              <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
-                <div className="flex items-center flex-wrap gap-1.5 text-xs">
-                  {PRESET_EMERGENCIES.slice(0, 4).map((preset) => (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => {
-                        setEmergencyBrief(preset.brief);
-                        handleAnalyzeProblem(preset.brief);
-                      }}
-                      className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-
+              {/* Analyze Action */}
+              <div className="flex items-center justify-end pt-1">
                 <button
                   type="button"
                   onClick={() => handleAnalyzeProblem()}
                   disabled={isAnalyzing || !emergencyBrief.trim()}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50 shadow-2xs"
+                  className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50 shadow-xs"
                 >
                   {isAnalyzing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  <span>{isAnalyzing ? 'Analyzing...' : 'Analyze with Sarvam AI'}</span>
+                  <span>{isAnalyzing ? 'Analyzing Medical Urgency...' : 'Analyze Emergency with AI'}</span>
                 </button>
               </div>
             </div>

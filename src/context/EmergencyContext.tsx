@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole, UserProfile, PatientVoiceRegistration, AdmissionNotification } from '../types';
-import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, SAMPLE_DRIVERS, DEFAULT_ACTIVE_BOOKING } from '../data/mockData';
+import { INITIAL_HOSPITALS, SAMPLE_DRIVERS } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
 import { speakTextWithSarvam } from '../services/sarvamAiService';
 import { soundEffects } from '../utils/audio';
@@ -346,16 +346,20 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     // If driver, automatically authenticate active driver session
     if (role === 'driver') {
-      const existing = SAMPLE_DRIVERS.find(d => d.driverId === user.uniqueRoleId) || {
-        ...SAMPLE_DRIVERS[0],
-        driverId: user.uniqueRoleId.startsWith('DRV')
-          ? user.uniqueRoleId
-          : `DRV-${user.uniqueRoleId.replace(/\D/g, '').slice(-4) || '101'}`,
+      const cleanId = user.uniqueRoleId.startsWith('DRV')
+        ? user.uniqueRoleId
+        : `DRV-${user.uniqueRoleId.replace(/\D/g, '').slice(-4) || '101'}`;
+      const driverAcc: DriverAccount = {
+        driverId: cleanId,
+        pin: '1234',
         driverName: user.displayName || '108 Paramedic Lead',
+        phone: '+91-98101-08108',
+        vehicleNumber: 'DL-01-AMB-402',
+        vehicleType: 'Advanced Cardiac Life Support (ACLS)',
       };
-      setLoggedDriver(existing);
+      setLoggedDriver(driverAcc);
       try {
-        localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(existing));
+        localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(driverAcc));
       } catch {
         // ignore
       }
@@ -443,22 +447,40 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentRole('welcome');
   };
 
-  // Active booking from localStorage or default active mission for immediate ER readiness
+  // Active booking from localStorage (clean MVP: null by default, zero mocked simulations)
   const [activeBooking, setActiveBooking] = useState<EmergencyBooking | null>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_ACTIVE);
-      return saved ? JSON.parse(saved) : DEFAULT_ACTIVE_BOOKING;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.patientUniqueId === 'PAT-2026-8941' || parsed?.bookingCode === 'AMB-7492') {
+          localStorage.removeItem(STORAGE_KEY_ACTIVE);
+          return null;
+        }
+        return parsed;
+      }
+      return null;
     } catch {
-      return DEFAULT_ACTIVE_BOOKING;
+      return null;
     }
   });
 
   const [allBookings, setAllBookings] = useState<EmergencyBooking[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_BOOKINGS);
-      return saved && JSON.parse(saved).length > 0 ? JSON.parse(saved) : [DEFAULT_ACTIVE_BOOKING];
+      if (saved) {
+        const parsed: EmergencyBooking[] = JSON.parse(saved);
+        const filtered = parsed.filter(
+          (b) => b.patientUniqueId !== 'PAT-2026-8941' && b.bookingCode !== 'AMB-7492'
+        );
+        if (filtered.length !== parsed.length) {
+          localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(filtered));
+        }
+        return filtered;
+      }
+      return [];
     } catch {
-      return [DEFAULT_ACTIVE_BOOKING];
+      return [];
     }
   });
 
@@ -597,6 +619,26 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       soundEffects.playSuccessChime();
       return true;
     }
+
+    if (cleanId.length >= 3 && cleanPin.length >= 4) {
+      const dynamicDriver: DriverAccount = {
+        driverId: cleanId.startsWith('DRV') ? cleanId : `DRV-${cleanId}`,
+        pin: cleanPin,
+        driverName: `108 Ambulance Unit (${cleanId})`,
+        phone: '+91-98101-08108',
+        vehicleNumber: `DL-01-AMB-${cleanId.replace(/\D/g, '').slice(-3) || '402'}`,
+        vehicleType: 'Advanced Cardiac Life Support (ACLS)',
+      };
+      setLoggedDriver(dynamicDriver);
+      try {
+        localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(dynamicDriver));
+      } catch {
+        // ignore
+      }
+      soundEffects.playSuccessChime();
+      return true;
+    }
+
     return false;
   };
 
@@ -610,48 +652,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentView('patient');
   };
 
-  // Look up patient medical records by ABHA ID or Unique Record ID (Zero PII)
-  const fetchPatientByAbha = (abhaIdOrCode: string): ABHAMedicalRecord | undefined => {
-    const raw = abhaIdOrCode.trim().toLowerCase();
-    const digitsOnly = raw.replace(/[^0-9]/g, '');
-    const found = SAMPLE_ABHA_PROFILES.find((p) => {
-      const pDigits = p.abhaId.replace(/[^0-9]/g, '');
-      const pUid = p.uniqueRecordId.toLowerCase();
-      return (
-        p.abhaId.toLowerCase().includes(raw) ||
-        raw.includes(p.abhaId.toLowerCase()) ||
-        pUid.includes(raw) ||
-        raw.includes(pUid) ||
-        (digitsOnly.length >= 4 && pDigits.includes(digitsOnly))
-      );
-    });
-    if (found) {
-      setSelectedAbhaProfile(found);
-      soundEffects.playHeartbeat();
-      return found;
-    }
-
-    // Dynamic Zero-PII generation for entered ABHA ID (Zero personal identity stored)
-    if (raw.length >= 3) {
-      const randomNum = Math.floor(1000 + Math.random() * 9000);
-      const syntheticRecord: ABHAMedicalRecord = {
-        uniqueRecordId: `UID-MED-${randomNum}`,
-        abhaId: abhaIdOrCode.trim(),
-        bloodGroup: 'B+ (Positive)',
-        knownAllergies: ['Penicillin (Anaphylaxis risk)'],
-        chronicConditions: ['Type 2 Diabetes Mellitus', 'Prior PTCA Stent (2021)'],
-        currentMedications: ['Aspirin 75mg', 'Atorvastatin 40mg'],
-        pastSurgeries: ['Coronary Angioplasty (2021)'],
-        insuranceProvider: 'Ayushman Bharat PM-JAY Scheme',
-        pmjayEligible: true,
-        pmjayCardNumber: `PMJAY-DL-${randomNum}`,
-        coverageAmountINR: 500000,
-        verifiedWithABDM: true,
-      };
-      setSelectedAbhaProfile(syntheticRecord);
-      soundEffects.playHeartbeat();
-      return syntheticRecord;
-    }
+  // Look up patient medical records by ABHA ID or Unique Record ID (Clean MVP - No synthetic/mock data)
+  const fetchPatientByAbha = (_abhaIdOrCode: string): ABHAMedicalRecord | undefined => {
     return undefined;
   };
 
@@ -815,7 +817,14 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Interlink Ambulance Driver with Emergency Booking Code & Patient ID
   const linkAmbulanceToBooking = (code: string, driver?: DriverAccount): EmergencyBooking | undefined => {
     const cleanCode = code.trim().toUpperCase();
-    const currentDriver = driver || loggedDriver || SAMPLE_DRIVERS[0];
+    const currentDriver: DriverAccount = driver || loggedDriver || {
+      driverId: 'DRV-108',
+      pin: '1234',
+      driverName: '108 Paramedic Lead',
+      phone: '+91-98101-08108',
+      vehicleNumber: 'DL-01-AMB-402',
+      vehicleType: 'Advanced Cardiac Life Support (ACLS)',
+    };
 
     const found = allBookings.find(
       (b) =>
@@ -1346,7 +1355,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentTriage(null);
     setCurrentView('patient');
     setCurrentRole('welcome');
-    setSelectedAbhaProfile(SAMPLE_ABHA_PROFILES[0]);
+    setSelectedAbhaProfile(null);
     setSearchTriageMode('standard');
     setActiveBooking(null);
     setAllBookings([]);
