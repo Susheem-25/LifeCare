@@ -133,6 +133,43 @@ export function stopSarvamSpeech(): void {
 }
 
 /**
+ * Speech-to-Text using Sarvam AI Saaras API (saaras:v4)
+ * Synchronous REST endpoint for audio under 30 seconds.
+ */
+export async function transcribeAudioWithSarvam(
+  audioBlob: Blob,
+  langCode: string = 'hi-IN'
+): Promise<string> {
+  const apiKey = getSarvamApiKey();
+  if (!apiKey) {
+    throw new Error('Sarvam API key not configured');
+  }
+
+  const mappedLang = langCode.includes('-') ? langCode : `${langCode}-IN`;
+
+  const formData = new FormData();
+  formData.append('file', audioBlob, 'emergency_voice.webm');
+  formData.append('model', 'saaras:v4');
+  formData.append('language_code', mappedLang);
+  formData.append('mode', 'transcribe');
+
+  const response = await fetch('https://api.sarvam.ai/speech-to-text', {
+    method: 'POST',
+    headers: {
+      'api-subscription-key': apiKey,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Sarvam STT failed: ${response.status} ${response.statusText}`);
+  }
+
+  const result = await response.json();
+  return result?.transcript || '';
+}
+
+/**
  * Problem Analysis using Sarvam AI API with rich local clinical knowledge base fallback.
  */
 export async function analyzeProblemWithSarvam(brief: string): Promise<AITriageAnalysis> {

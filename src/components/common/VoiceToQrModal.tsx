@@ -19,8 +19,7 @@ import {
 } from '../../utils/voiceRegistrationParser';
 import {
   startVoiceSos,
-  stopVoiceSos,
-  isSpeechRecognitionSupported
+  stopVoiceSos
 } from '../../utils/speechService';
 import {
   speakTextWithSarvam,
@@ -82,13 +81,8 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
   // Toggle voice listening
   const toggleListening = async () => {
     if (isListening) {
-      stopVoiceSos();
       setIsListening(false);
-      return;
-    }
-
-    if (!isSpeechRecognitionSupported()) {
-      setMicNotice('Speech recognition is not supported in this browser. Please use Chrome/Edge or select a voice template below.');
+      await stopVoiceSos();
       return;
     }
 

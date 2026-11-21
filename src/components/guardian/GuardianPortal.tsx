@@ -108,8 +108,8 @@ export const GuardianPortal: React.FC = () => {
         clearTimeout(silenceTimerRef.current);
         silenceTimerRef.current = null;
       }
-      stopVoiceSos();
       setIsListening(false);
+      await stopVoiceSos();
 
       const captured = currentTranscriptRef.current.trim();
       if (captured.length >= 3) {
@@ -123,7 +123,7 @@ export const GuardianPortal: React.FC = () => {
 
     const started = await startVoiceSos({
       langCode: voiceLanguage,
-      onTranscript: (text) => {
+      onTranscript: (text, isFinal) => {
         currentTranscriptRef.current = text;
         setEmergencyBrief(text);
 
@@ -132,10 +132,16 @@ export const GuardianPortal: React.FC = () => {
           clearTimeout(silenceTimerRef.current);
         }
 
+        // If finalized (e.g. Sarvam AI STT response or completed stream), analyze problem
+        if (isFinal && text.trim().length >= 3) {
+          handleAnalyzeProblem(text.trim());
+          return;
+        }
+
         // Auto-finalize after 2.5 seconds of silence if user spoke something substantial
-        silenceTimerRef.current = setTimeout(() => {
-          stopVoiceSos();
+        silenceTimerRef.current = setTimeout(async () => {
           setIsListening(false);
+          await stopVoiceSos();
           if (text.trim().length >= 3) {
             handleAnalyzeProblem(text.trim());
           }

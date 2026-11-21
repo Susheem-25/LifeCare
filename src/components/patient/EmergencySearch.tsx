@@ -100,8 +100,8 @@ export const EmergencySearch: React.FC = () => {
   // Real-time Voice SOS via Web Speech API (with Bhashini STT emulation fallback)
   const handleVoiceSosToggle = async () => {
     if (isListening) {
-      stopVoiceSos();
       setIsListening(false);
+      await stopVoiceSos();
       return;
     }
 
