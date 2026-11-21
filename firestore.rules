@@ -1,9 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Authenticated users can read/write their own profile
+    // Authenticated users can read/write user profiles
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null;
+    }
+    // Driver accounts & vehicle registrations
+    match /drivers/{driverId} {
+      allow read, write: if request.auth != null;
+    }
+    // Hospital profiles, doctors, beds & machine capacity
+    match /hospitals/{hospitalId} {
+      allow read, write: if request.auth != null;
     }
     // Emergency bookings accessible to authenticated emergency network roles
     match /bookings/{bookingId} {
