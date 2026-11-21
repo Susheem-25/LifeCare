@@ -789,45 +789,30 @@ export const GuardianPortal: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2 w-full">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleLockHospital(hosp);
-                        }}
-                        className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition cursor-pointer text-center flex items-center justify-center space-x-1.5 ${
-                          isSelected
-                            ? 'bg-emerald-600 text-white shadow-xs'
-                            : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
-                        }`}
-                      >
-                        {isSelected ? (
-                          <>
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>✓ Hospital Locked</span>
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="w-3.5 h-3.5" />
-                            <span>Lock Hospital</span>
-                          </>
-                        )}
-                      </button>
-
-                      <a
-                        href="tel:108"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          triggerAmbulanceCall();
-                        }}
-                        className="py-2.5 px-3.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer shrink-0 text-center"
-                        title="Call 108 Ambulance"
-                      >
-                        <PhoneCall className="w-3.5 h-3.5 text-white animate-pulse" />
-                        <span>Call Ambulance</span>
-                      </a>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLockHospital(hosp);
+                      }}
+                      className={`w-full py-2.5 rounded-xl text-xs font-bold transition cursor-pointer text-center flex items-center justify-center space-x-1.5 ${
+                        isSelected
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
+                      }`}
+                    >
+                      {isSelected ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>✓ Hospital Locked</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Lock Hospital</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 );
               })}
@@ -837,39 +822,6 @@ export const GuardianPortal: React.FC = () => {
           {/* Card 3: Neo4j Graph Processing & Patient ID */}
           {selectedHospital && (
             <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4 animate-fadeIn">
-              {/* High Priority 108 Emergency Ambulance Call Card */}
-              <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white p-4 sm:p-5 rounded-2xl shadow-lg shadow-red-600/30 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fadeIn">
-                <div className="flex items-center space-x-3 w-full sm:w-auto">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30 shadow-xs">
-                    <PhoneCall className="w-6 h-6 text-white animate-bounce" />
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
-                        National 108 Ambulance Network
-                      </span>
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    </div>
-                    <h4 className="text-base font-black tracking-tight mt-0.5">
-                      Emergency Ambulance Dispatch Available
-                    </h4>
-                    <p className="text-xs text-red-100">
-                      Emergency bed & trauma doctor locked at <strong>{selectedHospital.name}</strong> and saved to database.
-                    </p>
-                  </div>
-                </div>
-
-                <a
-                  href="tel:108"
-                  onClick={triggerAmbulanceCall}
-                  className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-red-50 text-red-700 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-md cursor-pointer transition active:scale-95 shrink-0"
-                  title="Direct phone dialer to call 108 Ambulance"
-                >
-                  <PhoneCall className="w-4 h-4 text-red-600" />
-                  <span>Call Ambulance (108)</span>
-                </a>
-              </div>
-
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="space-y-0.5">
                   <div className="text-[10px] font-mono font-bold text-purple-700 uppercase">
@@ -941,25 +893,6 @@ export const GuardianPortal: React.FC = () => {
           {/* Card 4: Real-time Live Map Route on Website (Post Booking) */}
           {completedRegistration && (
             <div className="space-y-4 animate-fadeIn">
-              {/* High Priority Ambulance Re-Dial Bar */}
-              <div className="bg-red-600 text-white rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md shadow-red-600/25">
-                <div className="flex items-center space-x-2.5">
-                  <PhoneCall className="w-5 h-5 text-white animate-pulse" />
-                  <div>
-                    <div className="font-bold text-sm">Ambulance Hotline Active (108)</div>
-                    <div className="text-xs text-red-100">Directly connected with dispatch. Re-dial at any moment if needed.</div>
-                  </div>
-                </div>
-                <a
-                  href="tel:108"
-                  onClick={triggerAmbulanceCall}
-                  className="w-full sm:w-auto px-4 py-2 bg-white text-red-700 hover:bg-red-50 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-1.5 transition shrink-0 cursor-pointer shadow-xs"
-                >
-                  <PhoneCall className="w-3.5 h-3.5 text-red-600" />
-                  <span>Call 108 Now</span>
-                </a>
-              </div>
-
               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between text-xs text-emerald-800">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
