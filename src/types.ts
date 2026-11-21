@@ -3,13 +3,15 @@ export type UrgencyLevel = 'CRITICAL_RED' | 'URGENT_AMBER' | 'PRIORITY_YELLOW';
 // Emergency Severity Index (ESI) 1-5 triage standard (Slide 3 & 4)
 export type ESILevel = 1 | 2 | 3 | 4 | 5;
 
+export type AppRole = 'welcome' | 'guardian' | 'driver' | 'hospital';
+
 export interface Doctor {
   id: string;
   name: string;
   specialization: string;
   qualifications: string;
   experienceYears: number;
-  status: 'AVAILABLE_AND_FREE' | 'IN_SURGERY' | 'OFF_DUTY';
+  status: 'AVAILABLE_AND_FREE' | 'IN_SURGERY' | 'OFF_DUTY' | 'FREE' | 'BUSY' | 'ABSENT';
   currentBay?: string;
   avatar: string;
   phone: string;
@@ -144,7 +146,7 @@ export interface EmergencyBooking {
   reservedEquipments: string[];
   createdAt: string;
   expiresAt: string; // 20 min hold
-  status: 'PENDING_AMBULANCE' | 'AMBULANCE_EN_ROUTE_PICKUP' | 'PATIENT_PICKED_UP' | 'IN_TRANSIT_TO_HOSPITAL' | 'ARRIVED_ER' | 'ADMITTED';
+  status: 'PENDING_AMBULANCE' | 'AMBULANCE_EN_ROUTE_PICKUP' | 'PATIENT_PICKED_UP' | 'IN_TRANSIT_TO_HOSPITAL' | 'ARRIVED_ER' | 'ADMITTED' | 'DISCHARGED';
   driverLoggedIn?: boolean;
   driverLoggedInAt?: string;
   ambulanceDetails: {

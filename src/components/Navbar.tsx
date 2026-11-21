@@ -7,8 +7,8 @@ import {
   RotateCcw,
   PhoneCall,
   Lock,
-  LogOut,
-  Presentation
+  Presentation,
+  ArrowLeft
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -17,36 +17,23 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
   const {
-    currentView,
-    setCurrentView,
+    currentRole,
+    setCurrentRole,
     activeBooking,
     resetEmergencyState,
     loggedHospital,
-    loggedDriver,
-    logoutHospital
+    loggedDriver
   } = useEmergency();
-
-  const handleGoToSosTriage = () => {
-    setCurrentView('patient');
-    setTimeout(() => {
-      const el = document.getElementById('citizen-sos-section');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        const input = document.getElementById('emergency-search-input') as HTMLInputElement | null;
-        if (input) input.focus();
-      }
-    }, 60);
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-2xl border-b border-slate-200/80 shadow-xs">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        {/* Main Header Bar: Brand on Left, Desktop Tabs in Center, Actions on Right */}
         <div className="min-h-14 sm:min-h-16 py-1.5 sm:py-2 flex items-center justify-between gap-2">
-          {/* Brand & Team Member Attribution */}
+          {/* Brand & Home Navigation */}
           <div
-            onClick={handleGoToSosTriage}
+            onClick={() => setCurrentRole('welcome')}
             className="flex items-center space-x-2.5 cursor-pointer group shrink-0"
+            title="Go to LifeCare Welcome Home"
           >
             <div className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-b from-red-500 to-red-600 text-white shadow-md shadow-red-500/25 group-hover:scale-105 transition-transform">
               <HeartPulse className="w-4.5 h-4.5 text-white" />
@@ -58,97 +45,104 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
                   Life<span className="text-red-600">Care</span>
                 </span>
                 <span className="hidden sm:inline-flex items-center text-[10px] font-mono text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.2 rounded-md font-semibold">
-                  Zero-Wait ER
-                </span>
-                <span className="hidden md:inline-flex items-center text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded-md font-semibold">
-                  108 Grid
+                  Caring for Lives
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-[11px] text-slate-600">
-                <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.2 rounded font-mono text-[9px] sm:text-[9.5px]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Connected
-                </span>
-                <span className="font-medium text-slate-700">
+              <div className="flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-[11px] text-slate-500">
+                <span className="font-medium truncate max-w-[200px] sm:max-w-none">
                   Autonomous Emergency Healthcare Operating System
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Desktop Role-Based Portal Tabs (Hidden on mobile <sm, visible on sm+) */}
-          <nav className="hidden sm:flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {/* Center Role Navigation Switcher (Desktop) */}
+          <nav className="hidden sm:flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+            {currentRole !== 'welcome' && (
+              <button
+                type="button"
+                onClick={() => setCurrentRole('welcome')}
+                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-white transition cursor-pointer font-bold text-xs"
+                title="Back to Welcome Portal"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Home</span>
+              </button>
+            )}
+
+            {/* Guardian Portal */}
             <button
-              onClick={handleGoToSosTriage}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer ${
-                currentView === 'patient'
-                  ? 'bg-red-600 text-white font-semibold shadow-xs'
+              type="button"
+              onClick={() => setCurrentRole('guardian')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
+                currentRole === 'guardian'
+                  ? 'bg-red-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
-              <HeartPulse className={`w-3.5 h-3.5 ${currentView === 'patient' ? 'text-white' : 'text-red-600'}`} />
-              <span className="font-semibold text-xs">SOS Triage</span>
+              <HeartPulse className={`w-3.5 h-3.5 ${currentRole === 'guardian' ? 'text-white' : 'text-red-600'}`} />
+              <span>Guardian</span>
             </button>
 
+            {/* Driver Portal */}
             <button
-              onClick={() => setCurrentView('ambulance')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer ${
-                currentView === 'ambulance'
-                  ? 'bg-red-600 text-white font-semibold shadow-xs'
+              type="button"
+              onClick={() => setCurrentRole('driver')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
+                currentRole === 'driver'
+                  ? 'bg-amber-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <Ambulance className="w-3.5 h-3.5" />
-              <span className="font-semibold text-xs">
-                {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Paramedic'}
+              <span>
+                {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Driver'}
               </span>
               {!loggedDriver && <Lock className="w-2.5 h-2.5 text-slate-400" />}
-              {activeBooking?.bookingCode && (
-                <span
-                  className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold ${
-                    currentView === 'ambulance' ? 'bg-white/30 text-white' : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {activeBooking.bookingCode}
-                </span>
-              )}
             </button>
 
+            {/* Hospital Portal */}
             <button
-              onClick={() => setCurrentView('hospital')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer ${
-                currentView === 'hospital'
-                  ? 'bg-red-600 text-white font-semibold shadow-xs'
+              type="button"
+              onClick={() => setCurrentRole('hospital')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold ${
+                currentRole === 'hospital'
+                  ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <Building2 className="w-3.5 h-3.5" />
-              {loggedHospital ? (
-                <span className={currentView === 'hospital' ? 'text-white font-bold text-xs' : 'text-red-600 font-bold text-xs'}>
-                  {loggedHospital.hospitalCode}
-                </span>
-              ) : (
-                <>
-                  <Lock className="w-2.5 h-2.5 text-slate-400" />
-                  <span className="font-semibold text-xs">Hospital ER</span>
-                </>
-              )}
+              <span>
+                {loggedHospital ? loggedHospital.hospitalCode : 'Hospital'}
+              </span>
+              {!loggedHospital && <Lock className="w-2.5 h-2.5 text-slate-400" />}
             </button>
           </nav>
 
-          {/* Right utility buttons */}
+          {/* Right Action Buttons */}
           <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            {/* Active Patient ID Pill */}
+            {activeBooking?.patientUniqueId && (
+              <button
+                type="button"
+                onClick={() => setCurrentRole('guardian')}
+                className="hidden md:inline-flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold transition cursor-pointer"
+                title="Active patient mission"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>ID: {activeBooking.patientUniqueId}</span>
+              </button>
+            )}
+
             {onOpenTrackModal && (
               <button
                 type="button"
                 onClick={onOpenTrackModal}
                 className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-[11px] font-mono text-red-800 font-bold transition cursor-pointer shadow-2xs"
-                title="View Architecture & 5-Step Methodology"
+                title="View Architecture Pitch"
               >
                 <Presentation className="w-3 h-3 text-red-600" />
-                <span className="hidden xs:inline">Architecture Pitch</span>
-                <span className="xs:hidden">Overview</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="hidden xs:inline">Pitch</span>
               </button>
             )}
 
@@ -161,84 +155,54 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
               <span>112</span>
             </a>
 
-            {loggedHospital && (
-              <button
-                onClick={logoutHospital}
-                className="p-1.5 rounded-xl border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-slate-50 transition cursor-pointer"
-                title="Logout Hospital"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            )}
-
             <button
               onClick={resetEmergencyState}
               className="p-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition cursor-pointer shadow-2xs"
-              title="Reset Simulation to Initial Clean State"
+              title="Reset Simulation to Initial State"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        {/* Mobile Dedicated Full-Width Segmented Tab Bar (Visible ONLY on mobile screens <sm) */}
+        {/* Mobile Navigation Tab Bar (Visible on mobile <sm) */}
         <div className="sm:hidden pb-2.5 pt-0.5">
-          <nav className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 w-full gap-1 shadow-2xs">
-            {/* SOS Triage Tab */}
+          <nav className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 w-full gap-1 shadow-2xs text-xs font-bold">
             <button
               type="button"
-              onClick={() => setCurrentView('patient')}
-              className={`flex-1 flex items-center justify-center space-x-1.5 py-2 px-1 rounded-lg text-xs transition cursor-pointer font-bold ${
-                currentView === 'patient'
-                  ? 'bg-red-600 text-white shadow-xs'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-white'
+              onClick={() => setCurrentRole('welcome')}
+              className={`flex-1 py-1.5 rounded-lg transition text-center ${
+                currentRole === 'welcome' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-600'
               }`}
             >
-              <HeartPulse className={`w-3.5 h-3.5 shrink-0 ${currentView === 'patient' ? 'text-white' : 'text-red-600'}`} />
-              <span className="truncate">SOS Triage</span>
+              Home
             </button>
-
-            {/* Ambulance / Driver Tab */}
             <button
               type="button"
-              onClick={() => setCurrentView('ambulance')}
-              className={`flex-1 flex items-center justify-center space-x-1.5 py-2 px-1 rounded-lg text-xs transition cursor-pointer font-bold ${
-                currentView === 'ambulance'
-                  ? 'bg-red-600 text-white shadow-xs'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-white'
+              onClick={() => setCurrentRole('guardian')}
+              className={`flex-1 py-1.5 rounded-lg transition text-center ${
+                currentRole === 'guardian' ? 'bg-red-600 text-white shadow-xs' : 'text-slate-600'
               }`}
             >
-              <Ambulance className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">
-                {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Paramedic'}
-              </span>
-              {!loggedDriver && <Lock className="w-2.5 h-2.5 text-slate-400 shrink-0" />}
-              {activeBooking?.bookingCode && (
-                <span
-                  className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold shrink-0 ${
-                    currentView === 'ambulance' ? 'bg-white/30 text-white' : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {activeBooking.bookingCode}
-                </span>
-              )}
+              Guardian
             </button>
-
-            {/* Hospital ER Tab */}
             <button
               type="button"
-              onClick={() => setCurrentView('hospital')}
-              className={`flex-1 flex items-center justify-center space-x-1.5 py-2 px-1 rounded-lg text-xs transition cursor-pointer font-bold ${
-                currentView === 'hospital'
-                  ? 'bg-red-600 text-white shadow-xs'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-white'
+              onClick={() => setCurrentRole('driver')}
+              className={`flex-1 py-1.5 rounded-lg transition text-center ${
+                currentRole === 'driver' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">
-                {loggedHospital ? loggedHospital.hospitalCode : 'Hospital'}
-              </span>
-              {!loggedHospital && <Lock className="w-2.5 h-2.5 text-slate-400 shrink-0" />}
+              Driver
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentRole('hospital')}
+              className={`flex-1 py-1.5 rounded-lg transition text-center ${
+                currentRole === 'hospital' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600'
+              }`}
+            >
+              Hospital
             </button>
           </nav>
         </div>

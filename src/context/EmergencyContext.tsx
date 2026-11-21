@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount } from '../types';
+import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole } from '../types';
 import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, SAMPLE_DRIVERS } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
 import { soundEffects } from '../utils/audio';
@@ -14,6 +14,7 @@ interface EmergencyContextType {
   activeBooking: EmergencyBooking | null;
   allBookings: EmergencyBooking[];
   currentView: AppView;
+  currentRole: AppRole;
   loggedHospital: Hospital | null;
   loggedDriver: DriverAccount | null;
   selectedAbhaProfile: ABHAMedicalRecord | null;
@@ -21,6 +22,7 @@ interface EmergencyContextType {
   setSearchTriageMode: (mode: 'standard' | 'sarvam' | 'neo4j') => void;
   navigateToTrack: (track: 'neo4j' | 'sarvam' | 'arduino' | 'general') => void;
   setCurrentView: (view: AppView) => void;
+  setCurrentRole: (role: AppRole) => void;
   setSelectedAbhaProfile: (profile: ABHAMedicalRecord | null) => void;
   fetchPatientByAbha: (abhaId: string) => ABHAMedicalRecord | undefined;
   loginHospital: (hospitalCode: string, password: string) => boolean;
@@ -45,6 +47,8 @@ interface EmergencyContextType {
   updateHospitalDetails: (hospitalId: string, updates: Partial<Hospital>) => void;
   assignTraumaBay: (bookingCode: string, bayName: string) => void;
   admitPatient: (bookingCode: string) => void;
+  dischargePatient: (bookingCode: string) => void;
+  setPatientStatus: (bookingCode: string, status: EmergencyBooking['status']) => void;
   resetEmergencyState: () => void;
 }
 
@@ -53,6 +57,7 @@ const STORAGE_KEY_BOOKINGS = 'lifecare_bookings_v2';
 const STORAGE_KEY_ACTIVE = 'lifecare_active_booking_v2';
 const STORAGE_KEY_LOGGED_HOSP_ID = 'lifecare_logged_hosp_id_v2';
 const STORAGE_KEY_LOGGED_DRIVER = 'lifecare_logged_driver_v2';
+const STORAGE_KEY_ROLE = 'lifecare_role_v3';
 
 const EmergencyContext = createContext<EmergencyContextType | undefined>(undefined);
 
@@ -69,6 +74,30 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const [currentTriage, setCurrentTriage] = useState<AITriageAnalysis | null>(null);
   const [currentView, setCurrentView] = useState<AppView>('patient');
+  const [currentRole, setCurrentRoleState] = useState<AppRole>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_ROLE) as AppRole | null;
+      if (saved && ['welcome', 'guardian', 'driver', 'hospital'].includes(saved)) {
+        return saved;
+      }
+    } catch {
+      // ignore
+    }
+    return 'welcome';
+  });
+
+  const setCurrentRole = (role: AppRole) => {
+    setCurrentRoleState(role);
+    try {
+      localStorage.setItem(STORAGE_KEY_ROLE, role);
+    } catch {
+      // ignore
+    }
+    if (role === 'guardian') setCurrentView('patient');
+    else if (role === 'driver') setCurrentView('ambulance');
+    else if (role === 'hospital') setCurrentView('hospital');
+  };
+
   const [selectedAbhaProfile, setSelectedAbhaProfile] = useState<ABHAMedicalRecord | null>(SAMPLE_ABHA_PROFILES[0]);
   const [searchTriageMode, setSearchTriageMode] = useState<'standard' | 'sarvam' | 'neo4j'>('standard');
 
@@ -778,19 +807,27 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     broadcastState(updatedActive, updatedList, hospitals);
   };
 
-  const admitPatient = (bookingCode: string) => {
+  const setPatientStatus = (bookingCode: string, status: EmergencyBooking['status']) => {
     let updatedActive = activeBooking;
     if (activeBooking && activeBooking.bookingCode === bookingCode) {
       updatedActive = {
         ...activeBooking,
-        status: 'ARRIVED_ER',
+        status,
       };
       saveActive(updatedActive);
     }
-    const updatedList = allBookings.map((b) => (b.bookingCode === bookingCode ? { ...b, status: 'ARRIVED_ER' as const } : b));
+    const updatedList = allBookings.map((b) => (b.bookingCode === bookingCode ? { ...b, status } : b));
     saveAll(updatedList);
     broadcastState(updatedActive, updatedList, hospitals);
     soundEffects.playSuccessChime();
+  };
+
+  const admitPatient = (bookingCode: string) => {
+    setPatientStatus(bookingCode, 'ADMITTED');
+  };
+
+  const dischargePatient = (bookingCode: string) => {
+    setPatientStatus(bookingCode, 'DISCHARGED');
   };
 
   const resetEmergencyState = () => {
@@ -803,6 +840,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setHospitals(freshHospitals);
     setCurrentTriage(null);
     setCurrentView('patient');
+    setCurrentRole('welcome');
     setSelectedAbhaProfile(SAMPLE_ABHA_PROFILES[0]);
     setSearchTriageMode('standard');
     setActiveBooking(null);
@@ -822,6 +860,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         activeBooking,
         allBookings,
         currentView,
+        currentRole,
         loggedHospital,
         loggedDriver,
         selectedAbhaProfile,
@@ -829,6 +868,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setSearchTriageMode,
         navigateToTrack,
         setCurrentView,
+        setCurrentRole,
         setSelectedAbhaProfile,
         fetchPatientByAbha,
         loginHospital,
@@ -853,6 +893,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         updateHospitalDetails,
         assignTraumaBay,
         admitPatient,
+        dischargePatient,
+        setPatientStatus,
         resetEmergencyState,
       }}
     >
