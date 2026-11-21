@@ -362,10 +362,15 @@ export const DriverPortal: React.FC = () => {
             </div>
           </div>
 
-          {/* Embedded Full Live Navigation Route Map */}
+          {/* Direct Navigation Action Card */}
           <LiveRouteMap
             isDriverView={true}
             patientId={selectedMission.patientUniqueId}
+            origin={{
+              lat: selectedMission.patientPickupCoords.lat,
+              lng: selectedMission.patientPickupCoords.lng,
+              address: selectedMission.patientPickupCoords.address,
+            }}
             destination={{
               lat: selectedMission.hospitalCoords.lat,
               lng: selectedMission.hospitalCoords.lng,

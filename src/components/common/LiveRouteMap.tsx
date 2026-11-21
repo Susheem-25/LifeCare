@@ -1,7 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { Clock, Compass, ExternalLink, Navigation } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Navigation, 
+  ExternalLink, 
+  MapPin, 
+  Building2, 
+  Clock, 
+  Compass, 
+  Copy, 
+  Check, 
+  LocateFixed, 
+  ShieldCheck,
+  Ambulance
+} from 'lucide-react';
 import { getGoogleMapsNavigationUrl } from '../../services/sarvamAiService';
 
 interface LiveRouteMapProps {
@@ -31,268 +41,233 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
   vehicleNumber = 'DL-01-AMB-849',
   isDriverView = false,
 }) => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const ambulanceMarkerRef = useRef<L.Marker | null>(null);
+  const [currentOrigin, setCurrentOrigin] = useState(origin);
+  const [isLocating, setIsLocating] = useState<boolean>(false);
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [gpsNotice, setGpsNotice] = useState<string>('');
 
-  const [mapType, setMapType] = useState<'realtime_osm' | 'google_embed'>('realtime_osm');
-  const [progress, setProgress] = useState<number>(0.3);
-
-  // Generate intermediate route coordinates along real Delhi roadways
-  // (Greater Kailash Part 1 -> Outer Ring Road -> Africa Avenue -> Ring Road AIIMS Trauma)
-  const routeWaypoints: [number, number][] = [
-    [origin.lat, origin.lng],
-    [28.5480, 77.2310],
-    [28.5520, 77.2250],
-    [28.5560, 77.2200],
-    [28.5610, 77.2150],
-    [28.5640, 77.2120],
-    [destination.lat, destination.lng],
-  ];
-
-  // Initialize Real Leaflet Map with OpenStreetMap Real-Time Tile API
-  useEffect(() => {
-    if (!mapContainerRef.current) return;
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
-
-    try {
-      // Center midway between origin and destination
-      const centerLat = (origin.lat + destination.lat) / 2;
-      const centerLng = (origin.lng + destination.lng) / 2;
-
-      const map = L.map(mapContainerRef.current, {
-        center: [centerLat, centerLng],
-        zoom: 13,
-        zoomControl: true,
-        attributionControl: false,
-      });
-
-      // Real-Time OpenStreetMap Tiles API
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        subdomains: ['a', 'b', 'c'],
-      }).addTo(map);
-
-      // Real Route Polyline
-      const polyline = L.polyline(routeWaypoints, {
-        color: '#dc2626',
-        weight: 5,
-        opacity: 0.85,
-        dashArray: '8, 8',
-      }).addTo(map);
-
-      // Fit map bounds to show route nicely
-      map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
-
-      // Origin Marker (Patient Pickup)
-      const pickupIcon = L.divIcon({
-        className: 'custom-pickup-pin',
-        html: `
-          <div style="background-color: #0284c7; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 13px;">
-            P
-          </div>
-        `,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
-      });
-
-      L.marker([origin.lat, origin.lng], { icon: pickupIcon })
-        .addTo(map)
-        .bindPopup(`<b>Patient Pickup:</b><br/>${origin.address || 'Pickup Point'}`);
-
-      // Destination Marker (Hospital Emergency Gate)
-      const hospitalIcon = L.divIcon({
-        className: 'custom-hospital-pin',
-        html: `
-          <div style="background-color: #dc2626; width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(220,38,38,0.5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 16px;">
-            +
-          </div>
-        `,
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-      });
-
-      L.marker([destination.lat, destination.lng], { icon: hospitalIcon })
-        .addTo(map)
-        .bindPopup(`<b>${destination.name}</b><br/>Bay: ${destination.bay || 'Trauma Bay'}`);
-
-      // Moving Ambulance Vehicle Marker
-      const ambulanceIcon = L.divIcon({
-        className: 'custom-amb-pin',
-        html: `
-          <div style="background-color: #0f172a; width: 40px; height: 26px; border-radius: 8px; border: 2px solid #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.4); display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: bold; font-family: monospace; font-size: 10px;">
-            108 AMB
-          </div>
-        `,
-        iconSize: [40, 26],
-        iconAnchor: [20, 13],
-      });
-
-      // Calculate initial position on waypoint array based on progress
-      const currentPoint = routeWaypoints[Math.min(Math.floor(progress * routeWaypoints.length), routeWaypoints.length - 1)];
-      const ambMarker = L.marker(currentPoint, { icon: ambulanceIcon }).addTo(map);
-      ambulanceMarkerRef.current = ambMarker;
-
-      mapInstanceRef.current = map;
-
-      // Invalidate size shortly after mounting so tiles load cleanly
-      const resizeTimer = setTimeout(() => {
-        map.invalidateSize();
-      }, 250);
-
-      return () => {
-        clearTimeout(resizeTimer);
-        map.remove();
-        mapInstanceRef.current = null;
-      };
-    } catch (e) {
-      console.warn('Leaflet map initialization:', e);
-    }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapType, destination.lat, destination.lng, origin.lat, origin.lng]);
-
-  // Update ambulance marker position periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        const next = prev >= 0.9 ? 0.2 : prev + 0.03;
-        if (ambulanceMarkerRef.current && routeWaypoints.length > 0) {
-          const idx = Math.min(Math.floor(next * (routeWaypoints.length - 1)), routeWaypoints.length - 1);
-          ambulanceMarkerRef.current.setLatLng(routeWaypoints[idx]);
-        }
-        return next;
-      });
-    }, 2500);
-
-    return () => clearInterval(interval);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const distance = Math.max(0.4, Math.round(initialDistanceKm * (1 - progress) * 10) / 10);
-  const eta = Math.max(1, Math.round(initialEtaMins * (1 - progress)));
-
-  const googleMapsNavUrl = getGoogleMapsNavigationUrl(
-    { lat: origin.lat, lng: origin.lng },
+  // Primary Google Maps navigation URL with pre-filled origin (current location) and destination (hospital)
+  const fullNavigationUrl = getGoogleMapsNavigationUrl(
+    { lat: currentOrigin.lat, lng: currentOrigin.lng },
     { lat: destination.lat, lng: destination.lng }
   );
 
-  // Google Maps interactive embed URL
-  const googleEmbedUrl = `https://maps.google.com/maps?q=${destination.lat},${destination.lng}&z=14&output=embed`;
+  // Direct Device GPS URL (omits origin so Google Maps automatically uses the device's real-time live GPS)
+  const deviceGpsNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination.lat},${destination.lng}&travelmode=driving`;
+
+  // Detect live device GPS coordinates
+  const handleDetectLiveGps = () => {
+    if (!navigator.geolocation) {
+      setGpsNotice('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setIsLocating(true);
+    setGpsNotice('');
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setCurrentOrigin({
+          lat: latitude,
+          lng: longitude,
+          address: `Current Live GPS (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`,
+        });
+        setIsLocating(false);
+        setGpsNotice('Current live device GPS coordinates captured!');
+        setTimeout(() => setGpsNotice(''), 3500);
+      },
+      (err) => {
+        setIsLocating(false);
+        setGpsNotice(`Could not retrieve device location: ${err.message}. Using default pickup.`);
+        setTimeout(() => setGpsNotice(''), 4000);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
+  // Copy link to clipboard
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(fullNavigationUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   return (
-    <div className="w-full bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-lg space-y-0">
-      {/* Realtime Map HUD Bar */}
-      <div className="px-5 py-3.5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center space-x-2.5">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-          </span>
-          <span className="font-mono font-bold text-emerald-400 uppercase tracking-wider text-[11px]">
-            Realtime GPS Navigation Map
-          </span>
-          <span className="text-slate-600">•</span>
-          <span className="font-mono text-slate-300 text-[11px]">
-            ID: {patientId}
-          </span>
+    <div className="w-full bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-7 shadow-lg space-y-6 animate-fadeIn">
+      {/* Top Telemetry Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100">
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              Direct Route Navigation
+            </span>
+            <span className="font-mono text-xs font-bold text-slate-700">
+              ID: {patientId}
+            </span>
+          </div>
+          <h3 className="text-xl font-black text-slate-900 mt-1">
+            Direct Hospital Route Navigation
+          </h3>
+          <p className="text-xs text-slate-500">
+            Pre-configured with current pickup origin and destination hospital ER bay.
+          </p>
         </div>
 
-        <div className="flex items-center space-x-3 text-xs font-mono">
-          <div className="flex items-center space-x-1 text-slate-300">
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
+        {/* Quick ETA & Distance Badges */}
+        <div className="flex items-center space-x-2 font-mono text-xs shrink-0">
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-xl flex items-center space-x-1.5">
+            <Clock className="w-3.5 h-3.5 text-amber-600" />
             <span>ETA:</span>
-            <strong className="text-amber-300 text-sm">{eta} mins</strong>
+            <strong className="text-sm font-black">{initialEtaMins} mins</strong>
           </div>
-          <div className="flex items-center space-x-1 text-slate-300">
-            <Compass className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-xl flex items-center space-x-1.5">
+            <Compass className="w-3.5 h-3.5 text-emerald-600" />
             <span>Distance:</span>
-            <strong className="text-emerald-300 text-sm">{distance} km</strong>
+            <strong className="text-sm font-black">{initialDistanceKm} km</strong>
           </div>
+        </div>
+      </div>
 
-          {/* Toggle between Leaflet OpenStreetMap Realtime API and Google Maps View */}
-          <div className="flex items-center bg-slate-800 p-0.5 rounded-lg border border-slate-700">
+      {/* Origin & Destination Fields Box */}
+      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4">
+        {/* Field 1: Current Location (Origin) */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-slate-700 flex items-center space-x-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+              <span className="uppercase text-[11px] font-mono tracking-wider">Current Location (Origin):</span>
+            </span>
             <button
               type="button"
-              onClick={() => setMapType('realtime_osm')}
-              className={`px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer ${
-                mapType === 'realtime_osm' ? 'bg-red-600 text-white' : 'text-slate-400 hover:text-white'
-              }`}
+              onClick={handleDetectLiveGps}
+              disabled={isLocating}
+              className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center space-x-1 cursor-pointer disabled:opacity-50"
             >
-              Realtime OSM
-            </button>
-            <button
-              type="button"
-              onClick={() => setMapType('google_embed')}
-              className={`px-2 py-1 rounded text-[10px] font-bold transition cursor-pointer ${
-                mapType === 'google_embed' ? 'bg-red-600 text-white' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Google Maps
+              <LocateFixed className="w-3 h-3 text-blue-600" />
+              <span>{isLocating ? 'Detecting GPS...' : 'Use Device Live GPS'}</span>
             </button>
           </div>
 
+          <div className="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <MapPin className="w-4 h-4 text-blue-600 shrink-0" />
+              <div className="truncate">
+                <div className="font-bold text-slate-900 truncate">
+                  {currentOrigin.address || 'Current Patient Location'}
+                </div>
+                <div className="text-[11px] font-mono text-slate-400">
+                  Coordinates: {currentOrigin.lat.toFixed(4)}° N, {currentOrigin.lng.toFixed(4)}° E
+                </div>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold shrink-0">
+              PICKUP
+            </span>
+          </div>
+        </div>
+
+        {/* Route Transit Divider */}
+        <div className="flex items-center space-x-3 text-xs text-slate-400 px-2 font-mono">
+          <div className="h-px bg-slate-200 flex-1"></div>
+          <div className="flex items-center space-x-1.5 text-slate-500 text-[11px] font-bold">
+            <Ambulance className="w-3.5 h-3.5 text-red-600" />
+            <span>Turn-by-turn driving route ({speedKmh} km/h)</span>
+          </div>
+          <div className="h-px bg-slate-200 flex-1"></div>
+        </div>
+
+        {/* Field 2: Hospital Location (Destination) */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-slate-700 flex items-center space-x-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-600"></span>
+              <span className="uppercase text-[11px] font-mono tracking-wider">Destination (Hospital & ER Bay):</span>
+            </span>
+            <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              ER Bay Reserved
+            </span>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <Building2 className="w-4 h-4 text-red-600 shrink-0" />
+              <div className="truncate">
+                <div className="font-bold text-slate-900 text-sm truncate">
+                  {destination.name}
+                </div>
+                <div className="text-[11px] text-slate-500 truncate">
+                  {destination.address} • Reserved Bay: <strong className="text-emerald-700 font-mono">{destination.bay || 'Trauma Bay #03'}</strong>
+                </div>
+                <div className="text-[10px] font-mono text-slate-400">
+                  Coordinates: {destination.lat.toFixed(4)}° N, {destination.lng.toFixed(4)}° E
+                </div>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono bg-red-50 text-red-700 px-2 py-0.5 rounded font-bold shrink-0">
+              HOSPITAL
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {gpsNotice && (
+        <div className="text-xs text-blue-800 bg-blue-50 border border-blue-200 p-2.5 rounded-xl font-medium animate-fadeIn">
+          {gpsNotice}
+        </div>
+      )}
+
+      {/* Direct App Launch Actions */}
+      <div className="space-y-3">
+        {/* Giant Direct App Action Button */}
+        <a
+          href={fullNavigationUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full bg-red-600 hover:bg-red-700 text-white p-4 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center space-x-2.5 shadow-lg shadow-red-600/30 hover:shadow-xl transition-all duration-200 cursor-pointer text-center"
+        >
+          <Navigation className="w-5 h-5 text-white" />
+          <span>Open in Google Maps App (Turn-by-Turn Navigation)</span>
+          <ExternalLink className="w-4 h-4 text-white/80" />
+        </a>
+
+        {/* Secondary Quick Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
           <a
-            href={googleMapsNavUrl}
+            href={deviceGpsNavUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-1 bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 transition cursor-pointer text-center"
           >
-            <span>Live App</span>
-            <ExternalLink className="w-3 h-3 text-white" />
+            <LocateFixed className="w-3.5 h-3.5 text-slate-600" />
+            <span>Launch from My Live Phone GPS</span>
           </a>
+
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 transition cursor-pointer text-center"
+          >
+            {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-600" />}
+            <span>{copiedLink ? 'Navigation Link Copied!' : 'Copy Navigation Link'}</span>
+          </button>
         </div>
       </div>
 
-      {/* Main Interactive Realtime Map Display */}
-      <div className="relative w-full h-80 sm:h-96 bg-slate-100">
-        {mapType === 'realtime_osm' ? (
-          <div ref={mapContainerRef} className="w-full h-full z-10" />
-        ) : (
-          <iframe
-            title="Google Maps Live Hospital Route"
-            src={googleEmbedUrl}
-            className="w-full h-full border-0"
-            loading="lazy"
-            allowFullScreen
-          />
-        )}
-
-        {/* Floating Route Badge */}
-        <div className="absolute left-4 bottom-4 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-3 shadow-lg max-w-xs text-xs pointer-events-none">
-          <div className="flex items-center space-x-1.5 text-slate-900 font-extrabold">
-            <Navigation className="w-3.5 h-3.5 text-red-600" />
-            <span className="truncate">{destination.name}</span>
-          </div>
-          <div className="text-[11px] text-slate-500 mt-0.5">
-            Locked Bay: <strong className="text-emerald-700 font-mono">{destination.bay || 'Trauma Bay #03'}</strong>
-          </div>
-          <div className="text-[10px] text-slate-400 mt-0.5">
-            Live OpenStreetMap Real-Time Tile Engine
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Telemetry Bar */}
-      <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+      {/* Safety & Transit Info Footer */}
+      <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 font-mono">
         <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Ambulance: <strong className="font-mono text-slate-900">{vehicleNumber}</strong> ({speedKmh} km/h)</span>
-          <span className="text-slate-300">•</span>
-          <span className="text-emerald-700 font-semibold">Green Corridor Signal Active</span>
-        </div>
-
-        <div className="flex items-center space-x-2 font-mono text-[11px]">
-          <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold">
-            0% Gate Rejection
-          </span>
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Vehicle: <strong>{vehicleNumber}</strong> • Green Corridor Active</span>
           {isDriverView && (
-            <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold">
-              Driver Cockpit Active
+            <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-bold">
+              Driver View
             </span>
           )}
+        </div>
+        <div className="text-[11px] text-slate-400">
+          Fields pre-filled • Direct app routing
         </div>
       </div>
     </div>

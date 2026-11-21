@@ -365,9 +365,14 @@ export const GuardianPortal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Real-time Map API Display */}
+              {/* Direct Route Navigation Card */}
               <LiveRouteMap
                 patientId={trackedBooking.patientUniqueId}
+                origin={{
+                  lat: trackedBooking.patientPickupCoords.lat,
+                  lng: trackedBooking.patientPickupCoords.lng,
+                  address: trackedBooking.patientPickupCoords.address,
+                }}
                 destination={{
                   lat: trackedBooking.hospitalCoords.lat,
                   lng: trackedBooking.hospitalCoords.lng,
@@ -677,9 +682,14 @@ export const GuardianPortal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Real-time Map API */}
+              {/* Direct Route Navigation Card */}
               <LiveRouteMap
                 patientId={completedRegistration.patientUniqueId}
+                origin={{
+                  lat: completedRegistration.patientPickupCoords.lat,
+                  lng: completedRegistration.patientPickupCoords.lng,
+                  address: completedRegistration.patientPickupCoords.address,
+                }}
                 destination={{
                   lat: completedRegistration.hospitalCoords.lat,
                   lng: completedRegistration.hospitalCoords.lng,
