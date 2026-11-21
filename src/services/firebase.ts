@@ -153,12 +153,12 @@ export async function signInWithGoogle(role: AppRole): Promise<UserProfile> {
     }
   }
 
-  // Resilient instant Google credential simulation for seamless offline / zero-latency experience
-  const simulatedUid = `goog_${Math.random().toString(36).substring(2, 10)}`;
+  // Resilient instant credential generation for offline / zero-latency experience
+  const instantUid = `goog_${Math.random().toString(36).substring(2, 10)}`;
   const roleName = role === 'guardian' ? 'Citizen Guardian' : role === 'driver' ? '108 Paramedic Lead' : 'ER Trauma Chief';
 
-  const simulatedProfile: UserProfile = {
-    uid: simulatedUid,
+  const instantProfile: UserProfile = {
+    uid: instantUid,
     email: `${role}.${assignedUniqueId.toLowerCase()}@emergency.gov.in`,
     displayName: `${roleName} [${assignedUniqueId}]`,
     photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
@@ -169,8 +169,8 @@ export async function signInWithGoogle(role: AppRole): Promise<UserProfile> {
     lastLoginAt: new Date().toISOString(),
   };
 
-  persistUserProfile(simulatedProfile);
-  return simulatedProfile;
+  persistUserProfile(instantProfile);
+  return instantProfile;
 }
 
 /**

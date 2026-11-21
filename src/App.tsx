@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { EmergencyProvider, useEmergency } from './context/EmergencyContext';
 import { Navbar } from './components/Navbar';
 import { WelcomeScreen } from './components/welcome/WelcomeScreen';
 import { GuardianPortal } from './components/guardian/GuardianPortal';
 import { DriverPortal } from './components/ambulance/DriverPortal';
 import { HospitalPortal } from './components/hospital/HospitalPortal';
-import { HackFrontTrackModal } from './components/tracks/HackFrontTrackModal';
 import { GoogleAuthModal } from './components/auth/GoogleAuthModal';
 import { VoiceToQrModal } from './components/common/VoiceToQrModal';
 import {
@@ -14,8 +13,7 @@ import {
   ShieldCheck,
   PhoneCall,
   Zap,
-  Activity,
-  Presentation
+  Activity
 } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
@@ -28,12 +26,11 @@ const MainAppContent: React.FC = () => {
     isVoiceQrModalOpen,
     setIsVoiceQrModalOpen
   } = useEmergency();
-  const [isTrackModalOpen, setIsTrackModalOpen] = useState<boolean>(false);
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col font-sans antialiased relative">
       {/* Top Application Navigation */}
-      <Navbar onOpenTrackModal={() => setIsTrackModalOpen(true)} />
+      <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10 space-y-6">
         {/* ========================================================
@@ -46,7 +43,6 @@ const MainAppContent: React.FC = () => {
               onSelectRole={(role) => {
                 setCurrentRole(role);
               }}
-              onOpenPitchModal={() => setIsTrackModalOpen(true)}
             />
           </div>
         )}
@@ -145,13 +141,13 @@ const MainAppContent: React.FC = () => {
               <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs font-mono text-slate-600">
                 National 108 Emergency Grid
               </span>
-              <button
-                onClick={() => setIsTrackModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 shadow-2xs font-mono font-bold text-red-700 transition cursor-pointer"
+              <a
+                href="tel:108"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-2xs font-mono font-bold transition"
               >
-                <Presentation className="w-3.5 h-3.5 text-red-600" />
-                <span>Architecture & Pitch</span>
-              </button>
+                <PhoneCall className="w-3.5 h-3.5 text-white animate-pulse" />
+                Ambulance 108
+              </a>
               <a
                 href="tel:112"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 shadow-2xs font-mono font-bold text-red-700 transition"
@@ -198,18 +194,6 @@ const MainAppContent: React.FC = () => {
           </div>
         </div>
       </footer>
-
-      {/* Architecture Pitch Modal */}
-      <HackFrontTrackModal
-        isOpen={isTrackModalOpen}
-        onClose={() => setIsTrackModalOpen(false)}
-        onNavigateToView={(view) => {
-          if (view === 'patient') setCurrentRole('guardian');
-          else if (view === 'ambulance') setCurrentRole('driver');
-          else if (view === 'hospital') setCurrentRole('hospital');
-          setIsTrackModalOpen(false);
-        }}
-      />
 
       {/* Firebase Google Authentication Modal */}
       <GoogleAuthModal

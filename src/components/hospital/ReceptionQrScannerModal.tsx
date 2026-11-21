@@ -98,7 +98,7 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
       console.warn('Camera scanner error:', err);
       const errMsg = err instanceof Error ? err.message : String(err);
       setScanError(
-        `Unable to access camera: ${errMsg}. Please use "Paste QR Payload / Simulate Scan" below.`
+        `Unable to access camera: ${errMsg}. Please use "Paste QR Payload / Direct Intake" below.`
       );
       setScannerActive(false);
     }
@@ -126,7 +126,7 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
     soundEffects.playSuccessChime();
   };
 
-  // Simulate scan or handle pasted payload
+  // Handle QR intake or pasted payload
   const handlePasteOrSimulate = () => {
     const payloadToProcess = pastePayload.trim() || SAMPLE_AMBULANCE_QR;
     handleSuccessfulQrPayload(payloadToProcess);
@@ -243,15 +243,15 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
             )}
           </div>
 
-          {/* Paste Payload / Desktop Simulation (6 cols) */}
+          {/* Paste Payload / Direct Ingestion (6 cols) */}
           <div className="md:col-span-6 space-y-3 flex flex-col justify-between">
             <div>
               <span className="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
                 <ClipboardPaste className="w-4 h-4 text-blue-600" />
-                <span>Paste QR Payload / Simulate Scan</span>
+                <span>Paste QR Payload / Direct Intake</span>
               </span>
               <p className="text-[11px] text-slate-500 mt-0.5">
-                Paste JSON or use 1-click simulation for desktop testing without a camera.
+                Paste JSON or use quick intake for instant admission without camera.
               </p>
             </div>
 
@@ -270,7 +270,7 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-3 rounded-xl transition cursor-pointer shadow-xs flex items-center justify-center space-x-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>{pastePayload.trim() ? 'Load Pasted QR' : '1-Click Simulate QR Intake'}</span>
+                <span>{pastePayload.trim() ? 'Load Pasted QR' : 'Direct QR Intake'}</span>
               </button>
             </div>
           </div>
@@ -564,7 +564,7 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
               No QR Code Scanned Yet
             </p>
             <p className="text-[11px] text-slate-400 max-w-md mx-auto">
-              Scan the patient’s QR code from the ambulance with the camera scanner, or click <strong>"1-Click Simulate QR Intake"</strong> above to test auto-filling the entire form instantly.
+              Scan the patient’s QR code from the ambulance with the camera scanner, or click <strong>"Direct QR Intake"</strong> above to auto-fill the entire intake form instantly.
             </p>
           </div>
         )}

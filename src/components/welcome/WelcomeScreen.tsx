@@ -10,7 +10,6 @@ import {
   Sparkles, 
   PhoneCall, 
   Zap, 
-  Layers,
   FileCheck,
   Loader2
 } from 'lucide-react';
@@ -39,10 +38,9 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
 
 interface WelcomeScreenProps {
   onSelectRole: (role: AppRole) => void;
-  onOpenPitchModal?: () => void;
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOpenPitchModal }) => {
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) => {
   const { hospitals, currentUser, loginWithGoogle } = useEmergency();
   const [authenticatingRole, setAuthenticatingRole] = useState<AppRole | null>(null);
 
@@ -335,16 +333,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
           </div>
 
           <div className="flex items-center space-x-3 text-xs">
-            {onOpenPitchModal && (
-              <button
-                type="button"
-                onClick={onOpenPitchModal}
-                className="inline-flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-bold transition cursor-pointer"
-              >
-                <Layers className="w-3.5 h-3.5 text-slate-600" />
-                <span>Architecture & Pitch</span>
-              </button>
-            )}
+            <a
+              href="tel:108"
+              className="inline-flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl font-bold transition shadow-xs"
+            >
+              <PhoneCall className="w-3.5 h-3.5 text-white animate-pulse" />
+              <span>Ambulance 108</span>
+            </a>
             <a
               href="tel:112"
               className="inline-flex items-center space-x-1.5 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-xl font-bold border border-red-200 transition"

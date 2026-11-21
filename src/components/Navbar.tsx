@@ -6,17 +6,12 @@ import {
   Building2,
   RotateCcw,
   PhoneCall,
-  Presentation,
   ArrowLeft,
   User
 } from 'lucide-react';
 import type { AppRole } from '../types';
 
-interface NavbarProps {
-  onOpenTrackModal?: () => void;
-}
-
-export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
+export const Navbar: React.FC = () => {
   const {
     currentRole,
     setCurrentRole,
@@ -157,17 +152,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
               </button>
             )}
 
-            {onOpenTrackModal && (
-              <button
-                type="button"
-                onClick={onOpenTrackModal}
-                className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-[11px] font-mono text-red-800 font-bold transition cursor-pointer shadow-2xs"
-                title="View Architecture Pitch"
-              >
-                <Presentation className="w-3 h-3 text-red-600" />
-                <span className="hidden xs:inline">Pitch</span>
-              </button>
-            )}
+            <a
+              href="tel:108"
+              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-red-600 hover:bg-red-700 text-[11px] font-mono text-white font-bold transition cursor-pointer shadow-xs"
+              title="Call 108 Ambulance Dispatch"
+            >
+              <PhoneCall className="w-3 h-3 text-white animate-pulse" />
+              <span>Call 108</span>
+            </a>
 
             <a
               href="tel:112"
@@ -181,7 +173,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
             <button
               onClick={resetEmergencyState}
               className="p-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition cursor-pointer shadow-2xs"
-              title="Reset Simulation to Initial State"
+              title="Reset Emergency Session"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>

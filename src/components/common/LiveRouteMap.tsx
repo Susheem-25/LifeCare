@@ -10,7 +10,8 @@ import {
   Check, 
   LocateFixed, 
   ShieldCheck,
-  Ambulance
+  Ambulance,
+  PhoneCall
 } from 'lucide-react';
 import { getGoogleMapsNavigationUrl } from '../../services/sarvamAiService';
 
@@ -253,21 +254,31 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
 
       {/* Direct App Launch Actions */}
       <div className="space-y-3">
-        {/* Giant Direct App Action Button */}
-        <a
-          href={fullNavigationUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full bg-red-600 hover:bg-red-700 text-white p-4 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center space-x-2.5 shadow-lg shadow-red-600/30 hover:shadow-xl transition-all duration-200 cursor-pointer text-center"
-        >
-          <Navigation className="w-5 h-5 text-white" />
-          <span>
-            {isLiveGpsActive
-              ? `Open Google Maps (Live Route from Current Location)`
-              : `Open in Google Maps App (Route to ${(destination.name || 'Hospital').split(' ')[0]})`}
-          </span>
-          <ExternalLink className="w-4 h-4 text-white/80" />
-        </a>
+        {/* Primary Action Buttons: Call 108 & Google Maps */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <a
+            href="tel:108"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 sm:p-4 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center space-x-2.5 shadow-lg shadow-emerald-600/25 hover:shadow-xl transition-all duration-200 cursor-pointer text-center"
+          >
+            <PhoneCall className="w-5 h-5 text-white animate-pulse" />
+            <span>Call 108 Ambulance</span>
+          </a>
+
+          <a
+            href={fullNavigationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-red-600 hover:bg-red-700 text-white p-3.5 sm:p-4 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center space-x-2.5 shadow-lg shadow-red-600/30 hover:shadow-xl transition-all duration-200 cursor-pointer text-center"
+          >
+            <Navigation className="w-5 h-5 text-white" />
+            <span>
+              {isLiveGpsActive
+                ? `Open Google Maps (Live Route)`
+                : `Open Google Maps (${(destination.name || 'Hospital').split(' ')[0]})`}
+            </span>
+            <ExternalLink className="w-4 h-4 text-white/80" />
+          </a>
+        </div>
 
         {/* Secondary Quick Action Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">

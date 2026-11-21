@@ -559,7 +559,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
                 type="button"
                 onClick={copyPayload}
                 className="w-full py-2 px-3 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center space-x-2 transition cursor-pointer"
-                title="Copy QR payload JSON for desktop simulation"
+                title="Copy digital QR payload JSON"
               >
                 {copied ? (
                   <>
@@ -569,7 +569,7 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Copy Payload JSON (For Test Simulation)</span>
+                    <span>Copy Intake QR Payload JSON</span>
                   </>
                 )}
               </button>
