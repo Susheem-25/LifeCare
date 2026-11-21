@@ -5,9 +5,7 @@ import { WelcomeScreen } from './components/welcome/WelcomeScreen';
 import { GuardianPortal } from './components/guardian/GuardianPortal';
 import { DriverPortal } from './components/ambulance/DriverPortal';
 import { HospitalPortal } from './components/hospital/HospitalPortal';
-import { RoadmapDashboard } from './components/roadmap/RoadmapDashboard';
 import { HackFrontTrackModal } from './components/tracks/HackFrontTrackModal';
-import { FooterTracksSection } from './components/tracks/FooterTracksSection';
 import {
   HeartPulse,
   Sparkles,
@@ -28,17 +26,6 @@ const MainAppContent: React.FC = () => {
       <Navbar onOpenTrackModal={() => setIsTrackModalOpen(true)} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10 space-y-6">
-        {/* Synchronized 5-Step Emergency Roadmap Dashboard */}
-        {currentRole !== 'welcome' && (
-          <div className="animate-fadeIn">
-            <RoadmapDashboard onStepClick={(step) => {
-              if (step <= 3) setCurrentRole('guardian');
-              else if (step === 4) setCurrentRole('driver');
-              else if (step === 5) setCurrentRole('hospital');
-            }} />
-          </div>
-        )}
-
         {/* ========================================================
             PAGE 1: WELCOME SCREEN (Welcome to LifeCare - Caring for Lives)
             Role Selection: Guardian, Driver, Hospital
@@ -114,9 +101,6 @@ const MainAppContent: React.FC = () => {
           </div>
         </aside>
       )}
-
-      {/* Architecture & 5-Step Methodology Section */}
-      <FooterTracksSection />
 
       {/* High-End Healthcare Footer */}
       <footer className="border-t border-slate-200/90 bg-gradient-to-b from-white via-slate-50/70 to-slate-100/90 pt-10 pb-8 px-3 sm:px-6 lg:px-8 mt-10 relative z-10 text-slate-600">
