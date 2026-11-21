@@ -508,7 +508,6 @@ export const DEFAULT_ACTIVE_BOOKING: EmergencyBooking = {
   inTransitPaperwork: {
     isSubmitted: true,
     submittedAt: new Date().toISOString(),
-    abhaDetails: SAMPLE_ABHA_PROFILES[0],
     initialVitals: {
       heartRate: 112,
       bloodPressureSys: 154,

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
 import { INITIAL_HOSPITALS } from '../../data/mockData';
 import { sanitizeIdentifier } from '../../utils/security';
-import type { Doctor, Equipment, EmergencyBooking } from '../../types';
+import type { Doctor, Equipment } from '../../types';
 import { 
   Building2, 
   Bed, 
@@ -17,12 +17,10 @@ import {
   Lock, 
   LogOut, 
   UserCheck, 
-  AlertTriangle, 
   UserPlus, 
   Cpu, 
   Zap, 
   X,
-  ShieldCheck,
   QrCode,
   Radio
 } from 'lucide-react';
@@ -61,9 +59,6 @@ export const HospitalPortal: React.FC = () => {
 
   // Patient Sub-Tabs: 'incoming' | 'admitted' | 'discharged'
   const [patientSubTab, setPatientSubTab] = useState<'incoming' | 'admitted' | 'discharged'>('incoming');
-
-  // Selected Patient for ABHA Medical Details Modal
-  const [selectedPatient, setSelectedPatient] = useState<EmergencyBooking | null>(null);
 
   // Add Doctor Modal State
   const [showAddDoctorModal, setShowAddDoctorModal] = useState<boolean>(false);
@@ -513,7 +508,7 @@ export const HospitalPortal: React.FC = () => {
                       return (
                         <div
                           key={patient.bookingCode}
-                          onClick={() => setSelectedPatient(patient)}
+                          onClick={() => setSelectedRadarBookingCode(patient.bookingCode)}
                           className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
                             isCurrentlyTracked
                               ? 'border-red-500 bg-red-50/40 shadow-xs ring-2 ring-red-400/20'
@@ -561,7 +556,7 @@ export const HospitalPortal: React.FC = () => {
                                 e.stopPropagation();
                                 setSelectedRadarBookingCode(patient.bookingCode);
                               }}
-                              className={`px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
+                              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
                                 isCurrentlyTracked
                                   ? 'bg-red-600 text-white shadow-xs'
                                   : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300'
@@ -581,13 +576,6 @@ export const HospitalPortal: React.FC = () => {
                               className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                             >
                               Admit to ER Bay
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedPatient(patient)}
-                              className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
-                            >
-                              View ABHA
                             </button>
                           </div>
                         </div>
@@ -609,8 +597,7 @@ export const HospitalPortal: React.FC = () => {
                   admittedPatients.map((patient) => (
                     <div
                       key={patient.bookingCode}
-                      onClick={() => setSelectedPatient(patient)}
-                      className="p-4 rounded-2xl border-2 border-emerald-200 hover:border-emerald-500 bg-emerald-50/20 hover:bg-emerald-50/50 transition cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                      className="p-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50/20 transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
                     >
                       <div className="space-y-1.5 flex-1">
                         <div className="flex items-center space-x-2">
@@ -627,9 +614,9 @@ export const HospitalPortal: React.FC = () => {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                          <span>Attending: <strong className="text-slate-800">{patient.assignedDoctor.name}</strong></span>
+                          <span>Attending Specialist: <strong className="text-slate-800">{patient.assignedDoctor.name}</strong></span>
                           <span>•</span>
-                          <span>ABHA Verified: <strong className="text-emerald-700 font-mono">{patient.inTransitPaperwork?.abhaDetails?.abhaId || '91-4820-9182-3921'}</strong></span>
+                          <span>ER Bay: <strong className="text-slate-800 font-mono">{patient.reservedBay}</strong></span>
                         </div>
                       </div>
 
@@ -644,13 +631,6 @@ export const HospitalPortal: React.FC = () => {
                           className="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                         >
                           Discharge Patient
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedPatient(patient)}
-                          className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
-                        >
-                          View ABHA
                         </button>
                       </div>
                     </div>
@@ -670,8 +650,7 @@ export const HospitalPortal: React.FC = () => {
                   dischargedPatients.map((patient) => (
                     <div
                       key={patient.bookingCode}
-                      onClick={() => setSelectedPatient(patient)}
-                      className="p-4 rounded-2xl border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-white transition cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                      className="p-4 rounded-2xl border border-slate-200 bg-slate-50 transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
                     >
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center space-x-2">
@@ -687,14 +666,6 @@ export const HospitalPortal: React.FC = () => {
                           {patient.emergencyBrief}
                         </div>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setSelectedPatient(patient)}
-                        className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"
-                      >
-                        View ABHA Record
-                      </button>
                     </div>
                   ))
                 )}
@@ -1388,198 +1359,6 @@ export const HospitalPortal: React.FC = () => {
         </div>
       )}
 
-      {/* ========================================================
-          MODAL: PATIENT ABHA MEDICAL DETAILS (FETCHED VIA ABHA ID)
-          ======================================================== */}
-      {selectedPatient && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-scaleUp max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  ABDM DigiLocker Verified
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-                  Medical Record: {selectedPatient.patientUniqueId}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedPatient(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* ABHA Dossier Profile Header */}
-            {selectedPatient.inTransitPaperwork?.abhaDetails ? (
-              <div className="space-y-4">
-                {/* Zero-Knowledge Breach Immunity Banner */}
-                <div className="bg-emerald-50/60 border border-emerald-200 p-3 rounded-2xl flex items-center justify-between text-xs">
-                  <div className="flex items-center space-x-2 text-emerald-900 font-bold">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Zero-Knowledge Shield: Identity-Decoupled Clinical Record</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-emerald-700 bg-white border border-emerald-300 px-2 py-0.5 rounded font-bold shrink-0">
-                    100% Breach Immune
-                  </span>
-                </div>
-
-                {/* E2EE Decryption Verification */}
-                <div className="bg-slate-900 text-white p-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
-                  <div className="flex items-center space-x-2">
-                    <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>DigiLocker E2EE Decrypted: <strong className="text-emerald-400">AES-GCM-256</strong></span>
-                  </div>
-                  <span className="text-[10px] text-slate-400">
-                    Fingerprint: {selectedPatient.inTransitPaperwork?.e2eePacket?.keyFingerprint || 'SHA256:7F3A9182...B8C1'}
-                  </span>
-                </div>
-
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                  <div>
-                    <div className="text-base font-extrabold text-slate-900 font-mono">
-                      Record ID: {selectedPatient.inTransitPaperwork.abhaDetails.uniqueRecordId || 'UID-MED-3921'}
-                    </div>
-                    <div className="text-slate-500 font-mono text-[11px] mt-0.5">
-                      Patient Ref: <strong className="text-slate-700">{selectedPatient.patientUniqueId}</strong> • ABHA ID: <strong className="text-slate-700">{selectedPatient.inTransitPaperwork.abhaDetails.abhaId}</strong>
-                    </div>
-                    <div className="text-emerald-700 font-medium text-[10px] mt-0.5">
-                      ✓ Personal identifiers (Name, DOB, Phone) excluded from ingestion for breach security
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2 font-mono text-xs shrink-0">
-                    <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg font-bold">
-                      Blood: {selectedPatient.inTransitPaperwork.abhaDetails.bloodGroup}
-                    </span>
-                    <span className="bg-slate-200 text-slate-800 px-2.5 py-1 rounded-lg font-bold">
-                      {selectedPatient.inTransitPaperwork.abhaDetails.pmjayEligible ? 'PM-JAY Cleared' : 'Insured'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Critical Medical History Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  {/* Allergies */}
-                  <div className="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl space-y-1">
-                    <div className="flex items-center space-x-1.5 text-rose-800 font-extrabold text-[11px] uppercase">
-                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                      <span>Known Allergies:</span>
-                    </div>
-                    <div className="text-rose-950 font-bold">
-                      {selectedPatient.inTransitPaperwork.abhaDetails.knownAllergies.join(', ') || 'No known drug allergies'}
-                    </div>
-                  </div>
-
-                  {/* Chronic Conditions */}
-                  <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-1">
-                    <div className="text-[11px] font-extrabold text-slate-700 uppercase">
-                      Chronic Conditions:
-                    </div>
-                    <div className="text-slate-800">
-                      {selectedPatient.inTransitPaperwork.abhaDetails.chronicConditions.join(', ')}
-                    </div>
-                  </div>
-
-                  {/* Current Medications */}
-                  <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-1">
-                    <div className="text-[11px] font-extrabold text-slate-700 uppercase">
-                      Current Medications:
-                    </div>
-                    <div className="text-slate-800 font-mono text-[11px]">
-                      {selectedPatient.inTransitPaperwork.abhaDetails.currentMedications.join(' • ')}
-                    </div>
-                  </div>
-
-                  {/* PM-JAY & Insurance */}
-                  <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl space-y-1">
-                    <div className="text-[11px] font-extrabold text-emerald-800 uppercase">
-                      Insurance & PM-JAY Cashless:
-                    </div>
-                    <div className="text-emerald-950 font-bold">
-                      {selectedPatient.inTransitPaperwork.abhaDetails.pmjayEligible
-                        ? 'Ayushman Bharat Eligible (₹5 Lakh Cashless Pre-Authorized)'
-                        : selectedPatient.inTransitPaperwork.abhaDetails.insuranceProvider}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Live In-Transit Vitals */}
-                {selectedPatient.inTransitPaperwork.initialVitals && (
-                  <div className="bg-slate-900 text-white p-4 rounded-2xl space-y-2 text-xs font-mono">
-                    <div className="text-slate-400 text-[10px] uppercase font-bold">
-                      In-Ambulance Telemetry Vitals:
-                    </div>
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                      <div className="bg-slate-800 p-2 rounded-xl">
-                        <div className="text-slate-400 text-[9px]">PULSE</div>
-                        <div className="text-emerald-400 font-bold text-sm">{selectedPatient.inTransitPaperwork.initialVitals.heartRate} bpm</div>
-                      </div>
-                      <div className="bg-slate-800 p-2 rounded-xl">
-                        <div className="text-slate-400 text-[9px]">SPO2</div>
-                        <div className="text-cyan-400 font-bold text-sm">{selectedPatient.inTransitPaperwork.initialVitals.spO2}%</div>
-                      </div>
-                      <div className="bg-slate-800 p-2 rounded-xl">
-                        <div className="text-slate-400 text-[9px]">BP</div>
-                        <div className="text-amber-400 font-bold text-sm">{selectedPatient.inTransitPaperwork.initialVitals.bloodPressureSys}/{selectedPatient.inTransitPaperwork.initialVitals.bloodPressureDia}</div>
-                      </div>
-                      <div className="bg-slate-800 p-2 rounded-xl">
-                        <div className="text-slate-400 text-[9px]">GCS</div>
-                        <div className="text-purple-400 font-bold text-sm">{selectedPatient.inTransitPaperwork.initialVitals.gcsScore}/15</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Inbound Ambulance Real-Time Route & Address (Ambulance to Hospital ER) */}
-                {selectedPatient.status !== 'ADMITTED' && selectedPatient.status !== 'DISCHARGED' && loggedHospital && (
-                  <div className="pt-2">
-                    <LiveRouteMap
-                      isHospitalView={true}
-                      patientId={selectedPatient.patientUniqueId}
-                      origin={{
-                        lat: selectedPatient.patientPickupCoords.lat,
-                        lng: selectedPatient.patientPickupCoords.lng,
-                        address: selectedPatient.patientPickupCoords.address,
-                      }}
-                      destination={{
-                        lat: loggedHospital.latitude,
-                        lng: loggedHospital.longitude,
-                        name: loggedHospital.name,
-                        address: loggedHospital.address,
-                        bay: selectedPatient.reservedBay,
-                      }}
-                      initialEtaMins={selectedPatient.ambulanceDetails.currentEtaMins}
-                      initialDistanceKm={selectedPatient.ambulanceDetails.distanceRemainingKm}
-                      speedKmh={selectedPatient.ambulanceDetails.currentSpeedKmh}
-                      vehicleNumber={selectedPatient.ambulanceDetails.vehicleNumber}
-                      driverName={selectedPatient.ambulanceDetails.driverName}
-                      driverPhone={selectedPatient.ambulanceDetails.driverPhone}
-                      emergencyBrief={selectedPatient.emergencyBrief}
-                    />
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-6 text-xs text-slate-500">
-                Patient registered under Emergency Fast-Track token ({selectedPatient.patientUniqueId}).
-              </div>
-            )}
-
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedPatient(null)}
-                className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-xs cursor-pointer"
-              >
-                Close Record
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {/* Voice-to-QR Reception Scanner Modal */}
       {loggedHospital && (
         <ReceptionQrScannerModal

@@ -1,8 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole, UserProfile, PatientVoiceRegistration } from '../types';
+import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole, UserProfile, PatientVoiceRegistration, AdmissionNotification } from '../types';
 import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, SAMPLE_DRIVERS, DEFAULT_ACTIVE_BOOKING } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
+import { speakTextWithSarvam } from '../services/sarvamAiService';
 import { soundEffects } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import {
@@ -68,6 +69,8 @@ interface EmergencyContextType {
   admitPatient: (bookingCode: string) => void;
   dischargePatient: (bookingCode: string) => void;
   setPatientStatus: (bookingCode: string, status: EmergencyBooking['status']) => void;
+  admissionNotice: AdmissionNotification | null;
+  dismissAdmissionNotice: () => void;
   userLocation: { lat: number; lng: number; address: string; isLiveGps: boolean };
   requestLiveLocation: () => void;
   resetEmergencyState: () => void;
@@ -151,6 +154,25 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getSavedUserProfile());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isVoiceQrModalOpen, setRawIsVoiceQrModalOpen] = useState(false);
+
+  // Real-Time Admission Notice for Guardian Reassurance
+  const [admissionNotice, setAdmissionNotice] = useState<AdmissionNotification | null>(() => {
+    try {
+      const saved = localStorage.getItem('lifecare_admission_notice');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const dismissAdmissionNotice = () => {
+    setAdmissionNotice(null);
+    try {
+      localStorage.removeItem('lifecare_admission_notice');
+    } catch {
+      // ignore
+    }
+  };
 
   const setIsVoiceQrModalOpen = (open: boolean) => {
     if (open && currentUser && currentUser.role !== 'guardian') {
@@ -455,6 +477,16 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (event.data.hospitals !== undefined) {
           setHospitals(event.data.hospitals);
         }
+        if (event.data.admissionNotice) {
+          setAdmissionNotice(event.data.admissionNotice);
+          try {
+            localStorage.setItem('lifecare_admission_notice', JSON.stringify(event.data.admissionNotice));
+          } catch {
+            // ignore
+          }
+          soundEffects.playSuccessChime();
+          speakTextWithSarvam('You are admitted. Have patience, everything will be alright.', { langCode: 'en-IN' }).catch(() => {});
+        }
       }
     };
 
@@ -463,7 +495,12 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, []);
 
-  const broadcastState = (newActive: EmergencyBooking | null, newBookings: EmergencyBooking[], newHosp?: Hospital[]) => {
+  const broadcastState = (
+    newActive: EmergencyBooking | null,
+    newBookings: EmergencyBooking[],
+    newHosp?: Hospital[],
+    newAdmission?: AdmissionNotification
+  ) => {
     try {
       const channel = new BroadcastChannel('lifecare_sync_channel');
       channel.postMessage({
@@ -471,6 +508,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         activeBooking: newActive,
         allBookings: newBookings,
         hospitals: newHosp || hospitals,
+        admissionNotice: newAdmission,
       });
       channel.close();
     } catch {
@@ -1150,7 +1188,32 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
     const updatedList = allBookings.map((b) => (b.bookingCode === bookingCode ? { ...b, status } : b));
     saveAll(updatedList);
-    broadcastState(updatedActive, updatedList, hospitals);
+
+    let newNotice: AdmissionNotification | undefined = undefined;
+    if (status === 'ADMITTED') {
+      const target = updatedList.find((b) => b.bookingCode === bookingCode) || updatedActive;
+      if (target) {
+        newNotice = {
+          bookingCode,
+          patientId: target.patientUniqueId,
+          patientName: target.patientName || 'Emergency Patient',
+          hospitalName: target.hospitalName,
+          bay: target.reservedBay,
+          doctorName: target.assignedDoctor?.name || 'Emergency Attending Specialist',
+          admittedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setAdmissionNotice(newNotice);
+        try {
+          localStorage.setItem('lifecare_admission_notice', JSON.stringify(newNotice));
+        } catch {
+          // ignore
+        }
+        soundEffects.playSuccessChime();
+        speakTextWithSarvam('You are admitted. Have patience, everything will be alright.', { langCode: 'en-IN' }).catch(() => {});
+      }
+    }
+
+    broadcastState(updatedActive, updatedList, hospitals, newNotice);
     soundEffects.playSuccessChime();
   };
 
@@ -1227,20 +1290,6 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       inTransitPaperwork: {
         isSubmitted: true,
         submittedAt: new Date().toISOString(),
-        abhaDetails: {
-          uniqueRecordId: `UID-MED-${randomNum}`,
-          abhaId: registration.optionalAbhaId || '91-4820-9182-3921',
-          bloodGroup: registration.bloodGroup,
-          knownAllergies: registration.allergies ? [registration.allergies] : ['None'],
-          chronicConditions: registration.medicalHistory ? [registration.medicalHistory] : ['None'],
-          currentMedications: registration.currentMedications ? [registration.currentMedications] : ['None'],
-          pastSurgeries: ['None'],
-          insuranceProvider: 'Ayushman Bharat PM-JAY Cashless',
-          pmjayEligible: true,
-          pmjayCardNumber: `PMJAY-DL-${randomNum}`,
-          coverageAmountINR: 500000,
-          verifiedWithABDM: true,
-        },
         initialVitals: {
           heartRate: 110,
           bloodPressureSys: 140,
@@ -1262,7 +1311,26 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const updatedBookings = [newBooking, ...allBookings.filter((b) => b.bookingCode !== bookingCode)];
     saveAll(updatedBookings);
     syncBookingToFirestore(newBooking);
-    broadcastState(newBooking, updatedBookings, hospitals);
+
+    const newNotice: AdmissionNotification = {
+      bookingCode,
+      patientId: newBooking.patientUniqueId,
+      patientName: newBooking.patientName,
+      hospitalName: newBooking.hospitalName,
+      bay: newBooking.reservedBay,
+      doctorName: newBooking.assignedDoctor?.name || 'Emergency Attending Specialist',
+      admittedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setAdmissionNotice(newNotice);
+    try {
+      localStorage.setItem('lifecare_admission_notice', JSON.stringify(newNotice));
+    } catch {
+      // ignore
+    }
+    soundEffects.playSuccessChime();
+    speakTextWithSarvam('You are admitted. Have patience, everything will be alright.', { langCode: 'en-IN' }).catch(() => {});
+
+    broadcastState(newBooking, updatedBookings, hospitals, newNotice);
 
     return newBooking;
   };
@@ -1283,6 +1351,11 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setActiveBooking(null);
     setAllBookings([]);
     setLoggedHospitalId('hosp-aiims-delhi');
+
+    setAdmissionNotice(null);
+    try {
+      localStorage.removeItem('lifecare_admission_notice');
+    } catch { }
 
     broadcastState(null, [], freshHospitals);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1341,6 +1414,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         admitPatient,
         dischargePatient,
         setPatientStatus,
+        admissionNotice,
+        dismissAdmissionNotice,
         userLocation,
         requestLiveLocation,
         resetEmergencyState,

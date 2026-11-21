@@ -17,6 +17,16 @@ export interface UserProfile {
   lastLoginAt: string;
 }
 
+export interface AdmissionNotification {
+  bookingCode: string;
+  patientId: string;
+  patientName: string;
+  hospitalName: string;
+  bay: string;
+  doctorName: string;
+  admittedAt: string;
+}
+
 export interface PatientVoiceRegistration {
   patientId: string; // e.g., LC-3829
   fullName: string;

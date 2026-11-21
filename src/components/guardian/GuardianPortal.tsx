@@ -18,7 +18,8 @@ import {
   Radio,
   QrCode,
   Languages,
-  PhoneCall
+  PhoneCall,
+  X
 } from 'lucide-react';
 import { PRESET_EMERGENCIES } from '../../data/mockData';
 import { sanitizeText, sanitizeIdentifier } from '../../utils/security';
@@ -55,7 +56,9 @@ export const GuardianPortal: React.FC = () => {
     bookHospitalBed,
     userLocation,
     requestLiveLocation,
-    setIsVoiceQrModalOpen
+    setIsVoiceQrModalOpen,
+    admissionNotice,
+    dismissAdmissionNotice
   } = useEmergency();
 
   // Mode: 'track' | 'register'
@@ -102,9 +105,10 @@ export const GuardianPortal: React.FC = () => {
   // Sync tracked booking when activeBooking updates
   useEffect(() => {
     if (activeBooking) {
-      // oxlint-disable-next-line react/set-state-in-effect
+      // oxlint-disable-next-line react-refresh/only-export-components, react/set-state-in-effect
       setTrackedBooking(activeBooking);
       setTrackPatientIdInput(activeBooking.patientUniqueId);
+      setCompletedRegistration(activeBooking);
     }
   }, [activeBooking]);
 
@@ -410,6 +414,69 @@ export const GuardianPortal: React.FC = () => {
         </div>
       </div>
 
+      {/* Patient Admitted Reassurance Alert */}
+      {(admissionNotice || activeBooking?.status === 'ADMITTED' || trackedBooking?.status === 'ADMITTED' || completedRegistration?.status === 'ADMITTED') && (
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white rounded-3xl p-6 sm:p-7 shadow-xl shadow-emerald-600/25 border-2 border-emerald-300 space-y-4 animate-scaleUp">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start space-x-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/30 shadow-inner">
+                <CheckCircle2 className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <span className="text-[11px] font-mono uppercase tracking-wider bg-white/25 px-2.5 py-0.5 rounded-full font-bold">
+                  Hospital Admission Confirmed
+                </span>
+                <h2 className="text-xl sm:text-2xl font-black mt-1.5 leading-snug">
+                  You are admitted. Have patience, everything will be alright.
+                </h2>
+                <p className="text-emerald-100 text-sm font-medium mt-1">
+                  आप अस्पताल में भर्ती हो चुके हैं। धैर्य रखें, सब कुछ ठीक हो जाएगा।
+                </p>
+              </div>
+            </div>
+
+            {admissionNotice && (
+              <button
+                type="button"
+                onClick={dismissAdmissionNotice}
+                className="text-white/70 hover:text-white p-1 hover:bg-white/10 rounded-full transition cursor-pointer"
+                title="Dismiss Notice"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs font-mono">
+            <div className="bg-black/20 rounded-xl p-3 border border-white/10">
+              <div className="text-emerald-200 text-[10px] uppercase font-bold">Patient Ref</div>
+              <div className="text-base font-black text-white">
+                {admissionNotice?.patientId || activeBooking?.patientUniqueId || trackedBooking?.patientUniqueId || 'PAT-ACTIVE'}
+              </div>
+            </div>
+            <div className="bg-black/20 rounded-xl p-3 border border-white/10">
+              <div className="text-emerald-200 text-[10px] uppercase font-bold">Allocated Bay</div>
+              <div className="text-base font-bold text-white">
+                {admissionNotice?.bay || activeBooking?.reservedBay || trackedBooking?.reservedBay || 'Trauma Bay #03'}
+              </div>
+            </div>
+            <div className="bg-black/20 rounded-xl p-3 border border-white/10">
+              <div className="text-emerald-200 text-[10px] uppercase font-bold">Hospital Name</div>
+              <div className="text-base font-bold text-white truncate">
+                {admissionNotice?.hospitalName || activeBooking?.hospitalName || trackedBooking?.hospitalName || 'Emergency Hospital'}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs text-emerald-100 bg-white/10 rounded-xl p-3 border border-white/10">
+            <HeartPulse className="w-4 h-4 text-rose-300 animate-pulse shrink-0" />
+            <span>
+              The emergency medical trauma team is actively attending to the patient. Continuous monitoring initiated.
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ========================================================
           FLOW 1: TRACK PATIENT
           ======================================================== */}
@@ -465,12 +532,21 @@ export const GuardianPortal: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-2 font-mono">
-                  <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 px-3 py-1 rounded-lg font-bold text-xs">
-                    ETA: {trackedBooking.ambulanceDetails.currentEtaMins} mins
-                  </span>
-                  <span className="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg text-xs">
-                    {trackedBooking.ambulanceDetails.distanceRemainingKm} km
-                  </span>
+                  {trackedBooking.status === 'ADMITTED' ? (
+                    <span className="bg-emerald-500 text-white px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 shadow-xs animate-pulse">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>ADMITTED TO ER BAY</span>
+                    </span>
+                  ) : (
+                    <>
+                      <span className="bg-emerald-950 text-emerald-400 border border-emerald-800 px-3 py-1 rounded-lg font-bold text-xs">
+                        ETA: {trackedBooking.ambulanceDetails.currentEtaMins} mins
+                      </span>
+                      <span className="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg text-xs">
+                        {trackedBooking.ambulanceDetails.distanceRemainingKm} km
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
