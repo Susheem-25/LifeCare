@@ -49,20 +49,18 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
   // Quick stats summary
   const totalFreeBeds = hospitals.reduce((acc, h) => acc + h.beds.icuFree + h.beds.emergencyFree, 0);
 
-  const handleSelectRoleWithGoogle = async (role: AppRole) => {
-    // If already authenticated with Google under this role, proceed directly
-    if (currentUser && currentUser.role === role) {
-      onSelectRole(role);
-      return;
-    }
+  const handleSelectRole = (role: AppRole) => {
+    onSelectRole(role);
+  };
 
+  const handleExplicitGoogleSignIn = async (role: AppRole, e: React.MouseEvent) => {
+    e.stopPropagation();
     setAuthenticatingRole(role);
     try {
       await loginWithGoogle(role);
       onSelectRole(role);
     } catch (err) {
       console.warn('[WelcomeScreen] Google Sign-In notice:', err);
-      // Resilient fallback: still proceed so user is never blocked
       onSelectRole(role);
     } finally {
       setAuthenticatingRole(null);
@@ -93,7 +91,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
         {/* Card 1: Guardian */}
         <div 
-          onClick={() => handleSelectRoleWithGoogle('guardian')}
+          onClick={() => handleSelectRole('guardian')}
           className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-red-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -z-0 opacity-60 group-hover:scale-110 transition-transform"></div>
@@ -108,7 +106,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
                 Citizen Portal
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
-                Login as Guardian
+                Guardian Portal
               </h2>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                 Emergency reporting for families and bystanders. Track active patients or register a new emergency with Sarvam AI voice triage.
@@ -138,38 +136,39 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
           <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
             <button
               type="button"
-              disabled={authenticatingRole !== null}
               onClick={(e) => {
                 e.stopPropagation();
-                handleSelectRoleWithGoogle('guardian');
+                handleSelectRole('guardian');
               }}
-              className="w-full bg-red-600 group-hover:bg-red-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-red-600/25 cursor-pointer disabled:opacity-80"
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-red-600/25 cursor-pointer"
             >
-              {authenticatingRole === 'guardian' ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>Signing in with Google...</span>
-                </>
-              ) : (
-                <>
-                  <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0">
-                    <GoogleIcon className="w-3.5 h-3.5" />
-                  </div>
-                  <span>Continue as Guardian</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
+              <span>Enter Guardian Portal</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-            <div className="text-[10px] text-center text-slate-500 font-mono flex items-center justify-center space-x-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span>Google OAuth 2.0 • Auto Role ID (GUA-XXXX)</span>
+            <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
+              <span className="flex items-center space-x-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
+                <span>{currentUser?.role === 'guardian' ? currentUser.uniqueRoleId : 'Citizen Emergency Grid'}</span>
+              </span>
+              <button
+                type="button"
+                onClick={(e) => handleExplicitGoogleSignIn('guardian', e)}
+                className="text-red-600 hover:underline font-bold inline-flex items-center"
+              >
+                {authenticatingRole === 'guardian' ? (
+                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                ) : (
+                  <GoogleIcon className="w-3 h-3 mr-1" />
+                )}
+                <span>{currentUser ? 'Switch ID' : 'Sign with Google'}</span>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Card 2: Driver */}
         <div 
-          onClick={() => handleSelectRoleWithGoogle('driver')}
+          onClick={() => handleSelectRole('driver')}
           className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-amber-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-full -z-0 opacity-60 group-hover:scale-110 transition-transform"></div>
@@ -184,10 +183,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
                 108 Emergency Network
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
-                Login as Driver
+                108 Driver Portal
               </h2>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Paramedic cockpit interface. Login with Driver Badge ID, enter Patient ID, and access direct navigation straight to the allocated hospital ER bay.
+                Paramedic cockpit interface. Direct mission navigation to allocated hospital ER bays, in-transit telemetry, and patient tracking.
               </p>
             </div>
 
@@ -214,38 +213,39 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
           <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
             <button
               type="button"
-              disabled={authenticatingRole !== null}
               onClick={(e) => {
                 e.stopPropagation();
-                handleSelectRoleWithGoogle('driver');
+                handleSelectRole('driver');
               }}
-              className="w-full bg-amber-600 group-hover:bg-amber-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-amber-600/25 cursor-pointer disabled:opacity-80"
+              className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-amber-600/25 cursor-pointer"
             >
-              {authenticatingRole === 'driver' ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>Signing in with Google...</span>
-                </>
-              ) : (
-                <>
-                  <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0">
-                    <GoogleIcon className="w-3.5 h-3.5" />
-                  </div>
-                  <span>Continue as Paramedic Driver</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
+              <span>Enter Driver Cockpit</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-            <div className="text-[10px] text-center text-slate-500 font-mono flex items-center justify-center space-x-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span>Google OAuth 2.0 • Auto Driver ID (DRV-XXXX)</span>
+            <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
+              <span className="flex items-center space-x-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
+                <span>{currentUser?.role === 'driver' ? currentUser.uniqueRoleId : '108 Paramedic Lead'}</span>
+              </span>
+              <button
+                type="button"
+                onClick={(e) => handleExplicitGoogleSignIn('driver', e)}
+                className="text-amber-700 hover:underline font-bold inline-flex items-center"
+              >
+                {authenticatingRole === 'driver' ? (
+                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                ) : (
+                  <GoogleIcon className="w-3 h-3 mr-1" />
+                )}
+                <span>{currentUser ? 'Switch ID' : 'Sign with Google'}</span>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Card 3: Hospital */}
         <div 
-          onClick={() => handleSelectRoleWithGoogle('hospital')}
+          onClick={() => handleSelectRole('hospital')}
           className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-emerald-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-0 opacity-60 group-hover:scale-110 transition-transform"></div>
@@ -260,10 +260,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
                 ER Command Center
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
-                Login as Hospital
+                Hospital Portal
               </h2>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Hospital staff portal. Login with Unique Hospital ID to manage editable beds, doctor rosters (Free/Busy/Absent), equipment, and patient admissions.
+                Hospital staff portal. Manage editable beds, doctor rosters (Free/Busy/Absent), equipment, and patient admissions.
               </p>
             </div>
 
@@ -290,31 +290,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onOp
           <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
             <button
               type="button"
-              disabled={authenticatingRole !== null}
               onClick={(e) => {
                 e.stopPropagation();
-                handleSelectRoleWithGoogle('hospital');
+                handleSelectRole('hospital');
               }}
-              className="w-full bg-emerald-600 group-hover:bg-emerald-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-emerald-600/25 cursor-pointer disabled:opacity-80"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-emerald-600/25 cursor-pointer"
             >
-              {authenticatingRole === 'hospital' ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>Signing in with Google...</span>
-                </>
-              ) : (
-                <>
-                  <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0">
-                    <GoogleIcon className="w-3.5 h-3.5" />
-                  </div>
-                  <span>Continue as Hospital ER</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
+              <span>Enter Hospital Staff Portal</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-            <div className="text-[10px] text-center text-slate-500 font-mono flex items-center justify-center space-x-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span>Google OAuth 2.0 • Auto Hospital ID (HSP-XXXX)</span>
+            <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
+              <span className="flex items-center space-x-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
+                <span>{currentUser?.role === 'hospital' ? currentUser.uniqueRoleId : 'Hospital Command'}</span>
+              </span>
+              <button
+                type="button"
+                onClick={(e) => handleExplicitGoogleSignIn('hospital', e)}
+                className="text-emerald-700 hover:underline font-bold inline-flex items-center"
+              >
+                {authenticatingRole === 'hospital' ? (
+                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                ) : (
+                  <GoogleIcon className="w-3 h-3 mr-1" />
+                )}
+                <span>{currentUser ? 'Switch ID' : 'Sign with Google'}</span>
+              </button>
             </div>
           </div>
         </div>

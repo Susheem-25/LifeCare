@@ -6,7 +6,6 @@ import {
   Building2,
   RotateCcw,
   PhoneCall,
-  Lock,
   Presentation,
   ArrowLeft,
   User
@@ -26,16 +25,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
     loggedHospital,
     loggedDriver,
     currentUser,
-    setIsAuthModalOpen,
-    loginWithGoogle
+    setIsAuthModalOpen
   } = useEmergency();
 
   const handleNavRoleClick = (role: AppRole) => {
-    if (!currentUser || currentUser.role !== role) {
-      loginWithGoogle(role).catch(() => setCurrentRole(role));
-    } else {
-      setCurrentRole(role);
-    }
+    setCurrentRole(role);
   };
 
   return (
@@ -111,7 +105,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
               <span>
                 {loggedDriver ? loggedDriver.driverName.split(' ')[0] : 'Driver'}
               </span>
-              {!loggedDriver && <Lock className="w-2.5 h-2.5 text-slate-400" />}
             </button>
 
             {/* Hospital Portal */}
@@ -128,7 +121,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTrackModal }) => {
               <span>
                 {loggedHospital ? loggedHospital.hospitalCode : 'Hospital'}
               </span>
-              {!loggedHospital && <Lock className="w-2.5 h-2.5 text-slate-400" />}
             </button>
           </nav>
 

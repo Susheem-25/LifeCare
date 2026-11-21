@@ -9,6 +9,8 @@ import {
   signInWithGoogle,
   signOutUser,
   getSavedUserProfile,
+  persistUserProfile,
+  generateUniqueRoleId,
   onAuthStateSubscription,
   syncBookingToFirestore,
   subscribeToFirestoreBookings,
@@ -29,6 +31,7 @@ interface EmergencyContextType {
   loggedDriver: DriverAccount | null;
   selectedAbhaProfile: ABHAMedicalRecord | null;
   currentUser: UserProfile | null;
+  setCurrentUser: (user: UserProfile | null) => void;
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
   isVoiceQrModalOpen: boolean;
@@ -262,6 +265,53 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const loginWithGoogle = async (role: AppRole): Promise<UserProfile> => {
+    // If user is already authenticated with Google, adapt session cleanly without opening redundant popups
+    if (currentUser && currentUser.uid) {
+      const assignedId = currentUser.uniqueRoleId.startsWith(
+        role === 'guardian' ? 'GRD' : role === 'driver' ? 'DRV' : 'HSP'
+      )
+        ? currentUser.uniqueRoleId
+        : generateUniqueRoleId(role);
+
+      const updatedProfile: UserProfile = {
+        ...currentUser,
+        role,
+        uniqueRoleId: assignedId,
+        lastLoginAt: new Date().toISOString(),
+      };
+      persistUserProfile(updatedProfile);
+      setCurrentUser(updatedProfile);
+      setCurrentRole(role);
+
+      if (role === 'driver' && !loggedDriver) {
+        const autoDriver: DriverAccount = {
+          driverId: assignedId.startsWith('DRV') ? assignedId : `DRV-${assignedId.replace(/\D/g, '').slice(-4) || '101'}`,
+          pin: '1234',
+          driverName: updatedProfile.displayName || '108 Paramedic Lead',
+          phone: '+91-98101-08108',
+          vehicleNumber: 'DL-01-AMB-402',
+          vehicleType: 'Advanced Cardiac Life Support (ACLS)',
+        };
+        setLoggedDriver(autoDriver);
+        try {
+          localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(autoDriver));
+        } catch {
+          // ignore
+        }
+      }
+
+      if (role === 'hospital' && !loggedHospitalId && hospitals.length > 0) {
+        setLoggedHospitalId(hospitals[0].id);
+        try {
+          localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, hospitals[0].id);
+        } catch {
+          // ignore
+        }
+      }
+
+      return updatedProfile;
+    }
+
     const user = await signInWithGoogle(role);
     setCurrentUser(user);
     setCurrentRole(role);
@@ -270,7 +320,9 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (role === 'driver') {
       const existing = SAMPLE_DRIVERS.find(d => d.driverId === user.uniqueRoleId) || {
         ...SAMPLE_DRIVERS[0],
-        driverId: user.uniqueRoleId,
+        driverId: user.uniqueRoleId.startsWith('DRV')
+          ? user.uniqueRoleId
+          : `DRV-${user.uniqueRoleId.replace(/\D/g, '').slice(-4) || '101'}`,
         driverName: user.displayName || '108 Paramedic Lead',
       };
       setLoggedDriver(existing);
@@ -296,6 +348,41 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     return user;
   };
+
+  // Keep driver and hospital sessions synchronized securely whenever an authenticated user is active
+  useEffect(() => {
+    if (currentUser) {
+      if (!loggedDriver) {
+        const cleanId = currentUser.uniqueRoleId.startsWith('DRV')
+          ? currentUser.uniqueRoleId
+          : `DRV-${currentUser.uniqueRoleId.replace(/\D/g, '').slice(-4) || '101'}`;
+        const autoDriver: DriverAccount = {
+          driverId: cleanId,
+          pin: '1234',
+          driverName: currentUser.displayName || '108 Paramedic Lead',
+          phone: '+91-98101-08108',
+          vehicleNumber: 'DL-01-AMB-402',
+          vehicleType: 'Advanced Cardiac Life Support (ACLS)',
+        };
+        setLoggedDriver(autoDriver);
+        try {
+          localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(autoDriver));
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!loggedHospitalId && hospitals.length > 0) {
+        const targetHosp = hospitals[0];
+        setLoggedHospitalId(targetHosp.id);
+        try {
+          localStorage.setItem(STORAGE_KEY_LOGGED_HOSP_ID, targetHosp.id);
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, [currentUser, hospitals, loggedDriver, loggedHospitalId]);
 
   const logoutUser = async (): Promise<void> => {
     await signOutUser();
@@ -1191,6 +1278,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         loggedDriver,
         selectedAbhaProfile,
         currentUser,
+        setCurrentUser,
         isAuthModalOpen,
         setIsAuthModalOpen,
         isVoiceQrModalOpen,

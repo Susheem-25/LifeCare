@@ -99,7 +99,7 @@ export function getSavedUserProfile(): UserProfile | null {
   }
 }
 
-function persistUserProfile(profile: UserProfile | null) {
+export function persistUserProfile(profile: UserProfile | null) {
   try {
     if (profile) {
       localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(profile));
@@ -199,6 +199,21 @@ export function onAuthStateSubscription(callback: (user: UserProfile | null) => 
         const saved = getSavedUserProfile();
         if (saved && saved.uid === user.uid) {
           callback(saved);
+        } else {
+          const assignedId = saved?.uniqueRoleId || generateUniqueRoleId(saved?.role || 'guardian');
+          const restored: UserProfile = {
+            uid: user.uid,
+            email: user.email || 'user@emergency.gov.in',
+            displayName: user.displayName || 'LifeCare Emergency User',
+            photoURL: user.photoURL || undefined,
+            role: saved?.role || 'guardian',
+            uniqueRoleId: assignedId,
+            authProvider: 'google.com',
+            createdAt: saved?.createdAt || new Date().toISOString(),
+            lastLoginAt: new Date().toISOString(),
+          };
+          persistUserProfile(restored);
+          callback(restored);
         }
       } else {
         const saved = getSavedUserProfile();
