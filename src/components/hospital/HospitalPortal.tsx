@@ -22,8 +22,10 @@ import {
   Cpu, 
   Zap, 
   X,
-  ShieldCheck 
+  ShieldCheck,
+  QrCode
 } from 'lucide-react';
+import { ReceptionQrScannerModal } from './ReceptionQrScannerModal';
 
 export const HospitalPortal: React.FC = () => {
   const { 
@@ -39,8 +41,11 @@ export const HospitalPortal: React.FC = () => {
     addEquipment,
     removeEquipment,
     admitPatient,
-    dischargePatient
+    dischargePatient,
+    admitVoiceQrPatient
   } = useEmergency();
+
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
 
   // Authentication State
   const [hospCodeInput, setHospCodeInput] = useState<string>('AIIMS-DELHI');
@@ -373,7 +378,18 @@ export const HospitalPortal: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl text-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsQrScannerOpen(true)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl transition cursor-pointer shadow-xs flex items-center space-x-1.5"
+                  title="Scan Patient Voice-QR code from ambulance"
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span>Scan Patient QR</span>
+                </button>
+
+                <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl text-xs">
                 <button
                   type="button"
                   onClick={() => setPatientSubTab('incoming')}
@@ -414,6 +430,7 @@ export const HospitalPortal: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
 
             {/* Sub-Tab 1: INCOMING PATIENTS */}
             {patientSubTab === 'incoming' && (
@@ -1433,6 +1450,18 @@ export const HospitalPortal: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+      {/* Voice-to-QR Reception Scanner Modal */}
+      {loggedHospital && (
+        <ReceptionQrScannerModal
+          isOpen={isQrScannerOpen}
+          onClose={() => setIsQrScannerOpen(false)}
+          hospital={loggedHospital}
+          onAdmitPatient={(reg, bay, doc) => {
+            admitVoiceQrPatient(reg, bay, doc, loggedHospital.id);
+            setPatientSubTab('admitted');
+          }}
+        />
       )}
     </div>
   );

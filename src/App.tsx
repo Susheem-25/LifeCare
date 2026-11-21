@@ -7,6 +7,7 @@ import { DriverPortal } from './components/ambulance/DriverPortal';
 import { HospitalPortal } from './components/hospital/HospitalPortal';
 import { HackFrontTrackModal } from './components/tracks/HackFrontTrackModal';
 import { GoogleAuthModal } from './components/auth/GoogleAuthModal';
+import { VoiceToQrModal } from './components/common/VoiceToQrModal';
 import {
   HeartPulse,
   Sparkles,
@@ -18,7 +19,15 @@ import {
 } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
-  const { currentRole, setCurrentRole, activeBooking, isAuthModalOpen, setIsAuthModalOpen } = useEmergency();
+  const { 
+    currentRole, 
+    setCurrentRole, 
+    activeBooking, 
+    isAuthModalOpen, 
+    setIsAuthModalOpen,
+    isVoiceQrModalOpen,
+    setIsVoiceQrModalOpen
+  } = useEmergency();
   const [isTrackModalOpen, setIsTrackModalOpen] = useState<boolean>(false);
 
   return (
@@ -204,6 +213,12 @@ const MainAppContent: React.FC = () => {
       <GoogleAuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* Ambulance / Guardian Voice-to-QR Pre-Admission Modal */}
+      <VoiceToQrModal
+        isOpen={isVoiceQrModalOpen}
+        onClose={() => setIsVoiceQrModalOpen(false)}
       />
     </div>
   );

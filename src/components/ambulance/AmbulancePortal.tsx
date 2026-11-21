@@ -16,7 +16,8 @@ import {
   Droplet,
   CreditCard,
   Lock,
-  LogOut
+  LogOut,
+  QrCode
 } from 'lucide-react';
 
 export const AmbulancePortal: React.FC = () => {
@@ -29,7 +30,8 @@ export const AmbulancePortal: React.FC = () => {
     linkAmbulanceToBooking,
     updateAmbulanceStatus,
     submitInTransitPaperwork,
-    fetchPatientByAbha
+    fetchPatientByAbha,
+    setIsVoiceQrModalOpen
   } = useEmergency();
 
   // Driver Login credentials state
@@ -267,6 +269,16 @@ export const AmbulancePortal: React.FC = () => {
         </div>
 
         <div className="flex items-center flex-wrap gap-2 text-xs">
+          <button
+            type="button"
+            onClick={() => setIsVoiceQrModalOpen(true)}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition cursor-pointer font-bold text-xs shadow-xs"
+            title="Generate Voice-to-QR Pre-Admission Pass"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Voice-to-QR</span>
+          </button>
+
           <span className="flex items-center gap-1.5 text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-xs font-semibold">
             <Radio className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
             <span>108 Network Active</span>

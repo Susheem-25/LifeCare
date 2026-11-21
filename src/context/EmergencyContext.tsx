@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole, UserProfile } from '../types';
+import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole, UserProfile, PatientVoiceRegistration } from '../types';
 import { INITIAL_HOSPITALS, SAMPLE_ABHA_PROFILES, SAMPLE_DRIVERS } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
 import { soundEffects } from '../utils/audio';
@@ -31,8 +31,11 @@ interface EmergencyContextType {
   currentUser: UserProfile | null;
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
+  isVoiceQrModalOpen: boolean;
+  setIsVoiceQrModalOpen: (open: boolean) => void;
   loginWithGoogle: (role: AppRole) => Promise<UserProfile>;
   logoutUser: () => Promise<void>;
+  admitVoiceQrPatient: (registration: PatientVoiceRegistration, bay: string, doctorName: string, hospitalId?: string) => EmergencyBooking;
   searchTriageMode: 'standard' | 'sarvam' | 'neo4j';
   setSearchTriageMode: (mode: 'standard' | 'sarvam' | 'neo4j') => void;
   navigateToTrack: (track: 'neo4j' | 'sarvam' | 'arduino' | 'general') => void;
@@ -121,6 +124,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Firebase Authentication & Role-based Unique ID Profile State
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getSavedUserProfile());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isVoiceQrModalOpen, setIsVoiceQrModalOpen] = useState(false);
 
   useEffect(() => {
     // Listen to Firebase Auth state
@@ -1010,6 +1014,111 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setPatientStatus(bookingCode, 'DISCHARGED');
   };
 
+  // Instant 1-Click Admission from Scanned Ambulance Voice-QR Payload
+  const admitVoiceQrPatient = (
+    registration: PatientVoiceRegistration,
+    bay: string,
+    doctorName: string,
+    hospitalId?: string
+  ): EmergencyBooking => {
+    const hosp = hospitals.find((h) => h.id === hospitalId) || loggedHospital || hospitals[0];
+    const doc = hosp.doctors.find((d) => d.name === doctorName) || hosp.doctors[0];
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const bookingCode = `QR-ADM-${randomNum}`;
+
+    const newBooking: EmergencyBooking = {
+      patientUniqueId: registration.patientId,
+      bookingCode,
+      patientName: registration.fullName,
+      patientPhone: registration.guardianPhone,
+      emergencyBrief: `${registration.chiefComplaint} (Voice-QR Reception Intake)`,
+      aiAnalysis: {
+        detectedCondition: registration.chiefComplaint,
+        summary: `Pre-admission packet scanned via Voice-QR. Immediate bed allocation to ${bay}.`,
+        urgency: 'CRITICAL_RED',
+        urgencyLabel: 'Code Red - Direct Admission',
+        esiLevel: 1,
+        esiCategory: 'ESI-1: Immediate Resuscitation',
+        goldenHourWindowMinutes: 60,
+        recommendedSpeciality: [doc.specialization],
+        requiredMachinery: ['Cath Lab Biplane', 'ALS Defibrillator'],
+        firstAidImmediateInstructions: ['Immediate IV access', 'Telemetry monitor hookup'],
+        icdCodeEstimate: 'ICD-10 I21.9',
+        aiConfidenceScore: 99,
+      },
+      hospitalId: hosp.id,
+      hospitalName: hosp.name,
+      hospitalAddress: hosp.address,
+      hospitalPhone: hosp.phone,
+      hospitalCoords: {
+        lat: hosp.latitude,
+        lng: hosp.longitude,
+      },
+      patientPickupCoords: {
+        lat: 28.542,
+        lng: 77.235,
+        address: 'Ambulance Rapid Intake (Voice QR)',
+      },
+      assignedDoctor: doc,
+      reservedBay: bay,
+      reservedBedType: 'Emergency Trauma Bay',
+      reservedEquipments: ['ALS Defibrillator', 'Vital Monitor'],
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 60 * 60000).toISOString(),
+      status: 'ADMITTED',
+      driverLoggedIn: true,
+      ambulanceDetails: {
+        vehicleNumber: 'DL-01-AMB-QR',
+        driverName: '108 Paramedic Team',
+        driverPhone: registration.guardianPhone,
+        type: 'Advanced Cardiac Life Support (ACLS)',
+        currentEtaMins: 0,
+        currentSpeedKmh: 0,
+        distanceRemainingKm: 0,
+      },
+      inTransitPaperwork: {
+        isSubmitted: true,
+        submittedAt: new Date().toISOString(),
+        abhaDetails: {
+          uniqueRecordId: `UID-MED-${randomNum}`,
+          abhaId: registration.optionalAbhaId || '91-4820-9182-3921',
+          bloodGroup: registration.bloodGroup,
+          knownAllergies: registration.allergies ? [registration.allergies] : ['None'],
+          chronicConditions: registration.medicalHistory ? [registration.medicalHistory] : ['None'],
+          currentMedications: registration.currentMedications ? [registration.currentMedications] : ['None'],
+          pastSurgeries: ['None'],
+          insuranceProvider: 'Ayushman Bharat PM-JAY Cashless',
+          pmjayEligible: true,
+          pmjayCardNumber: `PMJAY-DL-${randomNum}`,
+          coverageAmountINR: 500000,
+          verifiedWithABDM: true,
+        },
+        initialVitals: {
+          heartRate: 110,
+          bloodPressureSys: 140,
+          bloodPressureDia: 90,
+          spO2: 95,
+          respiratoryRate: 20,
+          temperatureF: 98.6,
+          gcsScore: 15,
+          recordedAt: new Date().toISOString(),
+        },
+        digitalConsentSigned: true,
+        preAdmitRegistrationNumber: `VOICE-QR-${randomNum}`,
+      },
+      securitySignature: `VOICE-QR-AES-GCM-256:0x${randomNum}`,
+      tokenExpiryTimestamp: Date.now() + 86400000,
+    };
+
+    saveActive(newBooking);
+    const updatedBookings = [newBooking, ...allBookings.filter((b) => b.bookingCode !== bookingCode)];
+    saveAll(updatedBookings);
+    syncBookingToFirestore(newBooking);
+    broadcastState(newBooking, updatedBookings, hospitals);
+
+    return newBooking;
+  };
+
   const resetEmergencyState = () => {
     try {
       localStorage.clear();
@@ -1047,8 +1156,11 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         currentUser,
         isAuthModalOpen,
         setIsAuthModalOpen,
+        isVoiceQrModalOpen,
+        setIsVoiceQrModalOpen,
         loginWithGoogle,
         logoutUser,
+        admitVoiceQrPatient,
         searchTriageMode,
         setSearchTriageMode,
         navigateToTrack,

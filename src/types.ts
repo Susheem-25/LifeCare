@@ -17,6 +17,37 @@ export interface UserProfile {
   lastLoginAt: string;
 }
 
+export interface PatientVoiceRegistration {
+  patientId: string; // e.g., LC-3829
+  fullName: string;
+  age: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  bloodGroup: string;
+  chiefComplaint: string;
+  allergies: string;
+  currentMedications: string;
+  medicalHistory: string;
+  guardianPhone: string;
+  optionalAbhaId?: string;
+  createdAt: string;
+}
+
+export interface CompactRegistrationQRPacket {
+  t: 'LC_REG_V1';
+  pid: string;
+  fn: string;
+  age: string;
+  gen: string;
+  bg: string;
+  cc: string;
+  alg: string;
+  med: string;
+  mh: string;
+  gp: string;
+  abha?: string;
+  ts: number;
+}
+
 export interface Doctor {
   id: string;
   name: string;

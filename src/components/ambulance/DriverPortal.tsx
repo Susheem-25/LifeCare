@@ -7,7 +7,9 @@ import {
   ExternalLink, 
   Lock, 
   LogOut, 
-  ArrowRight
+  ArrowRight,
+  QrCode,
+  Sparkles
 } from 'lucide-react';
 import { SAMPLE_DRIVERS } from '../../data/mockData';
 import { sanitizeIdentifier } from '../../utils/security';
@@ -22,7 +24,8 @@ export const DriverPortal: React.FC = () => {
     activeBooking,
     allBookings,
     linkAmbulanceToBooking,
-    updateAmbulanceStatus
+    updateAmbulanceStatus,
+    setIsVoiceQrModalOpen
   } = useEmergency();
 
   // Login credentials state
@@ -208,14 +211,26 @@ export const DriverPortal: React.FC = () => {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={logoutDriver}
-          className="inline-flex items-center space-x-1.5 text-xs text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-3 py-1.5 rounded-xl transition cursor-pointer"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Logout</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={() => setIsVoiceQrModalOpen(true)}
+            className="inline-flex items-center space-x-1.5 text-xs text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 rounded-xl font-bold transition cursor-pointer shadow-xs"
+            title="Spoken in-transit patient details converted to reception QR"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Voice-to-QR Intake</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={logoutDriver}
+            className="inline-flex items-center space-x-1.5 text-xs text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-3 py-1.5 rounded-xl transition cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
 
       {/* Patient ID Prompt Card */}
@@ -359,6 +374,32 @@ export const DriverPortal: React.FC = () => {
                 }`}
               >
                 4. Arrived at Hospital ER
+              </button>
+            </div>
+
+            {/* Voice-to-QR In-Transit Callout */}
+            <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-emerald-50 to-teal-50 p-3 rounded-2xl border border-emerald-200">
+              <div className="flex items-center space-x-2.5 text-xs">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <QrCode className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-slate-900 flex items-center space-x-1.5">
+                    <span>Voice-to-QR Pre-Admission Handover</span>
+                    <span className="text-[10px] bg-emerald-200 text-emerald-800 px-1.5 py-0.2 rounded-md font-mono">0 SEC WAIT</span>
+                  </div>
+                  <div className="text-[11px] text-slate-600">
+                    Dictate patient complaints, allergies & vitals in-transit. Generates instant reception QR pass.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsVoiceQrModalOpen(true)}
+                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition cursor-pointer shadow-xs flex items-center justify-center space-x-1.5 shrink-0"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Speak & Generate QR</span>
               </button>
             </div>
           </div>

@@ -18,7 +18,8 @@ import {
   Radio,
   ShieldCheck,
   Droplet,
-  AlertTriangle
+  AlertTriangle,
+  QrCode
 } from 'lucide-react';
 import { PRESET_EMERGENCIES, SAMPLE_ABHA_PROFILES } from '../../data/mockData';
 import { sanitizeText, sanitizeIdentifier } from '../../utils/security';
@@ -41,7 +42,8 @@ export const GuardianPortal: React.FC = () => {
     bookHospitalBed,
     fetchPatientByAbha,
     userLocation,
-    requestLiveLocation
+    requestLiveLocation,
+    setIsVoiceQrModalOpen
   } = useEmergency();
 
   // Mode: 'track' | 'register'
@@ -330,6 +332,16 @@ export const GuardianPortal: React.FC = () => {
             <Sparkles className="w-3.5 h-3.5" />
             <span>Register a New Patient</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setIsVoiceQrModalOpen(true)}
+            className="flex-1 sm:flex-none px-3.5 py-2 rounded-lg font-bold text-xs transition cursor-pointer flex items-center justify-center space-x-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xs"
+            title="Speak patient details and generate admission QR code"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Voice-to-QR Admission</span>
+          </button>
         </div>
       </div>
 
@@ -503,6 +515,16 @@ export const GuardianPortal: React.FC = () => {
                 >
                   {isSpeakingTts ? <VolumeX className="w-3.5 h-3.5 text-white" /> : <Volume2 className="w-3.5 h-3.5 text-amber-700" />}
                   <span>{isSpeakingTts ? 'Speaking...' : 'Read Aloud'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsVoiceQrModalOpen(true)}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200"
+                  title="Open Voice-to-QR Pre-Admission Form"
+                >
+                  <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Voice-to-QR</span>
                 </button>
               </div>
             </div>
