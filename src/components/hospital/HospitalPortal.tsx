@@ -94,20 +94,20 @@ export const HospitalPortal: React.FC = () => {
   const [isOnboardingSubmitting, setIsOnboardingSubmitting] = useState(false);
   const [onboardingError, setOnboardingError] = useState('');
 
-  // Inline add doctor drawer state for onboarding
+  // Inline add doctor drawer state for onboarding - starts completely clean
   const [isAddingDocInline, setIsAddingDocInline] = useState(false);
   const [newDocName, setNewDocName] = useState('');
-  const [newDocSpec, setNewDocSpec] = useState('Emergency Medicine Specialist');
-  const [newDocExp, setNewDocExp] = useState(10);
-  const [newDocBay, setNewDocBay] = useState('ER Trauma Bay 1');
-  const [newDocPhone, setNewDocPhone] = useState('+91-98110-00000');
+  const [newDocSpec, setNewDocSpec] = useState('');
+  const [newDocExp, setNewDocExp] = useState<number | ''>('');
+  const [newDocBay, setNewDocBay] = useState('');
+  const [newDocPhone, setNewDocPhone] = useState('');
 
-  // Inline add equipment drawer state for onboarding
+  // Inline add equipment drawer state for onboarding - starts completely clean
   const [isAddingMachInline, setIsAddingMachInline] = useState(false);
   const [newMachName, setNewMachName] = useState('');
   const [newMachCategory, setNewMachCategory] = useState<Equipment['category']>('LIFE_SUPPORT');
-  const [newMachBay, setNewMachBay] = useState('Trauma Resuscitation');
-  const [newMachQty, setNewMachQty] = useState(2);
+  const [newMachBay, setNewMachBay] = useState('');
+  const [newMachQty, setNewMachQty] = useState<number | ''>('');
 
   // Handle adding doctor during onboarding
   const handleAddDoctorInline = () => {
@@ -115,33 +115,40 @@ export const HospitalPortal: React.FC = () => {
     const newDoc: Doctor = {
       id: `doc-${Date.now()}`,
       name: sanitizeText(newDocName),
-      specialization: sanitizeText(newDocSpec),
+      specialization: sanitizeText(newDocSpec) || 'Emergency Specialist',
       qualifications: 'MBBS, MD',
-      experienceYears: Number(newDocExp) || 5,
+      experienceYears: Number(newDocExp) || 0,
       status: 'AVAILABLE_AND_FREE',
-      currentBay: sanitizeText(newDocBay),
+      currentBay: sanitizeText(newDocBay) || 'Emergency Bay',
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
-      phone: sanitizeText(newDocPhone),
+      phone: sanitizeText(newDocPhone) || 'Hospital PBX',
     };
     setOnboardDoctors((prev) => [...prev, newDoc]);
     setNewDocName('');
+    setNewDocSpec('');
+    setNewDocExp('');
+    setNewDocBay('');
+    setNewDocPhone('');
     setIsAddingDocInline(false);
   };
 
   // Handle adding machine during onboarding
   const handleAddMachineInline = () => {
     if (!newMachName.trim()) return;
+    const qty = Number(newMachQty) || 1;
     const newEq: Equipment = {
       id: `eq-${Date.now()}`,
       name: sanitizeText(newMachName),
       category: newMachCategory,
       status: 'READY_AND_STERILIZED',
-      location: sanitizeText(newMachBay),
-      quantityAvailable: Number(newMachQty) || 1,
-      totalQuantity: Number(newMachQty) || 1,
+      location: sanitizeText(newMachBay) || 'Emergency Room',
+      quantityAvailable: qty,
+      totalQuantity: qty,
     };
     setOnboardEquipments((prev) => [...prev, newEq]);
     setNewMachName('');
+    setNewMachBay('');
+    setNewMachQty('');
     setIsAddingMachInline(false);
   };
 
@@ -565,7 +572,7 @@ export const HospitalPortal: React.FC = () => {
                       type="text"
                       value={newDocBay}
                       onChange={(e) => setNewDocBay(e.target.value)}
-                      placeholder="Assigned Bay (e.g. Trauma Bay 1)"
+                      placeholder="Assigned Bay / Room (e.g. Trauma Bay 1)"
                       className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
                     />
                     <input
@@ -575,15 +582,19 @@ export const HospitalPortal: React.FC = () => {
                       placeholder="Doctor Phone (e.g. +91-98110-23451)"
                       className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
                     />
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        min="1"
-                        value={newDocExp}
-                        onChange={(e) => setNewDocExp(Number(e.target.value))}
-                        placeholder="Years Exp"
-                        className="w-24 bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
-                      />
+                    <div className="flex gap-2 sm:col-span-2">
+                      <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs flex-1 max-w-[210px]">
+                        <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap">Years of Exp:</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="70"
+                          value={newDocExp}
+                          onChange={(e) => setNewDocExp(e.target.value ? Number(e.target.value) : '')}
+                          placeholder="e.g. 10"
+                          className="w-16 bg-transparent text-slate-900 text-xs font-bold focus:outline-none"
+                        />
+                      </div>
                       <button
                         type="button"
                         onClick={handleAddDoctorInline}
@@ -671,14 +682,18 @@ export const HospitalPortal: React.FC = () => {
                       className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
                     />
                     <div className="flex gap-2">
-                      <input
-                        type="number"
-                        min="1"
-                        value={newMachQty}
-                        onChange={(e) => setNewMachQty(Number(e.target.value))}
-                        placeholder="Quantity"
-                        className="w-24 bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
-                      />
+                      <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs flex-1 max-w-[160px]">
+                        <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap">Quantity:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="999"
+                          value={newMachQty}
+                          onChange={(e) => setNewMachQty(e.target.value ? Number(e.target.value) : '')}
+                          placeholder="e.g. 2"
+                          className="w-16 bg-transparent text-slate-900 text-xs font-bold focus:outline-none"
+                        />
+                      </div>
                       <button
                         type="button"
                         onClick={handleAddMachineInline}
