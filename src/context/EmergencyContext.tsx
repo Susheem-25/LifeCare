@@ -45,9 +45,9 @@ interface EmergencyContextType {
   registerDriverDetails: (details: { driverName: string; phone: string; vehicleNumber: string; vehicleType: string }) => Promise<DriverAccount>;
   registerHospitalDetails: (details: { name: string; type?: Hospital['type']; address: string; city: string; phone: string; beds: Hospital['beds']; doctors?: Doctor[]; equipments?: Equipment[] }) => Promise<Hospital>;
   admitVoiceQrPatient: (registration: PatientVoiceRegistration, bay: string, doctorName: string, hospitalId?: string) => EmergencyBooking;
-  searchTriageMode: 'standard' | 'sarvam' | 'neo4j';
-  setSearchTriageMode: (mode: 'standard' | 'sarvam' | 'neo4j') => void;
-  navigateToTrack: (track: 'neo4j' | 'sarvam' | 'arduino' | 'general') => void;
+  searchTriageMode: 'standard' | 'sarvam' | 'graph';
+  setSearchTriageMode: (mode: 'standard' | 'sarvam' | 'graph') => void;
+  navigateToTrack: (track: 'graph' | 'sarvam' | 'arduino' | 'general') => void;
   setCurrentView: (view: AppView) => void;
   setCurrentRole: (role: AppRole) => void;
   setSelectedAbhaProfile: (profile: ABHAMedicalRecord | null) => void;
@@ -213,7 +213,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const [selectedAbhaProfile, setSelectedAbhaProfile] = useState<ABHAMedicalRecord | null>(null);
-  const [searchTriageMode, setSearchTriageMode] = useState<'standard' | 'sarvam' | 'neo4j'>('standard');
+  const [searchTriageMode, setSearchTriageMode] = useState<'standard' | 'sarvam' | 'graph'>('standard');
 
   // Firebase Authentication & Role-based Unique ID Profile State
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getSavedUserProfile());
@@ -375,10 +375,10 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const navigateToTrack = (track: 'neo4j' | 'sarvam' | 'arduino' | 'general') => {
-    if (track === 'neo4j') {
+  const navigateToTrack = (track: 'graph' | 'sarvam' | 'arduino' | 'general') => {
+    if (track === 'graph') {
       setCurrentView('patient');
-      setSearchTriageMode('neo4j');
+      setSearchTriageMode('graph');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (track === 'sarvam') {
       setCurrentView('patient');
@@ -739,7 +739,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     setLoggedDriver(newDriver);
     if (currentUser) {
-      await syncDriverProfileToFirestore(currentUser.uid, newDriver);
+      await syncDriverProfileToFirestore(currentUser.uid, newDriver, currentUser.email);
     }
     soundEffects.playSuccessChime();
     return newDriver;
@@ -800,7 +800,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
 
     if (currentUser) {
-      await syncHospitalProfileToFirestore(currentUser.uid, newHospital);
+      await syncHospitalProfileToFirestore(currentUser.uid, newHospital, currentUser.email);
     }
 
     soundEffects.playSuccessChime();
@@ -908,7 +908,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       inTransitPaperwork: {
         isSubmitted: false,
         digitalConsentSigned: true,
-        preAdmitRegistrationNumber: 'ABDM-ER-' + Math.floor(100000 + Math.random() * 900000),
+        preAdmitRegistrationNumber: 'LC-ER-' + Math.floor(100000 + Math.random() * 900000),
       },
       securitySignature: `HMAC-SHA256:0x${Math.random().toString(36).substring(2, 10)}${Date.now().toString(16)}`,
       tokenExpiryTimestamp: expiry.getTime(),
@@ -946,6 +946,17 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     saveAll(updatedBookings);
     syncBookingToFirestore(newBooking);
     broadcastState(newBooking, updatedBookings, updatedHospitals);
+    try {
+      localStorage.setItem('lifecare_emergency_siren_trigger', JSON.stringify({
+        hospitalId: newBooking.hospitalId,
+        hospitalName: newBooking.hospitalName,
+        patientName: newBooking.patientName,
+        bookingCode: newBooking.bookingCode,
+        timestamp: Date.now(),
+      }));
+    } catch {
+      // ignore
+    }
 
     soundEffects.playSuccessChime();
     confetti({
@@ -1068,7 +1079,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     vitals: PatientVitals,
     consent: boolean
   ) => {
-    const regNo = 'ABDM-ER-' + Math.floor(100000 + Math.random() * 900000);
+    const regNo = 'LC-ER-' + Math.floor(100000 + Math.random() * 900000);
 
     let updatedActive = activeBooking;
     if (activeBooking && activeBooking.bookingCode === bookingCode) {

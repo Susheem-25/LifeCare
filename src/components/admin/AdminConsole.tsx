@@ -945,6 +945,11 @@ export const AdminConsole: React.FC = () => {
                           <h4 className={`text-base font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{h.name}</h4>
                           <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>{h.address}, {h.city}</p>
                           <p className={`text-xs font-mono ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>Phone: {h.phone}</p>
+                          {(h.associatedEmail || h.email) && (
+                            <p className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold truncate">
+                              ✉ {h.associatedEmail || h.email}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -1095,6 +1100,11 @@ export const AdminConsole: React.FC = () => {
                             </div>
                             <h4 className={`text-base font-black mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{drv.driverName}</h4>
                             <p className={`text-xs font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>{drv.phone}</p>
+                            {(drv.associatedEmail || drv.email) && (
+                              <p className="text-xs font-mono text-amber-600 dark:text-amber-400 font-bold truncate">
+                                ✉ {drv.associatedEmail || drv.email}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>

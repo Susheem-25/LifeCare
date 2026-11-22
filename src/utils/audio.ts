@@ -2,15 +2,25 @@
 
 class SoundEffectsManager {
   private ctx: AudioContext | null = null;
+  private isUnlocked = false;
+
+  public unlockAudio() {
+    try {
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        this.ctx = new AudioCtx();
+      }
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+      this.isUnlocked = true;
+    } catch {
+      // Audio playback might be prevented before user interaction
+    }
+  }
 
   private initContext() {
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      this.ctx = new AudioCtx();
-    }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
+    this.unlockAudio();
   }
 
   // Heartbeat / ECG monitor blip
@@ -79,45 +89,58 @@ class SoundEffectsManager {
   public playEmergencySiren(durationSeconds = 15): () => void {
     try {
       this.stopEmergencySiren();
-      this.initContext();
+      this.unlockAudio();
       if (!this.ctx) return () => {};
 
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const lfo = this.ctx.createOscillator();
-      const lfoGain = this.ctx.createGain();
-      const masterGain = this.ctx.createGain();
+      const startSiren = () => {
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const lfo = this.ctx.createOscillator();
+          const lfoGain = this.ctx.createGain();
+          const masterGain = this.ctx.createGain();
 
-      // Authentic emergency trauma wail: modulated dual-tone between 650Hz and 950Hz
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(780, now);
+          // Authentic emergency trauma wail: modulated dual-tone between 620Hz and 980Hz
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(780, now);
 
-      lfo.type = 'sine';
-      lfo.frequency.setValueAtTime(0.7, now); // ~1.4s complete wail cycle
-      lfoGain.gain.setValueAtTime(170, now); // swing +/- 170Hz
+          lfo.type = 'sine';
+          lfo.frequency.setValueAtTime(0.85, now); // ~1.18s wail period
+          lfoGain.gain.setValueAtTime(180, now); // swing +/- 180Hz
 
-      lfo.connect(osc.frequency);
+          lfo.connect(osc.frequency);
 
-      // Volume envelope: smooth fade-in, steady presence, smooth fade-out
-      masterGain.gain.setValueAtTime(0.001, now);
-      masterGain.gain.exponentialRampToValueAtTime(0.25, now + 0.35);
-      masterGain.gain.setValueAtTime(0.25, now + Math.max(0.4, durationSeconds - 0.5));
-      masterGain.gain.exponentialRampToValueAtTime(0.001, now + durationSeconds);
+          // Clear audible volume envelope: rapid fade-in, loud presence (0.42), smooth fade-out
+          masterGain.gain.setValueAtTime(0.01, now);
+          masterGain.gain.exponentialRampToValueAtTime(0.42, now + 0.25);
+          masterGain.gain.setValueAtTime(0.42, now + Math.max(0.3, durationSeconds - 0.4));
+          masterGain.gain.exponentialRampToValueAtTime(0.001, now + durationSeconds);
 
-      osc.connect(masterGain);
-      masterGain.connect(this.ctx.destination);
+          osc.connect(masterGain);
+          masterGain.connect(this.ctx.destination);
 
-      osc.start(now);
-      lfo.start(now);
-      osc.stop(now + durationSeconds);
-      lfo.stop(now + durationSeconds);
+          osc.start(now);
+          lfo.start(now);
+          osc.stop(now + durationSeconds);
+          lfo.stop(now + durationSeconds);
 
-      this.sirenNodes = { osc, lfo, gain: masterGain };
+          this.sirenNodes = { osc, lfo, gain: masterGain };
 
-      this.sirenTimer = window.setTimeout(() => {
-        this.sirenNodes = null;
-        this.sirenTimer = null;
-      }, durationSeconds * 1000);
+          this.sirenTimer = window.setTimeout(() => {
+            this.sirenNodes = null;
+            this.sirenTimer = null;
+          }, durationSeconds * 1000);
+        } catch (err) {
+          console.warn('[Audio Siren]', err);
+        }
+      };
+
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().then(startSiren).catch(startSiren);
+      } else {
+        startSiren();
+      }
 
       return () => this.stopEmergencySiren();
     } catch {
@@ -153,6 +176,19 @@ class SoundEffectsManager {
 }
 
 export const soundEffects = new SoundEffectsManager();
+
+// Automatically unlock audio on first interaction anywhere in the window
+if (typeof window !== 'undefined') {
+  const handleInteraction = () => {
+    soundEffects.unlockAudio();
+    window.removeEventListener('click', handleInteraction);
+    window.removeEventListener('touchstart', handleInteraction);
+    window.removeEventListener('keydown', handleInteraction);
+  };
+  window.addEventListener('click', handleInteraction, { passive: true });
+  window.addEventListener('touchstart', handleInteraction, { passive: true });
+  window.addEventListener('keydown', handleInteraction, { passive: true });
+}
 
 export { 
   speakText, 

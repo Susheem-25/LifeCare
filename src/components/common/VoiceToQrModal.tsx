@@ -28,8 +28,7 @@ import {
 } from '../../utils/voiceRegistrationParser';
 import {
   maskName,
-  maskPhone,
-  maskAbha
+  maskPhone
 } from '../../services/cryptoService';
 import {
   startVoiceSos,
@@ -532,21 +531,6 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
                 />
               </div>
 
-              {/* Optional ABHA ID */}
-              <div className="sm:col-span-2">
-                <label className={`block text-[10px] font-mono uppercase font-bold mb-1 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                  Optional ABHA Health ID (DigiLocker):
-                </label>
-                <input
-                  type="text"
-                  value={formData.optionalAbhaId || ''}
-                  placeholder="e.g. 91-4820-9182-3921"
-                  onChange={(e) => handleFieldChange('optionalAbhaId', e.target.value)}
-                  className={`w-full border rounded-xl px-2.5 py-1.5 font-mono text-xs focus:outline-none focus:border-red-500 transition ${
-                    isDark ? 'bg-zinc-900 border-zinc-700 text-zinc-100' : 'bg-white border-slate-300 text-slate-900'
-                  }`}
-                />
-              </div>
             </div>
 
             {/* TTS Voice Confirmation Button */}
@@ -628,12 +612,6 @@ export const VoiceToQrModal: React.FC<VoiceToQrModalProps> = ({
                   <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Masked Phone:</span>
                   <strong className={isDark ? 'text-white' : 'text-slate-900'}>{maskPhone(formData.guardianPhone)}</strong>
                 </div>
-                {formData.optionalAbhaId && (
-                  <div className="flex items-center justify-between">
-                    <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>ABHA Token:</span>
-                    <strong className="text-cyan-600 dark:text-cyan-400">{maskAbha(formData.optionalAbhaId)}</strong>
-                  </div>
-                )}
               </div>
 
               <div className={`text-[10px] leading-tight pt-1.5 border-t flex items-start gap-1 ${
