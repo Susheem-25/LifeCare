@@ -10,7 +10,6 @@ import {
   ArrowRight, 
   CheckCircle2, 
   Lock, 
-  Zap, 
   Compass, 
   Sparkles,
   Loader2,
@@ -19,7 +18,8 @@ import {
   QrCode,
   Languages,
   PhoneCall,
-  X
+  X,
+  Building2
 } from 'lucide-react';
 import { sanitizeText, sanitizeIdentifier } from '../../utils/security';
 import { 
@@ -57,7 +57,8 @@ export const GuardianPortal: React.FC = () => {
     requestLiveLocation,
     setIsVoiceQrModalOpen,
     admissionNotice,
-    dismissAdmissionNotice
+    dismissAdmissionNotice,
+    currentUser
   } = useEmergency();
 
   // Mode: 'track' | 'register'
@@ -278,15 +279,20 @@ export const GuardianPortal: React.FC = () => {
       return a.distanceKm - b.distanceKm;
     });
 
-  // Lock Hospital -> Immediately saves to database, locks Neo4j graph & reserves hospital bed
+  // Lock Hospital -> Immediately saves to database & reserves hospital bed
   const handleLockHospital = (hospital: Hospital) => {
+    if (!currentUser) {
+      alert('Authentication required: Please sign in with Google to reserve a hospital bed.');
+      return;
+    }
+
     setSelectedHospital(hospital);
     setIsGraphProcessing(true);
 
     const booking = bookHospitalBed(
       hospital.id,
-      undefined,
-      'PROTECTED (ZERO PII)'
+      currentUser.displayName,
+      currentUser.email
     );
 
     setGeneratedPatientId(booking.patientUniqueId);
@@ -321,7 +327,7 @@ export const GuardianPortal: React.FC = () => {
     if (found) {
       setTrackedBooking(found);
     } else {
-      setTrackError(`No active mission found for "${clean}". Try PAT-2026-8941.`);
+      setTrackError(`No active emergency mission found for "${clean}". Please enter a valid registered Patient ID.`);
     }
   };
 
@@ -806,20 +812,29 @@ export const GuardianPortal: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
-              {eligibleHospitals.slice(0, 3).map((hosp, idx) => {
-                const isSelected = selectedHospital?.id === hosp.id;
-                const freeDoc = hosp.doctors.find((d) => d.status === 'AVAILABLE_AND_FREE' || d.status === 'FREE');
+              {eligibleHospitals.length === 0 ? (
+                <div className="col-span-full py-8 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 space-y-2">
+                  <Building2 className="w-8 h-8 text-slate-400 mx-auto" />
+                  <div className="text-sm font-bold text-slate-800">No Hospitals Registered Yet</div>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    When a hospital admin signs in with Google and registers their hospital, beds, and doctors in the Hospital Portal, it will appear here in real time.
+                  </p>
+                </div>
+              ) : (
+                eligibleHospitals.slice(0, 6).map((hosp, idx) => {
+                  const isSelected = selectedHospital?.id === hosp.id;
+                  const freeDoc = hosp.doctors?.find((d) => d.status === 'AVAILABLE_AND_FREE' || d.status === 'FREE');
 
-                return (
-                  <div
-                    key={hosp.id}
-                    onClick={() => handleLockHospital(hosp)}
-                    className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between gap-3 ${
-                      isSelected
-                        ? 'border-emerald-600 bg-emerald-50/50 shadow-md ring-2 ring-emerald-600/20'
-                        : 'border-slate-200 hover:border-slate-300 bg-white hover:shadow-xs'
-                    }`}
-                  >
+                  return (
+                    <div
+                      key={hosp.id}
+                      onClick={() => handleLockHospital(hosp)}
+                      className={`p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between gap-3 ${
+                        isSelected
+                          ? 'border-emerald-600 bg-emerald-50/50 shadow-md ring-2 ring-emerald-600/20'
+                          : 'border-slate-200 hover:border-slate-300 bg-white hover:shadow-xs'
+                      }`}
+                    >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-1.5">
                         <span className="font-extrabold text-slate-900 text-sm leading-snug">{hosp.name}</span>
@@ -874,7 +889,7 @@ export const GuardianPortal: React.FC = () => {
                     </button>
                   </div>
                 );
-              })}
+              }))}
             </div>
           </div>
 
@@ -904,7 +919,7 @@ export const GuardianPortal: React.FC = () => {
                     Generated Patient ID:
                   </span>
                   <div className="text-2xl font-mono font-black text-white mt-0.5">
-                    {generatedPatientId || 'PAT-2026-4821'}
+                    {generatedPatientId || 'PAT-PENDING'}
                   </div>
                 </div>
                 <div className="text-right text-[11px] font-mono text-slate-400">

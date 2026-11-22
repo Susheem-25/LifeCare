@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EmergencyProvider, useEmergency } from './context/EmergencyContext';
 import { Navbar } from './components/Navbar';
 import { WelcomeScreen } from './components/welcome/WelcomeScreen';
 import { GuardianPortal } from './components/guardian/GuardianPortal';
 import { DriverPortal } from './components/ambulance/DriverPortal';
 import { HospitalPortal } from './components/hospital/HospitalPortal';
+import { AdminConsole } from './components/admin/AdminConsole';
 import { GoogleAuthModal } from './components/auth/GoogleAuthModal';
 import { VoiceToQrModal } from './components/common/VoiceToQrModal';
 import {
@@ -29,6 +30,22 @@ const MainAppContent: React.FC = () => {
     setIsVoiceQrModalOpen
   } = useEmergency();
 
+  const [isAdminRoute, setIsAdminRoute] = useState<boolean>(() => {
+    return window.location.pathname === '/admin' || window.location.hash === '#/admin';
+  });
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setIsAdminRoute(window.location.pathname === '/admin' || window.location.hash === '#/admin');
+    };
+    window.addEventListener('popstate', handleRouteChange);
+    window.addEventListener('hashchange', handleRouteChange);
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+      window.removeEventListener('hashchange', handleRouteChange);
+    };
+  }, []);
+
   // Directly navigate to registered portal if user is already authenticated
   useEffect(() => {
     if (currentUser?.role && ['guardian', 'driver', 'hospital'].includes(currentUser.role)) {
@@ -38,10 +55,9 @@ const MainAppContent: React.FC = () => {
     }
   }, [currentUser, currentRole, setCurrentRole]);
 
-  // Effective role: Authenticated users bypass welcome screen and open their portal directly
-  const effectiveRole = (currentUser?.role && ['guardian', 'driver', 'hospital'].includes(currentUser.role))
-    ? currentUser.role
-    : currentRole;
+  if (isAdminRoute) {
+    return <AdminConsole />;
+  }
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col font-sans antialiased relative">
@@ -50,11 +66,10 @@ const MainAppContent: React.FC = () => {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10 space-y-6">
         {/* ========================================================
-            PAGE 1: WELCOME SCREEN (Welcome to LifeCare - Caring for Lives)
-            Role Selection: Guardian, Driver, Hospital
-            (Only shown for unauthenticated visitors)
+            PAGE 1: WELCOME & AUTHENTICATION SCREEN
+            Requires real Google Sign-In to proceed to any portal
             ======================================================== */}
-        {effectiveRole === 'welcome' && !currentUser && (
+        {!currentUser && (
           <div className="animate-fadeIn">
             <WelcomeScreen
               onSelectRole={(role) => {
@@ -89,31 +104,27 @@ const MainAppContent: React.FC = () => {
         )}
 
         {/* ========================================================
-            PAGE 2: GUARDIAN PORTAL (Guarded by RBAC)
-            Options: Track Patient or Register a New Patient
+            PAGE 2: GUARDIAN PORTAL (Authenticated Google Guardians Only)
             ======================================================== */}
-        {effectiveRole === 'guardian' && (!currentUser || currentUser.role === 'guardian') && (
+        {currentUser && currentUser.role === 'guardian' && (
           <div className="animate-fadeIn">
             <GuardianPortal />
           </div>
         )}
 
         {/* ========================================================
-            PAGE 3: DRIVER PORTAL (Guarded by RBAC)
-            Login with Driver ID -> Enter Patient ID -> Live Navigation Map
+            PAGE 3: DRIVER PORTAL (Authenticated 108 Drivers Only)
             ======================================================== */}
-        {effectiveRole === 'driver' && (!currentUser || currentUser.role === 'driver') && (
+        {currentUser && currentUser.role === 'driver' && (
           <div className="animate-fadeIn">
             <DriverPortal />
           </div>
         )}
 
         {/* ========================================================
-            PAGE 4: HOSPITAL PORTAL (Guarded by RBAC)
-            Login with Hospital ID -> Editable Beds, Doctors, Machines,
-            and Segregated Patient Directory (Incoming, Admitted, Discharged)
+            PAGE 4: HOSPITAL PORTAL (Authenticated Hospital Staff Only)
             ======================================================== */}
-        {effectiveRole === 'hospital' && (!currentUser || currentUser.role === 'hospital') && (
+        {currentUser && currentUser.role === 'hospital' && (
           <div className="animate-fadeIn">
             <HospitalPortal />
           </div>

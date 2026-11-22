@@ -23,6 +23,7 @@ import {
   collection,
   onSnapshot,
   updateDoc,
+  deleteDoc,
   type Firestore
 } from 'firebase/firestore';
 import type { UserProfile, AppRole, EmergencyBooking, PatientVitals, DriverAccount, Hospital } from '../types';
@@ -113,56 +114,35 @@ export function persistUserProfile(profile: UserProfile | null) {
 }
 
 /**
- * Google Sign-In with automatic role-specific unique ID generation
+ * Google Sign-In with automatic role-specific unique ID generation.
+ * Real Firebase Google Authentication only - strictly zero mocked/fake fallback credentials.
  */
 export async function signInWithGoogle(role: AppRole): Promise<UserProfile> {
   const existingProfile = getSavedUserProfile();
   const assignedUniqueId = existingProfile?.uniqueRoleId || generateUniqueRoleId(role);
 
-  // If live Firebase Auth is configured and online, attempt real Google Sign-In
-  if (auth && isRealFirebaseConfigured()) {
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      const result = await signInWithPopup(auth, provider);
-      const fbUser = result.user;
-
-      const profile: UserProfile = {
-        uid: fbUser.uid,
-        email: fbUser.email || 'confidential@emergency.network',
-        displayName: fbUser.displayName || `Emergency Responder (${assignedUniqueId})`,
-        photoURL: fbUser.photoURL || undefined,
-        role,
-        uniqueRoleId: assignedUniqueId,
-        authProvider: 'google.com',
-        createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString(),
-      };
-
-      // Store in Cloud Firestore in background (non-blocking so authentication completes instantly)
-      if (db) {
-        setDoc(doc(db, 'users', profile.uid), profile, { merge: true }).catch((dbErr) => {
-          console.warn('[Firestore] Profile write deferred or offline:', dbErr);
-        });
-      }
-
-      persistUserProfile(profile);
-      return profile;
-    } catch (authErr) {
-      console.warn('[Firebase Auth] Pop-up cancelled or network error, falling back to instant credential:', authErr);
-    }
+  if (!auth) {
+    throw new Error('Firebase Authentication is not initialized.');
   }
 
-  // Resilient instant credential generation for offline / zero-latency experience
-  const instantUid = `goog_${Math.random().toString(36).substring(2, 10)}`;
-  const roleName = role === 'guardian' ? 'Citizen Guardian' : role === 'driver' ? '108 Paramedic Lead' : 'ER Trauma Chief';
+  const provider = new GoogleAuthProvider();
+  provider.addScope('email');
+  provider.addScope('profile');
+  provider.setCustomParameters({ prompt: 'select_account' });
 
-  const instantProfile: UserProfile = {
-    uid: instantUid,
-    email: `${role}.${assignedUniqueId.toLowerCase()}@emergency.gov.in`,
-    displayName: `${roleName} [${assignedUniqueId}]`,
-    photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+  // Execute real Google OAuth popup flow
+  const result = await signInWithPopup(auth, provider);
+  const fbUser = result.user;
+
+  if (!fbUser || !fbUser.uid) {
+    throw new Error('Google Sign-In did not return a valid user credential.');
+  }
+
+  const profile: UserProfile = {
+    uid: fbUser.uid,
+    email: fbUser.email || 'user@emergency.gov.in',
+    displayName: fbUser.displayName || `Emergency Responder (${assignedUniqueId})`,
+    photoURL: fbUser.photoURL || undefined,
     role,
     uniqueRoleId: assignedUniqueId,
     authProvider: 'google.com',
@@ -170,8 +150,16 @@ export async function signInWithGoogle(role: AppRole): Promise<UserProfile> {
     lastLoginAt: new Date().toISOString(),
   };
 
-  persistUserProfile(instantProfile);
-  return instantProfile;
+  if (db) {
+    try {
+      await setDoc(doc(db, 'users', profile.uid), profile, { merge: true });
+    } catch (dbErr) {
+      console.warn('[Firestore] Profile write deferred or offline:', dbErr);
+    }
+  }
+
+  persistUserProfile(profile);
+  return profile;
 }
 
 /**
@@ -198,32 +186,28 @@ export function onAuthStateSubscription(callback: (user: UserProfile | null) => 
     unsubscribeFb = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
         const saved = getSavedUserProfile();
-        if (saved && saved.uid === user.uid) {
-          callback(saved);
-        } else {
-          const assignedId = saved?.uniqueRoleId || generateUniqueRoleId(saved?.role || 'guardian');
-          const restored: UserProfile = {
-            uid: user.uid,
-            email: user.email || 'user@emergency.gov.in',
-            displayName: user.displayName || 'LifeCare Emergency User',
-            photoURL: user.photoURL || undefined,
-            role: saved?.role || 'guardian',
-            uniqueRoleId: assignedId,
-            authProvider: 'google.com',
-            createdAt: saved?.createdAt || new Date().toISOString(),
-            lastLoginAt: new Date().toISOString(),
-          };
-          persistUserProfile(restored);
-          callback(restored);
-        }
+        const role = saved?.role || 'guardian';
+        const assignedId = saved?.uniqueRoleId || generateUniqueRoleId(role);
+        const restored: UserProfile = {
+          uid: user.uid,
+          email: user.email || 'user@emergency.gov.in',
+          displayName: user.displayName || `Emergency User (${assignedId})`,
+          photoURL: user.photoURL || undefined,
+          role,
+          uniqueRoleId: assignedId,
+          authProvider: 'google.com',
+          createdAt: saved?.createdAt || new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+        };
+        persistUserProfile(restored);
+        callback(restored);
       } else {
-        const saved = getSavedUserProfile();
-        callback(saved);
+        persistUserProfile(null);
+        callback(null);
       }
     });
   } else {
-    // Initial emit for local state
-    callback(getSavedUserProfile());
+    callback(null);
   }
 
   return () => {
@@ -258,10 +242,65 @@ export function subscribeToFirestoreBookings(
         (snapshot) => {
           const list: EmergencyBooking[] = [];
           snapshot.forEach((d) => list.push(d.data() as EmergencyBooking));
-          if (list.length > 0) callback(list);
+          list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          callback(list);
         },
         (error) => {
           console.warn('[Firestore] Bookings snapshot listener fallback:', error);
+        }
+      );
+    } catch {
+      // Fallback
+    }
+  }
+  return () => {};
+}
+
+/**
+ * Real-time listener for registered hospitals from Cloud Firestore
+ */
+export function subscribeToFirestoreHospitals(
+  callback: (hospitals: Hospital[]) => void
+): () => void {
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      const q = collection(db, 'hospitals');
+      return onSnapshot(
+        q,
+        (snapshot) => {
+          const list: Hospital[] = [];
+          snapshot.forEach((d) => list.push(d.data() as Hospital));
+          callback(list);
+        },
+        (error) => {
+          console.warn('[Firestore] Hospitals snapshot error:', error);
+        }
+      );
+    } catch {
+      // Fallback
+    }
+  }
+  return () => {};
+}
+
+/**
+ * Real-time listener for registered drivers from Cloud Firestore
+ */
+export function subscribeToFirestoreDrivers(
+  callback: (drivers: DriverAccount[]) => void
+): () => void {
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      const q = collection(db, 'drivers');
+      return onSnapshot(
+        q,
+        (snapshot) => {
+          const list: DriverAccount[] = [];
+          snapshot.forEach((d) => list.push(d.data() as DriverAccount));
+          callback(list);
+        },
+        (error) => {
+          console.warn('[Firestore] Drivers snapshot error:', error);
         }
       );
     } catch {
@@ -347,6 +386,86 @@ export async function fetchDriverProfile(uid: string): Promise<DriverAccount | n
 }
 
 /**
+ * Super Admin Management Operations
+ */
+
+export async function deleteHospitalFromFirestore(hospitalId: string): Promise<void> {
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      await deleteDoc(doc(db, 'hospitals', hospitalId));
+    } catch (err) {
+      console.warn('[Admin] Failed to delete hospital from Firestore:', err);
+      throw err;
+    }
+  }
+}
+
+export async function toggleHospitalSuspendInFirestore(hospitalId: string, isSuspended: boolean): Promise<void> {
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      await updateDoc(doc(db, 'hospitals', hospitalId), {
+        isSuspended,
+        suspendedAt: isSuspended ? new Date().toISOString() : null,
+      });
+    } catch (err) {
+      console.warn('[Admin] Failed to toggle hospital suspension:', err);
+      throw err;
+    }
+  }
+}
+
+export async function deleteDriverFromFirestore(driverDocId: string): Promise<void> {
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      await deleteDoc(doc(db, 'drivers', driverDocId));
+    } catch (err) {
+      console.warn('[Admin] Failed to delete driver from Firestore:', err);
+      throw err;
+    }
+  }
+}
+
+export async function toggleDriverSuspendInFirestore(driverDocId: string, isSuspended: boolean): Promise<void> {
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      await updateDoc(doc(db, 'drivers', driverDocId), {
+        isSuspended,
+        suspendedAt: isSuspended ? new Date().toISOString() : null,
+      });
+    } catch (err) {
+      console.warn('[Admin] Failed to toggle driver suspension:', err);
+      throw err;
+    }
+  }
+}
+
+export async function deleteBookingFromFirestore(bookingCode: string): Promise<void> {
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      await deleteDoc(doc(db, 'bookings', bookingCode));
+    } catch (err) {
+      console.warn('[Admin] Failed to delete booking from Firestore:', err);
+      throw err;
+    }
+  }
+}
+
+export async function toggleBookingSuspendInFirestore(bookingCode: string, isSuspended: boolean): Promise<void> {
+  if (db && isRealFirebaseConfigured()) {
+    try {
+      await updateDoc(doc(db, 'bookings', bookingCode), {
+        isSuspended,
+        suspendedAt: isSuspended ? new Date().toISOString() : null,
+      });
+    } catch (err) {
+      console.warn('[Admin] Failed to toggle booking suspension:', err);
+      throw err;
+    }
+  }
+}
+
+
+/**
  * Synchronize hospital profile to Cloud Firestore and local persistence
  */
 export async function syncHospitalProfileToFirestore(
@@ -403,3 +522,5 @@ export async function fetchHospitalProfileByOwner(uid: string): Promise<Hospital
   }
   return null;
 }
+
+

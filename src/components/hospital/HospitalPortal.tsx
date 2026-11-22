@@ -70,77 +70,26 @@ export const HospitalPortal: React.FC = () => {
 
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
 
-  // Hospital Onboarding State (after Google Sign-In)
-  const [onboardHospName, setOnboardHospName] = useState('Apollo Trauma & Emergency Center');
+  // Hospital Onboarding State (after Google Sign-In) - Starts 100% clean from scratch
+  const [onboardHospName, setOnboardHospName] = useState('');
   const [onboardHospType, setOnboardHospType] = useState<Hospital['type']>('Trauma Center Level 1');
-  const [onboardAddress, setOnboardAddress] = useState('Sarita Vihar, Delhi Mathura Road');
-  const [onboardCity, setOnboardCity] = useState('New Delhi');
-  const [onboardPhone, setOnboardPhone] = useState('+91-11-2692-5858');
+  const [onboardAddress, setOnboardAddress] = useState('');
+  const [onboardCity, setOnboardCity] = useState('');
+  const [onboardPhone, setOnboardPhone] = useState('');
 
-  // Bed inventory inputs
-  const [onboardIcuTotal, setOnboardIcuTotal] = useState(30);
-  const [onboardIcuFree, setOnboardIcuFree] = useState(8);
-  const [onboardEmergTotal, setOnboardEmergTotal] = useState(50);
-  const [onboardEmergFree, setOnboardEmergFree] = useState(14);
-  const [onboardVentTotal, setOnboardVentTotal] = useState(20);
-  const [onboardVentFree, setOnboardVentFree] = useState(6);
+  // Bed inventory inputs - start empty from scratch
+  const [onboardIcuTotal, setOnboardIcuTotal] = useState<number | ''>('');
+  const [onboardIcuFree, setOnboardIcuFree] = useState<number | ''>('');
+  const [onboardEmergTotal, setOnboardEmergTotal] = useState<number | ''>('');
+  const [onboardEmergFree, setOnboardEmergFree] = useState<number | ''>('');
+  const [onboardVentTotal, setOnboardVentTotal] = useState<number | ''>('');
+  const [onboardVentFree, setOnboardVentFree] = useState<number | ''>('');
 
-  // Onboarding Doctors List
-  const [onboardDoctors, setOnboardDoctors] = useState<Doctor[]>([
-    {
-      id: 'doc-1',
-      name: 'Dr. Vikramaditya Rathore',
-      specialization: 'Interventional Cardiology & Electrophysiology',
-      qualifications: 'MD, DM (Cardiology), FACC',
-      experienceYears: 18,
-      status: 'AVAILABLE_AND_FREE',
-      currentBay: 'Cath Lab 2 / Bay 4',
-      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
-      phone: '+91-98110-23451',
-    },
-    {
-      id: 'doc-2',
-      name: 'Dr. Sunita Kulkarni',
-      specialization: 'Senior Trauma & Critical Care Surgeon',
-      qualifications: 'MS (General Surgery), MCh (Trauma Surgery)',
-      experienceYears: 14,
-      status: 'AVAILABLE_AND_FREE',
-      currentBay: 'Trauma Resuscitation Bay 1',
-      avatar: 'https://images.unsplash.com/photo-1594824813583-8a903264421b?w=150&auto=format&fit=crop&q=80',
-      phone: '+91-98110-89123',
-    },
-  ]);
+  // Onboarding Doctors List - starts empty from scratch
+  const [onboardDoctors, setOnboardDoctors] = useState<Doctor[]>([]);
 
-  // Onboarding Equipments & Facilities List
-  const [onboardEquipments, setOnboardEquipments] = useState<Equipment[]>([
-    {
-      id: 'eq-1',
-      name: 'Cath Lab Biplane Philips Azurion 7',
-      category: 'LIFE_SUPPORT',
-      status: 'READY_AND_STERILIZED',
-      location: 'Trauma Bay #03 (Cath Lab 2)',
-      quantityAvailable: 1,
-      totalQuantity: 1,
-    },
-    {
-      id: 'eq-2',
-      name: 'Zoll R Series ALS Defibrillator & Pacer',
-      category: 'LIFE_SUPPORT',
-      status: 'READY_AND_STERILIZED',
-      location: 'Trauma Resuscitation Bay 1',
-      quantityAvailable: 3,
-      totalQuantity: 4,
-    },
-    {
-      id: 'eq-3',
-      name: 'Hamilton-G5 High Precision ICU Ventilators',
-      category: 'LIFE_SUPPORT',
-      status: 'READY_AND_STERILIZED',
-      location: 'Trauma Resuscitation & ICU',
-      quantityAvailable: 4,
-      totalQuantity: 5,
-    },
-  ]);
+  // Onboarding Equipments & Facilities List - starts empty from scratch
+  const [onboardEquipments, setOnboardEquipments] = useState<Equipment[]>([]);
 
   const [isOnboardingSubmitting, setIsOnboardingSubmitting] = useState(false);
   const [onboardingError, setOnboardingError] = useState('');
@@ -213,12 +162,12 @@ export const HospitalPortal: React.FC = () => {
         city: sanitizeText(onboardCity),
         phone: sanitizeText(onboardPhone),
         beds: {
-          icuTotal: Number(onboardIcuTotal) || 20,
-          icuFree: Number(onboardIcuFree) || 5,
-          emergencyTotal: Number(onboardEmergTotal) || 30,
-          emergencyFree: Number(onboardEmergFree) || 10,
-          ventilatorTotal: Number(onboardVentTotal) || 15,
-          ventilatorFree: Number(onboardVentFree) || 4,
+          icuTotal: Number(onboardIcuTotal) || 0,
+          icuFree: Number(onboardIcuFree) || 0,
+          emergencyTotal: Number(onboardEmergTotal) || 0,
+          emergencyFree: Number(onboardEmergFree) || 0,
+          ventilatorTotal: Number(onboardVentTotal) || 0,
+          ventilatorFree: Number(onboardVentFree) || 0,
         },
         doctors: onboardDoctors,
         equipments: onboardEquipments,

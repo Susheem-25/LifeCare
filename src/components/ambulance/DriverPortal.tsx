@@ -205,7 +205,7 @@ export const DriverPortal: React.FC = () => {
                 type="text"
                 value={onboardingName}
                 onChange={(e) => setOnboardingName(e.target.value)}
-                placeholder="e.g. Rajesh Kumar Yadav"
+                placeholder="Enter your full name"
                 className="w-full bg-slate-50 text-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-amber-500 focus:bg-white focus:outline-none font-medium"
                 required
               />
@@ -362,7 +362,7 @@ export const DriverPortal: React.FC = () => {
               type="text"
               value={patientIdInput}
               onChange={(e) => setPatientIdInput(sanitizeIdentifier(e.target.value))}
-              placeholder="e.g. PAT-2026-4821 or AMB-7492"
+              placeholder="Enter Patient ID (e.g. PAT-2026-XXXX)"
               className="w-full bg-slate-50 text-slate-900 pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-amber-500 focus:outline-none font-mono text-sm uppercase font-bold"
             />
           </div>

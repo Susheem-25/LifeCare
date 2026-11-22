@@ -11,7 +11,8 @@ import {
   PhoneCall, 
   Zap, 
   FileCheck,
-  Loader2
+  Loader2,
+  ShieldAlert
 } from 'lucide-react';
 import type { AppRole } from '../../types';
 
@@ -43,23 +44,28 @@ interface WelcomeScreenProps {
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) => {
   const { hospitals, currentUser, loginWithGoogle } = useEmergency();
   const [authenticatingRole, setAuthenticatingRole] = useState<AppRole | null>(null);
+  const [authError, setAuthError] = useState<string>('');
 
   // Quick stats summary
-  const totalFreeBeds = hospitals.reduce((acc, h) => acc + h.beds.icuFree + h.beds.emergencyFree, 0);
+  const totalFreeBeds = hospitals.reduce((acc, h) => acc + (h.beds?.icuFree || 0) + (h.beds?.emergencyFree || 0), 0);
 
-  const handleSelectRole = (role: AppRole) => {
-    onSelectRole(role);
-  };
+  const handleSelectRole = async (role: AppRole) => {
+    setAuthError('');
+    if (currentUser) {
+      if (currentUser.role === role) {
+        onSelectRole(role);
+      }
+      return;
+    }
 
-  const handleExplicitGoogleSignIn = async (role: AppRole, e: React.MouseEvent) => {
-    e.stopPropagation();
     setAuthenticatingRole(role);
     try {
       await loginWithGoogle(role);
       onSelectRole(role);
-    } catch (err) {
-      console.warn('[WelcomeScreen] Google Sign-In notice:', err);
-      onSelectRole(role);
+    } catch (err: unknown) {
+      console.warn('[WelcomeScreen] Google Sign-In error:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Google Sign-In failed or was cancelled.';
+      setAuthError(errorMsg);
     } finally {
       setAuthenticatingRole(null);
     }
@@ -84,6 +90,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
           Select your portal to proceed. Seamlessly connecting citizen guardians, 108 emergency ambulance drivers, and hospital trauma centers with AI triage and atomic bed reservation.
         </p>
       </div>
+
+      {/* Authentication Error Feedback Alert */}
+      {authError && (
+        <div className="max-w-xl mx-auto px-4 -mb-4">
+          <div className="bg-red-50 border-2 border-red-300 text-red-800 rounded-2xl p-4 flex items-center space-x-3 text-xs shadow-sm">
+            <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
+            <div>
+              <strong className="font-bold block text-red-900">Authentication Required</strong>
+              <span>{authError}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Authenticated Role Status Banner */}
       {currentUser && (
@@ -152,19 +171,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
           <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
             <button
               type="button"
+              disabled={authenticatingRole !== null}
               onClick={(e) => {
                 e.stopPropagation();
                 handleSelectRole('guardian');
               }}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-red-600/25 cursor-pointer"
+              className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-red-600/25 cursor-pointer"
             >
-              <span>Enter Guardian Portal</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {authenticatingRole === 'guardian' ? (
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+              ) : currentUser ? (
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              ) : (
+                <GoogleIcon className="w-4 h-4" />
+              )}
+              <span>
+                {authenticatingRole === 'guardian'
+                  ? 'Authenticating with Google...'
+                  : currentUser
+                  ? 'Enter Guardian Portal'
+                  : 'Sign in with Google (Guardian)'}
+              </span>
             </button>
             <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
               <span className="flex items-center space-x-1">
                 <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>{currentUser?.role === 'guardian' ? currentUser.uniqueRoleId : 'Citizen Emergency Grid'}</span>
+                <span>{currentUser?.role === 'guardian' ? currentUser.uniqueRoleId : 'Google Auth Required'}</span>
               </span>
               {currentUser ? (
                 <span className="text-emerald-700 font-bold inline-flex items-center">
@@ -172,18 +204,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                   <span>Authorized</span>
                 </span>
               ) : (
-                <button
-                  type="button"
-                  onClick={(e) => handleExplicitGoogleSignIn('guardian', e)}
-                  className="text-red-600 hover:underline font-bold inline-flex items-center"
-                >
-                  {authenticatingRole === 'guardian' ? (
-                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                  ) : (
-                    <GoogleIcon className="w-3 h-3 mr-1" />
-                  )}
-                  <span>Sign with Google</span>
-                </button>
+                <span className="text-slate-400 font-medium">Secured with Google OAuth</span>
               )}
             </div>
           </div>
@@ -238,19 +259,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
           <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
             <button
               type="button"
+              disabled={authenticatingRole !== null}
               onClick={(e) => {
                 e.stopPropagation();
                 handleSelectRole('driver');
               }}
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-amber-600/25 cursor-pointer"
+              className="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-amber-600/25 cursor-pointer"
             >
-              <span>Enter Driver Cockpit</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {authenticatingRole === 'driver' ? (
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+              ) : currentUser ? (
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              ) : (
+                <GoogleIcon className="w-4 h-4" />
+              )}
+              <span>
+                {authenticatingRole === 'driver'
+                  ? 'Authenticating with Google...'
+                  : currentUser
+                  ? 'Enter Driver Cockpit'
+                  : 'Sign in with Google (Driver)'}
+              </span>
             </button>
             <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
               <span className="flex items-center space-x-1">
                 <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>{currentUser?.role === 'driver' ? currentUser.uniqueRoleId : '108 Paramedic Lead'}</span>
+                <span>{currentUser?.role === 'driver' ? currentUser.uniqueRoleId : 'Google Auth Required'}</span>
               </span>
               {currentUser ? (
                 <span className="text-emerald-700 font-bold inline-flex items-center">
@@ -258,18 +292,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                   <span>Authorized</span>
                 </span>
               ) : (
-                <button
-                  type="button"
-                  onClick={(e) => handleExplicitGoogleSignIn('driver', e)}
-                  className="text-amber-700 hover:underline font-bold inline-flex items-center"
-                >
-                  {authenticatingRole === 'driver' ? (
-                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                  ) : (
-                    <GoogleIcon className="w-3 h-3 mr-1" />
-                  )}
-                  <span>Sign with Google</span>
-                </button>
+                <span className="text-slate-400 font-medium">Secured with Google OAuth</span>
               )}
             </div>
           </div>
@@ -324,19 +347,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
           <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
             <button
               type="button"
+              disabled={authenticatingRole !== null}
               onClick={(e) => {
                 e.stopPropagation();
                 handleSelectRole('hospital');
               }}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-emerald-600/25 cursor-pointer"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-emerald-600/25 cursor-pointer"
             >
-              <span>Enter Hospital Staff Portal</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {authenticatingRole === 'hospital' ? (
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+              ) : currentUser ? (
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              ) : (
+                <GoogleIcon className="w-4 h-4" />
+              )}
+              <span>
+                {authenticatingRole === 'hospital'
+                  ? 'Authenticating with Google...'
+                  : currentUser
+                  ? 'Enter Hospital Staff Portal'
+                  : 'Sign in with Google (Hospital)'}
+              </span>
             </button>
             <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
               <span className="flex items-center space-x-1">
                 <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>{currentUser?.role === 'hospital' ? currentUser.uniqueRoleId : 'Hospital Command'}</span>
+                <span>{currentUser?.role === 'hospital' ? currentUser.uniqueRoleId : 'Google Auth Required'}</span>
               </span>
               {currentUser ? (
                 <span className="text-emerald-700 font-bold inline-flex items-center">
@@ -344,18 +380,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                   <span>Authorized</span>
                 </span>
               ) : (
-                <button
-                  type="button"
-                  onClick={(e) => handleExplicitGoogleSignIn('hospital', e)}
-                  className="text-emerald-700 hover:underline font-bold inline-flex items-center"
-                >
-                  {authenticatingRole === 'hospital' ? (
-                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                  ) : (
-                    <GoogleIcon className="w-3 h-3 mr-1" />
-                  )}
-                  <span>Sign with Google</span>
-                </button>
+                <span className="text-slate-400 font-medium">Secured with Google OAuth</span>
               )}
             </div>
           </div>

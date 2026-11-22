@@ -37,29 +37,29 @@ const TRANSIT_LANDMARKS = [
   'Passing Chirag Dilli Flyover, Outer Ring Road Corridor',
   'Lala Lajpat Rai Marg, Moolchand Underpass Intersection',
   'Ring Road, South Extension Part 2 Flyover (Sirens Active)',
-  'Safdarjung Hospital Junction, Approaching AIIMS Trauma Gate 2',
-  'AIIMS Apex Trauma Center Emergency Bay #03 (Arriving)'
+  'Approaching Hospital Perimeter Gate',
+  'Hospital Emergency Trauma Bay (Arrived)'
 ];
 
 export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
-  origin = { lat: 28.5420, lng: 77.2350, address: 'B-44, Greater Kailash Part 1, New Delhi' },
+  origin = { lat: 28.5420, lng: 77.2350, address: 'Current Live GPS Location' },
   destination = {
     lat: 28.5672,
     lng: 77.2100,
-    name: 'AIIMS Apex Trauma Center & Emergency Hospital',
-    address: 'Ring Road, Safdarjung Enclave, New Delhi',
-    bay: 'Trauma Bay #03 (Cath Lab 2)',
+    name: 'Allocated Hospital Emergency Room',
+    address: 'Hospital Emergency Bay',
+    bay: 'Trauma Resuscitation Bay',
   },
-  patientId = 'PAT-2026-8941',
+  patientId = '',
   initialEtaMins = 8,
   initialDistanceKm = 4.2,
-  speedKmh = 54,
-  vehicleNumber = 'DL-01-AMB-402',
+  speedKmh = 50,
+  vehicleNumber = '108 Ambulance Unit',
   isDriverView = false,
   isHospitalView = false,
-  driverName = 'Rajesh Kumar Yadav',
-  driverPhone = '+91-98188-72619',
-  emergencyBrief = 'Acute Coronary Syndrome (Suspected STEMI)',
+  driverName = '108 Paramedic Lead',
+  driverPhone = '108 National Grid',
+  emergencyBrief = 'Active Emergency Dispatch',
 }) => {
   const [currentOrigin, setCurrentOrigin] = useState(origin);
   const [isLocating, setIsLocating] = useState<boolean>(false);

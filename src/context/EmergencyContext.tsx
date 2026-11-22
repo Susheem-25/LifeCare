@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Hospital, EmergencyBooking, AITriageAnalysis, ABHAMedicalRecord, PatientVitals, Doctor, Equipment, DriverAccount, AppRole, UserProfile, PatientVoiceRegistration, AdmissionNotification } from '../types';
-import { INITIAL_HOSPITALS, SAMPLE_DRIVERS } from '../data/mockData';
 import { analyzeEmergencyBrief, rankHospitalsForEmergency } from '../services/aiTriageService';
 import { speakTextWithSarvam } from '../services/sarvamAiService';
 import { soundEffects } from '../utils/audio';
@@ -13,6 +12,8 @@ import {
   onAuthStateSubscription,
   syncBookingToFirestore,
   subscribeToFirestoreBookings,
+  subscribeToFirestoreHospitals,
+  subscribeToFirestoreDrivers,
   syncVitalsToFirestore,
   syncDriverProfileToFirestore,
   fetchDriverProfile,
@@ -92,15 +93,27 @@ const STORAGE_KEY_ROLE = 'lifecare_role_v3';
 const EmergencyContext = createContext<EmergencyContextType | undefined>(undefined);
 
 export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load hospitals from localStorage or initial mock data
+  // Load hospitals from localStorage or Firestore (Clean MVP: empty by default, zero mocked hospitals)
   const [hospitals, setHospitals] = useState<Hospital[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_HOSPITALS);
-      return saved ? JSON.parse(saved) : INITIAL_HOSPITALS;
+      if (saved) {
+        const parsed: Hospital[] = JSON.parse(saved);
+        const dummyIds = ['hosp-aiims-delhi', 'hosp-max-saket', 'hosp-fortis-escorts', 'hosp-apollo-jasola'];
+        const clean = parsed.filter((h) => !dummyIds.includes(h.id));
+        if (clean.length !== parsed.length) {
+          localStorage.setItem(STORAGE_KEY_HOSPITALS, JSON.stringify(clean));
+        }
+        return clean;
+      }
+      return [];
     } catch {
-      return INITIAL_HOSPITALS;
+      return [];
     }
   });
+
+  // Real registered drivers available in network
+  const [availableDrivers, setAvailableDrivers] = useState<DriverAccount[]>([]);
 
   const [currentTriage, setCurrentTriage] = useState<AITriageAnalysis | null>(null);
   const [currentView, setCurrentView] = useState<AppView>(() => {
@@ -209,15 +222,38 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     // Listen to real-time Cloud Firestore emergency missions
     const unsubCloud = subscribeToFirestoreBookings((cloudBookings) => {
-      if (cloudBookings && cloudBookings.length > 0) {
-        setAllBookings(cloudBookings);
-        if (cloudBookings[0]) setActiveBooking(cloudBookings[0]);
+      setAllBookings(cloudBookings);
+      if (cloudBookings.length > 0) {
+        setActiveBooking((prev) => {
+          if (!prev) return cloudBookings[0] || null;
+          const match = cloudBookings.find((b) => b.bookingCode === prev.bookingCode);
+          return match || prev;
+        });
       }
+    });
+
+    // Listen to real-time registered hospitals in Cloud Firestore
+    const unsubHospitals = subscribeToFirestoreHospitals((cloudHospitals) => {
+      const dummyIds = ['hosp-aiims-delhi', 'hosp-max-saket', 'hosp-fortis-escorts', 'hosp-apollo-jasola'];
+      const realHospitals = cloudHospitals.filter((h) => !dummyIds.includes(h.id));
+      setHospitals(realHospitals);
+      try {
+        localStorage.setItem(STORAGE_KEY_HOSPITALS, JSON.stringify(realHospitals));
+      } catch {
+        // ignore
+      }
+    });
+
+    // Listen to real-time registered drivers in Cloud Firestore
+    const unsubDrivers = subscribeToFirestoreDrivers((cloudDrivers) => {
+      setAvailableDrivers(cloudDrivers);
     });
 
     return () => {
       unsubAuth();
       unsubCloud();
+      unsubHospitals();
+      unsubDrivers();
     };
   }, []);
 
@@ -608,43 +644,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCurrentView('patient');
   };
 
-  const loginDriver = (driverId: string, pin: string): boolean => {
-    const cleanId = driverId.trim().toUpperCase();
-    const cleanPin = pin.trim();
-    const matched = SAMPLE_DRIVERS.find(
-      (d) => d.driverId.toUpperCase() === cleanId && d.pin === cleanPin
-    );
-
-    if (matched) {
-      setLoggedDriver(matched);
-      try {
-        localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(matched));
-      } catch {
-        // ignore
-      }
-      soundEffects.playSuccessChime();
-      return true;
-    }
-
-    if (cleanId.length >= 3 && cleanPin.length >= 4) {
-      const dynamicDriver: DriverAccount = {
-        driverId: cleanId.startsWith('DRV') ? cleanId : `DRV-${cleanId}`,
-        pin: cleanPin,
-        driverName: `108 Ambulance Unit (${cleanId})`,
-        phone: '+91-98101-08108',
-        vehicleNumber: `DL-01-AMB-${cleanId.replace(/\D/g, '').slice(-3) || '402'}`,
-        vehicleType: 'Advanced Cardiac Life Support (ACLS)',
-      };
-      setLoggedDriver(dynamicDriver);
-      try {
-        localStorage.setItem(STORAGE_KEY_LOGGED_DRIVER, JSON.stringify(dynamicDriver));
-      } catch {
-        // ignore
-      }
-      soundEffects.playSuccessChime();
-      return true;
-    }
-
+  const loginDriver = (_driverId: string, _pin: string): boolean => {
     return false;
   };
 
@@ -717,48 +717,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       longitude: userLocation.lng,
       rating: 4.9,
       beds: details.beds,
-      doctors: details.doctors && details.doctors.length > 0 ? details.doctors : [
-        {
-          id: `doc-${hospId}-1`,
-          name: 'Dr. Rajiv Malhotra',
-          specialization: 'Director of Emergency Medicine & Trauma Care',
-          qualifications: 'MD (Emergency Medicine), FACEM',
-          experienceYears: 16,
-          status: 'AVAILABLE_AND_FREE',
-          currentBay: 'Resuscitation Bay 1',
-          avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
-          phone: details.phone || '+91-98110-23451',
-        },
-      ],
-      equipments: details.equipments && details.equipments.length > 0 ? details.equipments : [
-        {
-          id: `eq-${hospId}-1`,
-          name: 'Philips Azurion 7 Biplane Cath Lab',
-          category: 'LIFE_SUPPORT',
-          status: 'READY_AND_STERILIZED',
-          location: 'Cath Lab 1 / Trauma Resuscitation',
-          quantityAvailable: 1,
-          totalQuantity: 1,
-        },
-        {
-          id: `eq-${hospId}-2`,
-          name: 'Hamilton-G5 ICU High Precision Ventilator',
-          category: 'LIFE_SUPPORT',
-          status: 'READY_AND_STERILIZED',
-          location: 'ER Trauma Bay #01',
-          quantityAvailable: 4,
-          totalQuantity: 4,
-        },
-        {
-          id: `eq-${hospId}-3`,
-          name: 'Zoll R Series ALS Defibrillator & External Pacer',
-          category: 'LIFE_SUPPORT',
-          status: 'READY_AND_STERILIZED',
-          location: 'Trauma Bay #02',
-          quantityAvailable: 3,
-          totalQuantity: 3,
-        },
-      ],
+      doctors: details.doctors || [],
+      equipments: details.equipments || [],
       traumaLevel: 1,
       accreditation: ['NABH', 'Emergency Care Quality Standard'],
     };
@@ -848,6 +808,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     const nameToUse = patientName || `PATIENT [${patientUniqueId}]`;
     const phoneToUse = patientPhone || 'PROTECTED (ZERO PII)';
+    const assignedDriver = availableDrivers.length > 0 ? availableDrivers[0] : null;
 
     const newBooking: EmergencyBooking = {
       patientUniqueId,
@@ -876,30 +837,18 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       createdAt: now.toISOString(),
       expiresAt: expiry.toISOString(),
       status: 'AMBULANCE_EN_ROUTE_PICKUP',
-      driverLoggedIn: false,
+      driverLoggedIn: Boolean(assignedDriver),
       ambulanceDetails: {
-        vehicleNumber: 'DL-01-AMB-' + Math.floor(100 + Math.random() * 900),
-        driverName: 'Rajesh Kumar Yadav',
-        driverPhone: '+91-98188-72619',
-        type: 'Advanced Cardiac Life Support (ACLS)',
+        vehicleNumber: assignedDriver ? assignedDriver.vehicleNumber : '108 Unit (Awaiting Assignment)',
+        driverName: assignedDriver ? assignedDriver.driverName : 'Pending Driver Assignment',
+        driverPhone: assignedDriver ? assignedDriver.phone : '108 Emergency Grid',
+        type: (assignedDriver ? assignedDriver.vehicleType : '108 Emergency Ambulance') as any,
         currentEtaMins: 6,
-        currentSpeedKmh: 52,
-        distanceRemainingKm: 2.8,
+        currentSpeedKmh: assignedDriver ? 48 : 0,
+        distanceRemainingKm: 2.5,
       },
       inTransitPaperwork: {
-        isSubmitted: Boolean(targetAbha),
-        submittedAt: targetAbha ? now.toISOString() : undefined,
-        abhaDetails: targetAbha || undefined,
-        initialVitals: {
-          heartRate: 112,
-          bloodPressureSys: 154,
-          bloodPressureDia: 94,
-          spO2: 92,
-          respiratoryRate: 24,
-          temperatureF: 98.6,
-          gcsScore: 15,
-          recordedAt: now.toISOString(),
-        },
+        isSubmitted: false,
         digitalConsentSigned: true,
         preAdmitRegistrationNumber: 'ABDM-ER-' + Math.floor(100000 + Math.random() * 900000),
       },
@@ -993,6 +942,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const updatedList = allBookings.map((b) => (b.bookingCode === found.bookingCode ? updatedBooking : b));
     saveAll(updatedList);
     broadcastState(updatedBooking, updatedList, hospitals);
+    syncBookingToFirestore(updatedBooking);
 
     try {
       const channel = new BroadcastChannel('lifecare_sync_channel');
@@ -1482,28 +1432,16 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const resetEmergencyState = () => {
-    try {
-      localStorage.clear();
-    } catch { }
-
-    const freshHospitals: Hospital[] = JSON.parse(JSON.stringify(INITIAL_HOSPITALS));
-
-    setHospitals(freshHospitals);
     setCurrentTriage(null);
-    setCurrentView('patient');
-    setCurrentRole('welcome');
     setSelectedAbhaProfile(null);
-    setSearchTriageMode('standard');
     setActiveBooking(null);
-    setAllBookings([]);
-    setLoggedHospitalId('hosp-aiims-delhi');
-
     setAdmissionNotice(null);
     try {
+      localStorage.removeItem(STORAGE_KEY_ACTIVE);
       localStorage.removeItem('lifecare_admission_notice');
     } catch { }
 
-    broadcastState(null, [], freshHospitals);
+    broadcastState(null, allBookings, hospitals);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     soundEffects.playSuccessChime();
   };
