@@ -154,11 +154,10 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-1.5 rounded-xl border transition-all cursor-pointer shadow-2xs flex items-center justify-center ${
-                isDarkTheme
+              className={`p-1.5 rounded-xl border transition-all cursor-pointer shadow-2xs flex items-center justify-center ${isDarkTheme
                   ? 'bg-zinc-900/90 hover:bg-zinc-800 text-amber-400 border-zinc-800 hover:border-zinc-700'
                   : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-              }`}
+                }`}
               title={`Switch to ${isDarkTheme ? 'Light' : 'Dark'} Mode`}
               aria-label="Toggle Theme"
             >
@@ -198,13 +197,12 @@ export const Navbar: React.FC = () => {
                 </span>
               )}
               <div
-                className={`px-3 py-1.5 rounded-lg text-white font-bold flex items-center space-x-1.5 shadow-xs ${
-                  currentRole === 'guardian'
+                className={`px-3 py-1.5 rounded-lg text-white font-bold flex items-center space-x-1.5 shadow-xs ${currentRole === 'guardian'
                     ? 'bg-red-600'
                     : currentRole === 'driver'
-                    ? 'bg-amber-600'
-                    : 'bg-emerald-600'
-                }`}
+                      ? 'bg-amber-600'
+                      : 'bg-emerald-600'
+                  }`}
               >
                 {currentRole === 'guardian' && <HeartPulse className="w-3.5 h-3.5 text-white" />}
                 {currentRole === 'driver' && <Ambulance className="w-3.5 h-3.5 text-white" />}
@@ -213,8 +211,8 @@ export const Navbar: React.FC = () => {
                   {currentRole === 'guardian'
                     ? 'Guardian'
                     : currentRole === 'driver'
-                    ? '108 Driver'
-                    : 'Hospital'}
+                      ? '108 Driver'
+                      : 'Hospital'}
                 </span>
               </div>
             </div>
