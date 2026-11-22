@@ -170,82 +170,130 @@ const MainAppContent: React.FC = () => {
       )}
 
       {/* High-End Healthcare Footer */}
-      <footer className="border-t border-slate-200/90 bg-gradient-to-b from-white via-slate-50/70 to-slate-100/90 pt-10 pb-8 px-3 sm:px-6 lg:px-8 mt-10 relative z-10 text-slate-600">
+      <footer className={`border-t transition-colors duration-300 pt-10 pb-8 px-3 sm:px-6 lg:px-8 mt-10 relative z-10 ${
+        isDarkWelcome
+          ? 'border-zinc-800/80 bg-[#060913] text-zinc-400'
+          : 'border-slate-200/90 bg-gradient-to-b from-white via-slate-50/70 to-slate-100/90 text-slate-600'
+      }`}>
         <div className="max-w-7xl mx-auto space-y-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200/70">
+          <div className={`flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b ${
+            isDarkWelcome ? 'border-zinc-800/80' : 'border-slate-200/70'
+          }`}>
             <div className="flex items-center gap-3 text-center md:text-left">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-b from-red-500 to-red-600 text-white flex items-center justify-center shadow-md shadow-red-500/25 shrink-0">
                 <HeartPulse className="w-5 h-5 text-white" />
               </div>
               <div>
                 <div className="flex items-center justify-center md:justify-start gap-2">
-                  <span className="font-mono text-xl font-bold text-slate-900 tracking-tight">
-                    Life<span className="text-red-600">Care</span>
+                  <span className={`font-mono text-xl font-bold tracking-tight ${isDarkWelcome ? 'text-white' : 'text-slate-900'}`}>
+                    Life<span className="text-red-500">Care</span>
                   </span>
-                  <span className="text-[10px] font-mono font-bold bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full">
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                    isDarkWelcome
+                      ? 'bg-red-950/70 text-red-400 border-red-800/80'
+                      : 'bg-red-100 text-red-700 border-red-200'
+                  }`}>
                     Caring for Lives
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className={`text-xs mt-0.5 ${isDarkWelcome ? 'text-zinc-400 font-mono' : 'text-slate-500'}`}>
                   AI-Powered Emergency Triage & Atomic Hospital Bed Allocation
                 </p>
               </div>
             </div>
 
             <div className="flex items-center flex-wrap justify-center gap-2 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-red-200 shadow-2xs font-mono font-bold text-red-700">
-                <Sparkles className="w-3.5 h-3.5 text-red-600" />
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono font-bold border shadow-2xs ${
+                isDarkWelcome
+                  ? 'bg-zinc-900 border-red-900/60 text-red-400'
+                  : 'bg-white border-red-200 text-red-700'
+              }`}>
+                <Sparkles className="w-3.5 h-3.5 text-red-500" />
                 Sarvam AI Voice Powered
               </span>
-              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs font-mono text-slate-600">
+              <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl font-mono border shadow-2xs ${
+                isDarkWelcome
+                  ? 'bg-zinc-900 border-zinc-800 text-zinc-300'
+                  : 'bg-white border-slate-200 text-slate-600'
+              }`}>
                 National 108 Emergency Grid
               </span>
               <a
                 href="tel:108"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-2xs font-mono font-bold transition"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white shadow-md shadow-red-600/30 font-mono font-bold transition"
               >
                 <PhoneCall className="w-3.5 h-3.5 text-white animate-pulse" />
                 Ambulance 108
               </a>
               <a
                 href="tel:112"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 shadow-2xs font-mono font-bold text-red-700 transition"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono font-bold transition border shadow-2xs ${
+                  isDarkWelcome
+                    ? 'bg-zinc-900 hover:bg-zinc-800 border-red-900/80 text-red-400'
+                    : 'bg-rose-50 hover:bg-rose-100 border-rose-200 text-red-700'
+                }`}
               >
-                <PhoneCall className="w-3.5 h-3.5 text-red-600" />
+                <PhoneCall className="w-3.5 h-3.5 text-red-500" />
                 Helpline 112
               </a>
             </div>
           </div>
 
-          <div className="py-2 flex flex-wrap items-center justify-center gap-2 text-[11px] font-mono text-slate-600">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200 text-teal-800 shadow-2xs font-bold">
-              <Zap className="w-3 h-3 text-teal-600" />
+          <div className="py-2 flex flex-wrap items-center justify-center gap-2 text-[11px] font-mono">
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border shadow-2xs font-bold ${
+              isDarkWelcome
+                ? 'bg-zinc-900/90 border-teal-900/60 text-teal-400'
+                : 'bg-teal-50 border-teal-200 text-teal-800'
+            }`}>
+              <Zap className="w-3.5 h-3.5 text-teal-500" />
               Cloud Atomic Lock &lt;10ms
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-2xs font-bold">
-              <ShieldCheck className="w-3 h-3 text-emerald-600" />
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border shadow-2xs font-bold ${
+              isDarkWelcome
+                ? 'bg-zinc-900/90 border-emerald-900/60 text-emerald-400'
+                : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            }`}>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
               0% Gate Rejection
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 shadow-2xs font-bold">
-              <Activity className="w-3.5 h-3.5 text-blue-600" />
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border shadow-2xs font-bold ${
+              isDarkWelcome
+                ? 'bg-zinc-900/90 border-blue-900/60 text-blue-400'
+                : 'bg-blue-50 border-blue-200 text-blue-800'
+            }`}>
+              <Activity className="w-3.5 h-3.5 text-blue-500" />
               0 sec Reception Intake
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 shadow-2xs font-bold">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border shadow-2xs font-bold ${
+              isDarkWelcome
+                ? 'bg-zinc-900/90 border-amber-900/60 text-amber-400'
+                : 'bg-amber-50 border-amber-200 text-amber-800'
+            }`}>
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               Sarvam AI (Indic STT + TTS)
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 shadow-2xs font-bold">
-              <HeartPulse className="w-3.5 h-3.5 text-rose-600" />
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border shadow-2xs font-bold ${
+              isDarkWelcome
+                ? 'bg-zinc-900/90 border-rose-900/60 text-rose-400'
+                : 'bg-rose-50 border-rose-200 text-rose-800'
+            }`}>
+              <HeartPulse className="w-3.5 h-3.5 text-rose-500" />
               7-10% Survival Preserved / Min
             </span>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 pt-2 border-t border-slate-200/50 text-center sm:text-left">
+          <div className={`flex flex-col sm:flex-row items-center justify-between gap-3 text-xs pt-2 border-t text-center sm:text-left ${
+            isDarkWelcome ? 'border-zinc-800/80 text-zinc-500' : 'border-slate-200/50 text-slate-500'
+          }`}>
             <p>
-              © 2026 <strong>LifeCare</strong> • Caring for Lives. All rights reserved.
+              © 2026 <strong className={isDarkWelcome ? 'text-zinc-300 font-mono' : 'text-slate-700'}>LifeCare</strong> • Caring for Lives. All rights reserved.
             </p>
             <div className="flex items-center gap-2 font-mono text-[11px]">
-              <span className="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold border ${
+                isDarkWelcome
+                  ? 'bg-emerald-950/80 border-emerald-800 text-emerald-400'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              }`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 Emergency OS Online
               </span>
