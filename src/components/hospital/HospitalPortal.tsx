@@ -23,7 +23,8 @@ import {
   Sparkles,
   Loader2,
   ShieldCheck,
-  Phone
+  Phone,
+  Pencil
 } from 'lucide-react';
 import { ReceptionQrScannerModal } from './ReceptionQrScannerModal';
 
@@ -55,6 +56,7 @@ export const HospitalPortal: React.FC = () => {
     allBookings, 
     updateHospitalBeds, 
     updateDoctorStatus,
+    updateDoctorDetails,
     addDoctor,
     removeDoctor,
     updateEquipmentStatus,
@@ -97,6 +99,7 @@ export const HospitalPortal: React.FC = () => {
   // Inline add doctor drawer state for onboarding - starts completely clean
   const [isAddingDocInline, setIsAddingDocInline] = useState(false);
   const [newDocName, setNewDocName] = useState('');
+  const [newDocDegrees, setNewDocDegrees] = useState('');
   const [newDocSpec, setNewDocSpec] = useState('');
   const [newDocExp, setNewDocExp] = useState<number | ''>('');
   const [newDocBay, setNewDocBay] = useState('');
@@ -116,7 +119,7 @@ export const HospitalPortal: React.FC = () => {
       id: `doc-${Date.now()}`,
       name: sanitizeText(newDocName),
       specialization: sanitizeText(newDocSpec) || 'Emergency Specialist',
-      qualifications: 'MBBS, MD',
+      qualifications: sanitizeText(newDocDegrees) || 'MBBS, MD',
       experienceYears: Number(newDocExp) || 0,
       status: 'AVAILABLE_AND_FREE',
       currentBay: sanitizeText(newDocBay) || 'Emergency Bay',
@@ -125,6 +128,7 @@ export const HospitalPortal: React.FC = () => {
     };
     setOnboardDoctors((prev) => [...prev, newDoc]);
     setNewDocName('');
+    setNewDocDegrees('');
     setNewDocSpec('');
     setNewDocExp('');
     setNewDocBay('');
@@ -196,10 +200,46 @@ export const HospitalPortal: React.FC = () => {
   const [showAddDoctorModal, setShowAddDoctorModal] = useState<boolean>(false);
   const [docName, setDocName] = useState<string>('');
   const [docSpec, setDocSpec] = useState<string>('Interventional Cardiology & Electrophysiology');
-  const [docQual, setDocQual] = useState<string>('MD, DM (Cardiology)');
-  const [docExp, setDocExp] = useState<number>(10);
+  const [docQual, setDocQual] = useState<string>('');
+  const [docExp, setDocExp] = useState<number | ''>('');
   const [docPhone, setDocPhone] = useState<string>('');
   const [docInitialStatus, setDocInitialStatus] = useState<Doctor['status']>('AVAILABLE_AND_FREE');
+
+  // Edit Doctor Modal State (in Dashboard)
+  const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
+  const [editDocName, setEditDocName] = useState<string>('');
+  const [editDocSpec, setEditDocSpec] = useState<string>('');
+  const [editDocQual, setEditDocQual] = useState<string>('');
+  const [editDocExp, setEditDocExp] = useState<number | ''>('');
+  const [editDocPhone, setEditDocPhone] = useState<string>('');
+  const [editDocStatus, setEditDocStatus] = useState<Doctor['status']>('AVAILABLE_AND_FREE');
+
+  const handleOpenEditDoctor = (doc: Doctor) => {
+    setEditingDoctor(doc);
+    setEditDocName(doc.name);
+    setEditDocSpec(doc.specialization);
+    setEditDocQual(doc.qualifications || '');
+    setEditDocExp(doc.experienceYears);
+    setEditDocPhone(doc.phone || '');
+    setEditDocStatus(doc.status);
+  };
+
+  const handleUpdateDoctorSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loggedHospital || !editingDoctor || !editDocName.trim()) return;
+
+    updateDoctorDetails(loggedHospital.id, editingDoctor.id, {
+      name: sanitizeText(editDocName),
+      specialization: sanitizeText(editDocSpec) || editingDoctor.specialization,
+      qualifications: sanitizeText(editDocQual) || 'MBBS, MD',
+      experienceYears: Number(editDocExp) || 0,
+      phone: sanitizeText(editDocPhone) || editingDoctor.phone,
+      status: editDocStatus,
+    });
+
+    setEditingDoctor(null);
+    showToast(`Updated Dr. ${editDocName}'s degrees and details!`);
+  };
 
   // Add Machine Modal State (in Dashboard)
   const [showAddMachineModal, setShowAddMachineModal] = useState<boolean>(false);
@@ -563,6 +603,13 @@ export const HospitalPortal: React.FC = () => {
                     />
                     <input
                       type="text"
+                      value={newDocDegrees}
+                      onChange={(e) => setNewDocDegrees(e.target.value)}
+                      placeholder="Doctor Degrees (e.g. MBBS, MD, DM, MS, DNB)"
+                      className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
+                    />
+                    <input
+                      type="text"
                       value={newDocSpec}
                       onChange={(e) => setNewDocSpec(e.target.value)}
                       placeholder="Specialization (e.g. Critical Care Trauma)"
@@ -617,6 +664,7 @@ export const HospitalPortal: React.FC = () => {
                     <div>
                       <div className="font-bold text-slate-900">{doc.name}</div>
                       <div className="text-[11px] text-slate-500">
+                        {doc.qualifications && <span className="font-mono font-semibold text-slate-700">{doc.qualifications} • </span>}
                         {doc.specialization} • {doc.currentBay} • {doc.experienceYears} yrs exp
                       </div>
                     </div>
@@ -1382,17 +1430,27 @@ export const HospitalPortal: React.FC = () => {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        removeDoctor(loggedHospital.id, doctor.id);
-                        showToast(`Removed ${doctor.name}`);
-                      }}
-                      className="text-slate-400 hover:text-red-600 p-1 rounded-lg transition cursor-pointer"
-                      title="Remove Doctor"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditDoctor(doctor)}
+                        className="text-slate-400 hover:text-emerald-600 p-1.5 rounded-lg transition cursor-pointer"
+                        title="Update Doctor Details & Degrees"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeDoctor(loggedHospital.id, doctor.id);
+                          showToast(`Removed ${doctor.name}`);
+                        }}
+                        className="text-slate-400 hover:text-red-600 p-1.5 rounded-lg transition cursor-pointer"
+                        title="Remove Doctor"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Status Toggle Buttons: Free | Busy | Absent */}
@@ -1609,28 +1667,31 @@ export const HospitalPortal: React.FC = () => {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-slate-600 font-bold mb-1">Qualifications</label>
-                  <input
-                    type="text"
-                    value={docQual}
-                    onChange={(e) => setDocQual(e.target.value)}
-                    placeholder="e.g. MD, DM"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-600 font-bold mb-1">Experience (Years)</label>
-                  <input
-                    type="number"
-                    value={docExp}
-                    onChange={(e) => setDocExp(Number(e.target.value))}
-                    min={1}
-                    max={40}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900"
-                  />
-                </div>
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">
+                  Doctor Degrees & Medical Qualifications
+                </label>
+                <input
+                  type="text"
+                  value={docQual}
+                  onChange={(e) => setDocQual(e.target.value)}
+                  placeholder="e.g. MBBS, MD (Trauma), DM (Cardiology), MS, DNB"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">Experience (Years)</label>
+                <input
+                  type="number"
+                  value={docExp}
+                  onChange={(e) => setDocExp(e.target.value ? Number(e.target.value) : '')}
+                  min={0}
+                  max={60}
+                  placeholder="e.g. 10"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900"
+                />
               </div>
 
               <div>
@@ -1670,6 +1731,125 @@ export const HospitalPortal: React.FC = () => {
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-bold transition shadow-xs cursor-pointer"
                 >
                   Save Doctor
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================
+          MODAL: EDIT DOCTOR DETAILS & DEGREES
+          ======================================================== */}
+      {editingDoctor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <Pencil className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-lg font-black text-slate-900">Update Doctor Details & Degrees</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingDoctor(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateDoctorSubmit} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">Doctor Name</label>
+                <input
+                  type="text"
+                  value={editDocName}
+                  onChange={(e) => setEditDocName(e.target.value)}
+                  placeholder="Doctor Name (e.g. Dr. Raghav Anand)"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">
+                  Doctor Degrees & Medical Qualifications
+                </label>
+                <input
+                  type="text"
+                  value={editDocQual}
+                  onChange={(e) => setEditDocQual(e.target.value)}
+                  placeholder="e.g. MBBS, MD, DM, MS, DNB, FRCS"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">Specialization</label>
+                <select
+                  value={editDocSpec}
+                  onChange={(e) => setEditDocSpec(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
+                >
+                  <option value="Interventional Cardiology & Electrophysiology">Interventional Cardiology</option>
+                  <option value="Senior Trauma & Critical Care Surgeon">Trauma & Critical Care Surgeon</option>
+                  <option value="Neurologist & Acute Stroke Specialist">Neurologist / Stroke Specialist</option>
+                  <option value="Senior Pulmonologist & Critical Care Specialist">Senior Pulmonologist</option>
+                  <option value="Emergency Medicine Specialist">Emergency Medicine Specialist</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1">Experience (Years)</label>
+                  <input
+                    type="number"
+                    value={editDocExp}
+                    onChange={(e) => setEditDocExp(e.target.value ? Number(e.target.value) : '')}
+                    min={0}
+                    max={60}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-bold mb-1">Phone Number</label>
+                  <input
+                    type="text"
+                    value={editDocPhone}
+                    onChange={(e) => setEditDocPhone(e.target.value)}
+                    placeholder="+91-98110-12345"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">Availability Status</label>
+                <select
+                  value={editDocStatus}
+                  onChange={(e) => setEditDocStatus(e.target.value as Doctor['status'])}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
+                >
+                  <option value="AVAILABLE_AND_FREE">Free on Duty</option>
+                  <option value="IN_SURGERY">Busy (In Surgery)</option>
+                  <option value="OFF_DUTY">Absent / Off Duty</option>
+                </select>
+              </div>
+
+              <div className="pt-2 flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingDoctor(null)}
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-bold transition shadow-xs cursor-pointer"
+                >
+                  Save Changes
                 </button>
               </div>
             </form>

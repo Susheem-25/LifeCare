@@ -53,6 +53,8 @@ export const AdminConsole: React.FC = () => {
     toggleTheme
   } = useEmergency();
 
+  const isDark = theme === 'dark';
+
   const [activeTab, setActiveTab] = useState<'audit' | 'patients' | 'hospitals' | 'drivers'>('audit');
   const [authError, setAuthError] = useState<string>('');
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
@@ -293,32 +295,58 @@ export const AdminConsole: React.FC = () => {
       });
   }, [registeredDrivers, driverSearch, driverTypeFilter, driverSort]);
 
-  // 1. OLED ACCESS GATEWAY: If not authenticated or not an authorized admin email
+  // 1. ACCESS GATEWAY: If not authenticated or not an authorized admin email
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-black text-slate-100 flex items-center justify-center p-4 antialiased selection:bg-red-500 selection:text-white">
-        <div className="w-full max-w-md macos-glass macos-glass-dark rounded-3xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className={`min-h-screen transition-colors duration-300 flex items-center justify-center p-4 antialiased relative selection:bg-red-500 selection:text-white ${
+        isDark ? 'bg-[#060913] text-zinc-100' : 'bg-slate-50 text-slate-900'
+      }`}>
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={`inline-flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-xl transition cursor-pointer border ${
+              isDark
+                ? 'text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border-zinc-800'
+                : 'text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
+            }`}
+            title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+          >
+            {isDark ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-slate-500" />}
+            <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
+        </div>
+
+        <div className={`w-full max-w-md macos-glass rounded-3xl p-8 space-y-6 shadow-2xl relative overflow-hidden ${
+          isDark ? 'macos-glass-dark text-white' : 'macos-glass-light text-slate-900'
+        }`}>
+          <div className={`absolute top-0 right-0 w-40 h-40 ${isDark ? 'bg-red-600/10' : 'bg-red-500/10'} rounded-full blur-3xl pointer-events-none`}></div>
 
           <div className="text-center space-y-3">
-            <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 text-red-500 flex items-center justify-center mx-auto shadow-inner">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto shadow-inner border ${
+              isDark ? 'bg-zinc-900 border-zinc-800 text-red-500' : 'bg-red-50 border-red-200 text-red-600'
+            }`}>
               <ShieldAlert className="w-7 h-7" />
             </div>
-            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-red-950/60 border border-red-800/80 text-red-400 text-[11px] font-mono font-bold tracking-wider uppercase">
+            <div className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold tracking-wider uppercase border ${
+              isDark ? 'bg-red-950/60 border-red-800/80 text-red-400' : 'bg-red-50 border-red-200 text-red-700'
+            }`}>
               <span>Restricted Command • /admin</span>
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">
+            <h1 className={`text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
               LifeCare Super Admin
             </h1>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className={`text-xs leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
               Access to this console requires verified Google authentication matching authorized system administrator credentials.
             </p>
           </div>
 
           {authError && (
-            <div className="bg-red-950/60 border border-red-800 text-red-300 text-xs p-3.5 rounded-2xl space-y-1">
-              <div className="font-bold flex items-center space-x-1.5 text-red-200">
-                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+            <div className={`text-xs p-3.5 rounded-2xl space-y-1 border ${
+              isDark ? 'bg-red-950/60 border-red-800 text-red-300' : 'bg-red-50 border-red-200 text-red-700'
+            }`}>
+              <div className={`font-bold flex items-center space-x-1.5 ${isDark ? 'text-red-200' : 'text-red-800'}`}>
+                <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
                 <span>Authentication Rejected</span>
               </div>
               <p className="text-[11px] leading-relaxed">{authError}</p>
@@ -330,10 +358,14 @@ export const AdminConsole: React.FC = () => {
               type="button"
               disabled={isAuthenticating}
               onClick={handleAdminGoogleLogin}
-              className="w-full bg-white hover:bg-zinc-200 disabled:opacity-50 text-black py-3.5 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2.5 transition shadow-lg shadow-white/5 cursor-pointer"
+              className={`w-full py-3.5 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2.5 transition shadow-lg cursor-pointer ${
+                isDark
+                  ? 'bg-white hover:bg-zinc-200 text-black shadow-white/5'
+                  : 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/25'
+              }`}
             >
               {isAuthenticating ? (
-                <RefreshCw className="w-4 h-4 animate-spin text-black" />
+                <RefreshCw className={`w-4 h-4 animate-spin ${isDark ? 'text-black' : 'text-white'}`} />
               ) : (
                 <GoogleIcon className="w-4 h-4" />
               )}
@@ -342,14 +374,16 @@ export const AdminConsole: React.FC = () => {
 
             <a
               href="/"
-              className="w-full text-zinc-500 hover:text-zinc-300 text-xs font-medium py-2 block text-center transition"
+              className={`w-full text-xs font-medium py-2 block text-center transition ${
+                isDark ? 'text-zinc-400 hover:text-zinc-200' : 'text-slate-500 hover:text-slate-800'
+              }`}
             >
               ← Return to Citizen Public Grid
             </a>
           </div>
 
-          <div className="pt-4 border-t border-zinc-900 text-center">
-            <p className="text-[10px] font-mono text-zinc-600">
+          <div className={`pt-4 border-t text-center ${isDark ? 'border-zinc-800/80 text-zinc-500' : 'border-slate-200 text-slate-400'}`}>
+            <p className="text-[10px] font-mono">
               LifeCare Zero-Trust Architecture • All Admin Access Logs Monitored
             </p>
           </div>
@@ -358,60 +392,76 @@ export const AdminConsole: React.FC = () => {
     );
   }
 
-  // 2. OLED SUPER ADMIN CONSOLE INTERFACE
+  // 2. SUPER ADMIN CONSOLE INTERFACE
   return (
-    <div className="min-h-screen bg-black text-zinc-100 antialiased font-sans selection:bg-emerald-500 selection:text-black">
+    <div className={`min-h-screen transition-colors duration-300 font-sans antialiased selection:bg-red-500 selection:text-white ${
+      isDark ? 'bg-[#060913] text-zinc-100' : 'bg-slate-50 text-slate-900'
+    }`}>
       {/* Action Notification Toast */}
       {actionNotice && (
-        <div className="fixed top-4 right-4 z-50 bg-emerald-950 border-2 border-emerald-500 text-emerald-200 px-4 py-2.5 rounded-2xl text-xs font-mono font-bold shadow-2xl flex items-center space-x-2 animate-fadeIn">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className={`fixed top-4 right-4 z-50 px-4 py-2.5 rounded-2xl text-xs font-mono font-bold shadow-2xl flex items-center space-x-2 animate-fadeIn border-2 ${
+          isDark ? 'bg-emerald-950 border-emerald-500 text-emerald-200' : 'bg-emerald-50 border-emerald-500 text-emerald-900'
+        }`}>
+          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           <span>{actionNotice}</span>
         </div>
       )}
 
-      {/* OLED Admin Top Bar */}
-      <header className="border-b border-zinc-800/80 bg-black/90 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      {/* Admin Top Bar */}
+      <header className={`border-b sticky top-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between macos-glass ${
+        isDark ? 'bg-[#060913]/90 border-zinc-800/80 text-white' : 'bg-white/90 border-slate-200/90 text-slate-900 shadow-xs'
+      }`}>
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-rose-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-red-600/30">
             LC
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-black text-white tracking-tight">LifeCare OLED Command</span>
-              <span className="bg-red-950/80 text-red-400 border border-red-800 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase">
+              <span className={`text-sm font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>LifeCare Command</span>
+              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border ${
+                isDark ? 'bg-red-950/80 text-red-400 border-red-800' : 'bg-red-50 text-red-700 border-red-200'
+              }`}>
                 SUPER ADMIN
               </span>
             </div>
-            <p className="text-[11px] font-mono text-zinc-400">
+            <p className={`text-[11px] font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
               Zero-Wait Emergency Operating System • Live National Telemetry
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3 sm:space-x-4">
           <div className="hidden sm:flex flex-col text-right">
-            <span className="text-xs font-bold text-white">{currentUser?.displayName}</span>
-            <span className="text-[10px] font-mono text-emerald-400">{currentUser?.email}</span>
+            <span className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{currentUser?.displayName}</span>
+            <span className={`text-[10px] font-mono ${isDark ? 'text-emerald-400' : 'text-emerald-600 font-semibold'}`}>{currentUser?.email}</span>
           </div>
 
           <button
             type="button"
             onClick={toggleTheme}
-            className="inline-flex items-center space-x-1.5 text-xs text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-3 py-1.5 rounded-xl transition cursor-pointer"
-            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            className={`inline-flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-xl transition cursor-pointer border ${
+              isDark
+                ? 'text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border-zinc-800'
+                : 'text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
+            }`}
+            title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
           >
-            {theme === 'dark' ? (
+            {isDark ? (
               <Sun className="w-3.5 h-3.5 text-amber-400" />
             ) : (
-              <Moon className="w-3.5 h-3.5 text-slate-300" />
+              <Moon className="w-3.5 h-3.5 text-slate-500" />
             )}
-            <span className="hidden sm:inline">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+            <span className="hidden sm:inline">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
 
           <button
             type="button"
             onClick={handleAdminLogout}
-            className="inline-flex items-center space-x-1.5 text-xs text-zinc-400 hover:text-red-400 bg-zinc-900 hover:bg-red-950/50 border border-zinc-800 hover:border-red-900 px-3 py-1.5 rounded-xl transition cursor-pointer"
+            className={`inline-flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-xl transition cursor-pointer border ${
+              isDark
+                ? 'text-zinc-400 hover:text-red-400 bg-zinc-900 hover:bg-red-950/50 border-zinc-800 hover:border-red-900'
+                : 'text-slate-600 hover:text-red-600 bg-white hover:bg-red-50 border-slate-200 hover:border-red-200 shadow-2xs'
+            }`}
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Logout</span>
@@ -422,7 +472,9 @@ export const AdminConsole: React.FC = () => {
       {/* Main Console Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
         {/* Navigation Tabs Bar */}
-        <div className="bg-[#09090b] border border-zinc-800 rounded-2xl p-1.5 flex flex-wrap gap-1.5">
+        <div className={`rounded-2xl p-1.5 flex flex-wrap gap-1.5 macos-glass ${
+          isDark ? 'macos-glass-dark' : 'macos-glass-light'
+        }`}>
           {[
             { id: 'audit', label: 'Emergency Audit & Timeline', icon: Activity, count: allBookings.length },
             { id: 'patients', label: 'Patients & Linked Guardians', icon: Users, count: allBookings.length },
@@ -438,13 +490,25 @@ export const AdminConsole: React.FC = () => {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex-1 min-w-[160px] py-2.5 px-3.5 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 cursor-pointer ${
                   isActive
-                    ? 'bg-zinc-800 text-white shadow-xs border border-zinc-700'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                    ? isDark
+                      ? 'bg-zinc-800 text-white shadow-xs border border-zinc-700'
+                      : 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                    : isDark
+                      ? 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? (isDark ? 'text-emerald-400' : 'text-red-600') : (isDark ? 'text-zinc-500' : 'text-slate-400')}`} />
                 <span>{tab.label}</span>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${isActive ? 'bg-zinc-900 text-emerald-400 border border-zinc-700' : 'bg-zinc-900 text-zinc-500'}`}>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                  isActive
+                    ? isDark
+                      ? 'bg-zinc-900 text-emerald-400 border-zinc-700'
+                      : 'bg-red-50 text-red-700 border-red-200'
+                    : isDark
+                      ? 'bg-zinc-900 text-zinc-500 border-transparent'
+                      : 'bg-slate-100 text-slate-500 border-slate-200'
+                }`}>
                   {tab.count}
                 </span>
               </button>
@@ -459,44 +523,44 @@ export const AdminConsole: React.FC = () => {
           <div className="space-y-6 animate-fadeIn">
             {/* Quick Metrics Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-[#09090b] border border-zinc-800 p-4 rounded-2xl space-y-1">
-                <span className="text-[10px] font-mono text-zinc-400 uppercase">Total Emergency Dispatches</span>
-                <div className="text-2xl font-black text-white">{allBookings.length}</div>
+              <div className={`p-4 rounded-2xl space-y-1 macos-glass ${isDark ? 'macos-glass-dark' : 'macos-glass-light'}`}>
+                <span className={`text-[10px] font-mono uppercase ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Total Emergency Dispatches</span>
+                <div className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{allBookings.length}</div>
               </div>
-              <div className="bg-[#09090b] border border-zinc-800 p-4 rounded-2xl space-y-1">
-                <span className="text-[10px] font-mono text-amber-400 uppercase">In-Transit Ambulances</span>
-                <div className="text-2xl font-black text-amber-400">
+              <div className={`p-4 rounded-2xl space-y-1 macos-glass ${isDark ? 'macos-glass-dark' : 'macos-glass-light'}`}>
+                <span className="text-[10px] font-mono text-amber-500 uppercase">In-Transit Ambulances</span>
+                <div className="text-2xl font-black text-amber-500">
                   {allBookings.filter((b) => b.status === 'AMBULANCE_EN_ROUTE_PICKUP' || b.status === 'PATIENT_PICKED_UP' || b.status === 'IN_TRANSIT_TO_HOSPITAL').length}
                 </div>
               </div>
-              <div className="bg-[#09090b] border border-zinc-800 p-4 rounded-2xl space-y-1">
-                <span className="text-[10px] font-mono text-emerald-400 uppercase">ER Bay Admissions</span>
-                <div className="text-2xl font-black text-emerald-400">
+              <div className={`p-4 rounded-2xl space-y-1 macos-glass ${isDark ? 'macos-glass-dark' : 'macos-glass-light'}`}>
+                <span className="text-[10px] font-mono text-emerald-500 uppercase">ER Bay Admissions</span>
+                <div className="text-2xl font-black text-emerald-500">
                   {allBookings.filter((b) => b.status === 'ADMITTED').length}
                 </div>
               </div>
-              <div className="bg-[#09090b] border border-zinc-800 p-4 rounded-2xl space-y-1">
-                <span className="text-[10px] font-mono text-cyan-400 uppercase">Active Network Hospitals</span>
-                <div className="text-2xl font-black text-cyan-400">{hospitals.length}</div>
+              <div className={`p-4 rounded-2xl space-y-1 macos-glass ${isDark ? 'macos-glass-dark' : 'macos-glass-light'}`}>
+                <span className="text-[10px] font-mono text-cyan-500 uppercase">Active Network Hospitals</span>
+                <div className={`text-2xl font-black ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>{hospitals.length}</div>
               </div>
             </div>
 
             {/* Event Audit Stream */}
-            <div className="bg-[#09090b] border border-zinc-800 rounded-3xl p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+            <div className={`rounded-3xl p-6 space-y-6 macos-glass ${isDark ? 'macos-glass-dark' : 'macos-glass-light'}`}>
+              <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-zinc-800/80' : 'border-slate-200'}`}>
                 <div>
-                  <h3 className="text-base font-black text-white flex items-center space-x-2">
-                    <Activity className="w-4 h-4 text-emerald-400" />
+                  <h3 className={`text-base font-black flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    <Activity className="w-4 h-4 text-emerald-500" />
                     <span>Live Emergency Mission Audit Trail</span>
                   </h3>
-                  <p className="text-xs text-zinc-400">
+                  <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                     Chronological lifecycle of locked beds, ambulance linkage, telemetry updates, and hospital intake.
                   </p>
                 </div>
               </div>
 
               {allBookings.length === 0 ? (
-                <div className="text-center py-16 text-zinc-500 text-xs">
+                <div className={`text-center py-16 text-xs ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                   No emergency missions logged in database yet. New emergencies from the Guardian Portal will appear here live.
                 </div>
               ) : (
@@ -504,19 +568,25 @@ export const AdminConsole: React.FC = () => {
                   {allBookings.map((b) => (
                     <div
                       key={b.bookingCode}
-                      className="bg-black border border-zinc-800/90 rounded-2xl p-5 space-y-4 hover:border-zinc-700 transition"
+                      className={`border rounded-2xl p-5 space-y-4 transition macos-glass-inner ${
+                        isDark ? 'macos-glass-inner-dark hover:border-zinc-600' : 'macos-glass-inner-light hover:border-slate-300 shadow-2xs'
+                      }`}
                     >
                       {/* Mission Top Header */}
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-900 pb-3">
+                      <div className={`flex flex-wrap items-center justify-between gap-3 border-b pb-3 ${
+                        isDark ? 'border-zinc-900' : 'border-slate-200/80'
+                      }`}>
                         <div className="flex items-center space-x-2.5">
-                          <span className="font-mono font-bold text-red-400 bg-red-950/70 border border-red-800 px-2.5 py-0.5 rounded-md text-xs">
+                          <span className={`font-mono font-bold text-xs px-2.5 py-0.5 rounded-md border ${
+                            isDark ? 'text-red-400 bg-red-950/70 border-red-800' : 'text-red-700 bg-red-50 border-red-200'
+                          }`}>
                             {b.patientUniqueId}
                           </span>
-                          <span className="text-xs font-mono text-zinc-400">
+                          <span className={`text-xs font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                             Ref: {b.bookingCode}
                           </span>
-                          <span className="text-[10px] font-mono text-zinc-500 flex items-center space-x-1">
-                            <Clock className="w-3 h-3 text-zinc-500" />
+                          <span className={`text-[10px] font-mono flex items-center space-x-1 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
+                            <Clock className="w-3 h-3" />
                             <span>{new Date(b.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                           </span>
                         </div>
@@ -524,10 +594,10 @@ export const AdminConsole: React.FC = () => {
                         <div className="flex items-center space-x-2">
                           <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${
                             b.status === 'ADMITTED'
-                              ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
+                              ? isDark ? 'bg-emerald-950 text-emerald-400 border-emerald-800' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : b.status === 'DISCHARGED'
-                              ? 'bg-zinc-900 text-zinc-400 border-zinc-800'
-                              : 'bg-amber-950 text-amber-400 border-amber-800'
+                              ? isDark ? 'bg-zinc-900 text-zinc-400 border-zinc-800' : 'bg-slate-100 text-slate-600 border-slate-200'
+                              : isDark ? 'bg-amber-950 text-amber-400 border-amber-800' : 'bg-amber-50 text-amber-700 border-amber-200'
                           }`}>
                             {b.status.replace(/_/g, ' ')}
                           </span>
@@ -537,38 +607,44 @@ export const AdminConsole: React.FC = () => {
                       {/* Audit Milestones Progress Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
                         {/* Step 1: Bed Locked */}
-                        <div className="bg-[#09090b] border border-zinc-800/70 p-3.5 rounded-xl space-y-1">
+                        <div className={`p-3.5 rounded-xl space-y-1 border ${
+                          isDark ? 'bg-black/50 border-zinc-800/70' : 'bg-white border-slate-200 shadow-2xs'
+                        }`}>
                           <div className="text-[10px] text-zinc-500 uppercase flex items-center space-x-1">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                             <span>1. Hospital Bed Locked</span>
                           </div>
-                          <div className="text-white font-bold">{b.hospitalName}</div>
-                          <div className="text-emerald-400 text-[11px]">Locked: {b.reservedBay}</div>
-                          <div className="text-zinc-500 text-[10px]">Guardian: {b.patientName}</div>
+                          <div className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.hospitalName}</div>
+                          <div className="text-emerald-500 text-[11px]">Locked: {b.reservedBay}</div>
+                          <div className={`text-[10px] ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>Guardian: {b.patientName}</div>
                         </div>
 
                         {/* Step 2: Ambulance Link */}
-                        <div className="bg-[#09090b] border border-zinc-800/70 p-3.5 rounded-xl space-y-1">
+                        <div className={`p-3.5 rounded-xl space-y-1 border ${
+                          isDark ? 'bg-black/50 border-zinc-800/70' : 'bg-white border-slate-200 shadow-2xs'
+                        }`}>
                           <div className="text-[10px] text-zinc-500 uppercase flex items-center space-x-1">
-                            <Ambulance className="w-3 h-3 text-amber-400" />
+                            <Ambulance className="w-3 h-3 text-amber-500" />
                             <span>2. 108 Fleet Dispatch</span>
                           </div>
-                          <div className="text-white font-bold">{b.ambulanceDetails?.vehicleNumber || 'Pending Driver'}</div>
-                          <div className="text-amber-400 text-[11px]">Driver: {b.ambulanceDetails?.driverName}</div>
-                          <div className="text-zinc-500 text-[10px]">Speed: {b.ambulanceDetails?.currentSpeedKmh} km/h • ETA: {b.ambulanceDetails?.currentEtaMins}m</div>
+                          <div className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.ambulanceDetails?.vehicleNumber || 'Pending Driver'}</div>
+                          <div className="text-amber-500 text-[11px]">Driver: {b.ambulanceDetails?.driverName}</div>
+                          <div className={`text-[10px] ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>Speed: {b.ambulanceDetails?.currentSpeedKmh} km/h • ETA: {b.ambulanceDetails?.currentEtaMins}m</div>
                         </div>
 
                         {/* Step 3: ER Bay Intake */}
-                        <div className="bg-[#09090b] border border-zinc-800/70 p-3.5 rounded-xl space-y-1">
+                        <div className={`p-3.5 rounded-xl space-y-1 border ${
+                          isDark ? 'bg-black/50 border-zinc-800/70' : 'bg-white border-slate-200 shadow-2xs'
+                        }`}>
                           <div className="text-[10px] text-zinc-500 uppercase flex items-center space-x-1">
-                            <Stethoscope className="w-3 h-3 text-cyan-400" />
+                            <Stethoscope className="w-3 h-3 text-cyan-500" />
                             <span>3. Hospital Admission</span>
                           </div>
-                          <div className="text-white font-bold">
+                          <div className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                             {b.status === 'ADMITTED' ? 'Patient Admitted' : 'En Route to Bay'}
                           </div>
-                          <div className="text-cyan-400 text-[11px]">Doctor: {b.assignedDoctor?.name || 'ER Trauma Chief'}</div>
-                          <div className="text-zinc-500 text-[10px]">Triage Acuity: {b.aiAnalysis?.esiCategory || 'ESI Level 1'}</div>
+                          <div className={`text-[11px] ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>Doctor: {b.assignedDoctor?.name || 'ER Trauma Chief'}</div>
+                          <div className={`text-[10px] ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>Triage Acuity: {b.aiAnalysis?.esiCategory || 'ESI Level 1'}</div>
                         </div>
                       </div>
                     </div>
@@ -585,17 +661,19 @@ export const AdminConsole: React.FC = () => {
         {activeTab === 'patients' && (
           <div className="space-y-4 animate-fadeIn">
             {/* Filters Header */}
-            <div className="bg-[#09090b] border border-zinc-800 rounded-2xl p-4 space-y-3">
+            <div className={`rounded-2xl p-4 space-y-3 macos-glass ${isDark ? 'macos-glass-dark' : 'macos-glass-light'}`}>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
                 {/* Search */}
                 <div className="relative sm:col-span-2">
-                  <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
+                  <Search className={`w-4 h-4 absolute left-3 top-2.5 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`} />
                   <input
                     type="text"
                     value={patientSearch}
                     onChange={(e) => setPatientSearch(e.target.value)}
                     placeholder="Search Patient ID, Guardian, Phone, or Booking Code..."
-                    className="w-full bg-black text-white pl-9 pr-3 py-2 rounded-xl border border-zinc-800 focus:border-emerald-500 focus:outline-none font-mono"
+                    className={`w-full pl-9 pr-3 py-2 rounded-xl border focus:border-red-500 focus:outline-none font-mono ${
+                      isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                    }`}
                   />
                 </div>
 
@@ -604,7 +682,9 @@ export const AdminConsole: React.FC = () => {
                   <select
                     value={patientStatusFilter}
                     onChange={(e) => setPatientStatusFilter(e.target.value)}
-                    className="w-full bg-black text-white px-3 py-2 rounded-xl border border-zinc-800 focus:border-emerald-500 focus:outline-none"
+                    className={`w-full px-3 py-2 rounded-xl border focus:border-red-500 focus:outline-none ${
+                      isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                    }`}
                   >
                     <option value="ALL">All Mission Statuses</option>
                     <option value="ACTIVE">Active / En Route</option>
@@ -618,7 +698,9 @@ export const AdminConsole: React.FC = () => {
                   <select
                     value={patientSort}
                     onChange={(e) => setPatientSort(e.target.value as any)}
-                    className="w-full bg-black text-white px-3 py-2 rounded-xl border border-zinc-800 focus:border-emerald-500 focus:outline-none font-mono"
+                    className={`w-full px-3 py-2 rounded-xl border focus:border-red-500 focus:outline-none font-mono ${
+                      isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                    }`}
                   >
                     <option value="NEWEST">Sort: Newest First</option>
                     <option value="OLDEST">Sort: Oldest First</option>
@@ -627,8 +709,8 @@ export const AdminConsole: React.FC = () => {
               </div>
 
               {/* Date Range Row */}
-              <div className="flex flex-wrap items-center gap-3 text-xs pt-1 border-t border-zinc-900">
-                <span className="text-zinc-500 font-mono text-[11px] flex items-center space-x-1">
+              <div className={`flex flex-wrap items-center gap-3 text-xs pt-2 border-t ${isDark ? 'border-zinc-800/80' : 'border-slate-200'}`}>
+                <span className={`font-mono text-[11px] flex items-center space-x-1 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                   <Calendar className="w-3.5 h-3.5" />
                   <span>Filter Date Range:</span>
                 </span>
@@ -636,14 +718,18 @@ export const AdminConsole: React.FC = () => {
                   type="date"
                   value={patientStartDate}
                   onChange={(e) => setPatientStartDate(e.target.value)}
-                  className="bg-black text-white px-2.5 py-1 rounded-lg border border-zinc-800 text-[11px] font-mono"
+                  className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono ${
+                    isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                  }`}
                 />
-                <span className="text-zinc-600">to</span>
+                <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>to</span>
                 <input
                   type="date"
                   value={patientEndDate}
                   onChange={(e) => setPatientEndDate(e.target.value)}
-                  className="bg-black text-white px-2.5 py-1 rounded-lg border border-zinc-800 text-[11px] font-mono"
+                  className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono ${
+                    isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                  }`}
                 />
                 {(patientStartDate || patientEndDate) && (
                   <button
@@ -652,7 +738,7 @@ export const AdminConsole: React.FC = () => {
                       setPatientStartDate('');
                       setPatientEndDate('');
                     }}
-                    className="text-zinc-400 hover:text-white text-[11px] underline cursor-pointer"
+                    className={`text-[11px] underline cursor-pointer ${isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
                   >
                     Clear Dates
                   </button>
@@ -661,52 +747,56 @@ export const AdminConsole: React.FC = () => {
             </div>
 
             {/* Patients Table / List */}
-            <div className="bg-[#09090b] border border-zinc-800 rounded-3xl overflow-hidden">
+            <div className={`rounded-3xl overflow-hidden macos-glass ${isDark ? 'macos-glass-dark divide-zinc-800/80' : 'macos-glass-light divide-slate-200'}`}>
               {filteredPatients.length === 0 ? (
-                <div className="text-center py-16 text-zinc-500 text-xs">
+                <div className={`text-center py-16 text-xs ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                   No matching patients found.
                 </div>
               ) : (
-                <div className="divide-y divide-zinc-800/80">
+                <div className={`divide-y ${isDark ? 'divide-zinc-800/80' : 'divide-slate-200'}`}>
                   {filteredPatients.map((p) => {
                     const isSuspended = (p as any).isSuspended;
                     return (
                       <div
                         key={p.bookingCode}
                         className={`p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition ${
-                          isSuspended ? 'bg-red-950/20 opacity-70' : 'hover:bg-zinc-950'
+                          isSuspended
+                            ? isDark ? 'bg-red-950/20 opacity-70' : 'bg-red-50/70 opacity-80'
+                            : isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-white/60'
                         }`}
                       >
                         <div className="space-y-1.5 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono font-bold text-red-400 text-xs bg-red-950/80 border border-red-800 px-2 py-0.5 rounded-md">
+                            <span className={`font-mono font-bold text-xs px-2 py-0.5 rounded-md border ${
+                              isDark ? 'text-red-400 bg-red-950/80 border-red-800' : 'text-red-700 bg-red-50 border-red-200'
+                            }`}>
                               {p.patientUniqueId}
                             </span>
-                            <span className="text-xs font-mono text-zinc-400">
+                            <span className={`text-xs font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                               Booking: {p.bookingCode}
                             </span>
-                            <span className="text-[10px] font-mono text-zinc-500">
+                            <span className={`text-[10px] font-mono ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                               Created: {new Date(p.createdAt).toLocaleDateString()} {new Date(p.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             {isSuspended && (
-                              <span className="text-[10px] font-mono font-bold text-red-400 bg-red-950 border border-red-800 px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-mono font-bold text-red-500 bg-red-950/80 border border-red-800 px-2 py-0.5 rounded-full">
                                 SUSPENDED
                               </span>
                             )}
                           </div>
 
-                          <div className="text-sm font-bold text-white flex flex-wrap items-center gap-2">
+                          <div className={`text-sm font-bold flex flex-wrap items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                             <span>Guardian: {p.patientName}</span>
-                            <span className="text-zinc-600">•</span>
-                            <span className="font-mono text-zinc-400 text-xs">{p.patientPhone}</span>
+                            <span className={isDark ? 'text-zinc-600' : 'text-slate-300'}>•</span>
+                            <span className={`font-mono text-xs ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>{p.patientPhone}</span>
                           </div>
 
-                          <div className="text-xs text-zinc-400 flex flex-wrap items-center gap-3">
-                            <span>Hospital: <strong className="text-zinc-200">{p.hospitalName}</strong></span>
+                          <div className={`text-xs flex flex-wrap items-center gap-3 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
+                            <span>Hospital: <strong className={isDark ? 'text-zinc-200' : 'text-slate-800'}>{p.hospitalName}</strong></span>
                             <span>•</span>
-                            <span>Bay: <strong className="text-emerald-400">{p.reservedBay}</strong></span>
+                            <span>Bay: <strong className="text-emerald-500">{p.reservedBay}</strong></span>
                             <span>•</span>
-                            <span>Driver: <strong className="text-amber-400">{p.ambulanceDetails?.driverName || 'Unassigned'}</strong> ({p.ambulanceDetails?.vehicleNumber || 'No Fleet'})</span>
+                            <span>Driver: <strong className="text-amber-500">{p.ambulanceDetails?.driverName || 'Unassigned'}</strong> ({p.ambulanceDetails?.vehicleNumber || 'No Fleet'})</span>
                           </div>
                         </div>
 
@@ -717,8 +807,12 @@ export const AdminConsole: React.FC = () => {
                             onClick={() => handleToggleSuspendBooking(p)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border cursor-pointer flex items-center space-x-1.5 ${
                               isSuspended
-                                ? 'bg-emerald-950 hover:bg-emerald-900 border-emerald-800 text-emerald-300'
-                                : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-amber-300'
+                                ? isDark
+                                  ? 'bg-emerald-950 hover:bg-emerald-900 border-emerald-800 text-emerald-300'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
+                                : isDark
+                                  ? 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-amber-300'
+                                  : 'bg-white hover:bg-amber-50 border-slate-200 text-amber-700 shadow-2xs'
                             }`}
                           >
                             <Ban className="w-3.5 h-3.5" />
@@ -728,7 +822,11 @@ export const AdminConsole: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleDeleteBooking(p)}
-                            className="px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border bg-red-950/80 hover:bg-red-900 border-red-800 text-red-300 cursor-pointer flex items-center space-x-1.5"
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border cursor-pointer flex items-center space-x-1.5 ${
+                              isDark
+                                ? 'bg-red-950/80 hover:bg-red-900 border-red-800 text-red-300'
+                                : 'bg-red-50 hover:bg-red-100 border-red-200 text-red-700 shadow-2xs'
+                            }`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>Delete</span>
@@ -749,15 +847,19 @@ export const AdminConsole: React.FC = () => {
         {activeTab === 'hospitals' && (
           <div className="space-y-4 animate-fadeIn">
             {/* Hospital Filters Header */}
-            <div className="bg-[#09090b] border border-zinc-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className={`rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs macos-glass ${
+              isDark ? 'macos-glass-dark' : 'macos-glass-light'
+            }`}>
               <div className="relative flex-1 w-full sm:w-auto">
-                <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
+                <Search className={`w-4 h-4 absolute left-3 top-2.5 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`} />
                 <input
                   type="text"
                   value={hospitalSearch}
                   onChange={(e) => setHospitalSearch(e.target.value)}
                   placeholder="Search Hospital Name, Code, or City..."
-                  className="w-full bg-black text-white pl-9 pr-3 py-2 rounded-xl border border-zinc-800 focus:border-emerald-500 focus:outline-none font-mono"
+                  className={`w-full pl-9 pr-3 py-2 rounded-xl border focus:border-red-500 focus:outline-none font-mono ${
+                    isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                  }`}
                 />
               </div>
 
@@ -765,7 +867,9 @@ export const AdminConsole: React.FC = () => {
                 <select
                   value={hospitalCityFilter}
                   onChange={(e) => setHospitalCityFilter(e.target.value)}
-                  className="bg-black text-white px-3 py-2 rounded-xl border border-zinc-800 focus:border-emerald-500 focus:outline-none"
+                  className={`px-3 py-2 rounded-xl border focus:border-red-500 focus:outline-none ${
+                    isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                  }`}
                 >
                   <option value="ALL">All Cities</option>
                   {hospitalCities.map((c) => (
@@ -776,7 +880,9 @@ export const AdminConsole: React.FC = () => {
                 <select
                   value={hospitalSort}
                   onChange={(e) => setHospitalSort(e.target.value as any)}
-                  className="bg-black text-white px-3 py-2 rounded-xl border border-zinc-800 focus:border-emerald-500 focus:outline-none font-mono"
+                  className={`px-3 py-2 rounded-xl border focus:border-red-500 focus:outline-none font-mono ${
+                    isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                  }`}
                 >
                   <option value="NAME">Sort by Name</option>
                   <option value="BEDS">Sort by Free ICU</option>
@@ -786,7 +892,7 @@ export const AdminConsole: React.FC = () => {
 
             {/* Hospitals Cards Grid */}
             {filteredHospitals.length === 0 ? (
-              <div className="bg-[#09090b] border border-zinc-800 rounded-3xl p-16 text-center text-zinc-500 text-xs">
+              <div className={`rounded-3xl p-16 text-center text-xs macos-glass ${isDark ? 'macos-glass-dark text-zinc-500' : 'macos-glass-light text-slate-400'}`}>
                 No hospitals registered in network yet. New hospitals registered via Google Sign-In will appear here live.
               </div>
             ) : (
@@ -796,14 +902,18 @@ export const AdminConsole: React.FC = () => {
                   return (
                     <div
                       key={h.id}
-                      className={`bg-[#09090b] border rounded-3xl p-6 space-y-4 transition ${
-                        isSuspended ? 'border-red-900 bg-red-950/10' : 'border-zinc-800 hover:border-zinc-700'
+                      className={`rounded-3xl p-6 space-y-4 transition macos-glass-inner border ${
+                        isSuspended
+                          ? isDark ? 'border-red-900 bg-red-950/20' : 'border-red-300 bg-red-50/70'
+                          : isDark ? 'macos-glass-inner-dark hover:border-zinc-600' : 'macos-glass-inner-light hover:border-slate-300 shadow-xs'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center space-x-2">
-                            <span className="text-[10px] font-mono font-bold bg-zinc-900 border border-zinc-700 text-cyan-400 px-2 py-0.5 rounded-md">
+                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${
+                              isDark ? 'bg-zinc-900 border-zinc-700 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-800'
+                            }`}>
                               {h.hospitalCode || h.id}
                             </span>
                             {isSuspended && (
@@ -812,43 +922,45 @@ export const AdminConsole: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          <h4 className="text-base font-black text-white">{h.name}</h4>
-                          <p className="text-xs text-zinc-400">{h.address}, {h.city}</p>
-                          <p className="text-xs text-zinc-500 font-mono">Phone: {h.phone}</p>
+                          <h4 className={`text-base font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{h.name}</h4>
+                          <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>{h.address}, {h.city}</p>
+                          <p className={`text-xs font-mono ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>Phone: {h.phone}</p>
                         </div>
                       </div>
 
                       {/* Bed Capacities */}
-                      <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono bg-black p-3 rounded-2xl border border-zinc-800/80">
+                      <div className={`grid grid-cols-3 gap-2 text-center text-xs font-mono p-3 rounded-2xl border ${
+                        isDark ? 'bg-black/50 border-zinc-800/80' : 'bg-white border-slate-200 shadow-2xs'
+                      }`}>
                         <div>
-                          <span className="text-[10px] text-zinc-500 block">ICU BEDS</span>
-                          <span className="text-emerald-400 font-bold">{h.beds?.icuFree ?? 0}</span> / {h.beds?.icuTotal ?? 0}
+                          <span className={`text-[10px] block ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>ICU BEDS</span>
+                          <span className="text-emerald-500 font-bold">{h.beds?.icuFree ?? 0}</span> / {h.beds?.icuTotal ?? 0}
                         </div>
                         <div>
-                          <span className="text-[10px] text-zinc-500 block">EMERGENCY</span>
-                          <span className="text-amber-400 font-bold">{h.beds?.emergencyFree ?? 0}</span> / {h.beds?.emergencyTotal ?? 0}
+                          <span className={`text-[10px] block ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>EMERGENCY</span>
+                          <span className="text-amber-500 font-bold">{h.beds?.emergencyFree ?? 0}</span> / {h.beds?.emergencyTotal ?? 0}
                         </div>
                         <div>
-                          <span className="text-[10px] text-zinc-500 block">VENTILATORS</span>
-                          <span className="text-cyan-400 font-bold">{h.beds?.ventilatorFree ?? 0}</span> / {h.beds?.ventilatorTotal ?? 0}
+                          <span className={`text-[10px] block ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>VENTILATORS</span>
+                          <span className={`font-bold ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>{h.beds?.ventilatorFree ?? 0}</span> / {h.beds?.ventilatorTotal ?? 0}
                         </div>
                       </div>
 
                       {/* Doctor & Equipment Counts */}
-                      <div className="flex items-center justify-between text-xs text-zinc-400 font-mono px-1">
-                        <span>Doctors on Roster: <strong className="text-white">{h.doctors?.length || 0}</strong></span>
-                        <span>Medical Equipment: <strong className="text-white">{h.equipments?.length || 0}</strong></span>
+                      <div className={`flex items-center justify-between text-xs font-mono px-1 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                        <span>Doctors on Roster: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{h.doctors?.length || 0}</strong></span>
+                        <span>Medical Equipment: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{h.equipments?.length || 0}</strong></span>
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex items-center justify-end space-x-2 pt-2 border-t border-zinc-800/80">
+                      <div className={`flex items-center justify-end space-x-2 pt-2 border-t ${isDark ? 'border-zinc-800/80' : 'border-slate-200'}`}>
                         <button
                           type="button"
                           onClick={() => handleToggleSuspendHospital(h)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border cursor-pointer flex items-center space-x-1.5 ${
                             isSuspended
-                              ? 'bg-emerald-950 hover:bg-emerald-900 border-emerald-800 text-emerald-300'
-                              : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-amber-300'
+                              ? isDark ? 'bg-emerald-950 hover:bg-emerald-900 border-emerald-800 text-emerald-300' : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
+                              : isDark ? 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-amber-300' : 'bg-white hover:bg-amber-50 border-slate-200 text-amber-700 shadow-2xs'
                           }`}
                         >
                           <Ban className="w-3.5 h-3.5" />
@@ -858,7 +970,9 @@ export const AdminConsole: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleDeleteHospital(h)}
-                          className="px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border bg-red-950/80 hover:bg-red-900 border-red-800 text-red-300 cursor-pointer flex items-center space-x-1.5"
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border cursor-pointer flex items-center space-x-1.5 ${
+                            isDark ? 'bg-red-950/80 hover:bg-red-900 border-red-800 text-red-300' : 'bg-red-50 hover:bg-red-100 border-red-200 text-red-700 shadow-2xs'
+                          }`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Delete</span>
@@ -878,15 +992,19 @@ export const AdminConsole: React.FC = () => {
         {activeTab === 'drivers' && (
           <div className="space-y-4 animate-fadeIn">
             {/* Driver Filters Header */}
-            <div className="bg-[#09090b] border border-zinc-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className={`rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs macos-glass ${
+              isDark ? 'macos-glass-dark' : 'macos-glass-light'
+            }`}>
               <div className="relative flex-1 w-full sm:w-auto">
-                <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
+                <Search className={`w-4 h-4 absolute left-3 top-2.5 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`} />
                 <input
                   type="text"
                   value={driverSearch}
                   onChange={(e) => setDriverSearch(e.target.value)}
                   placeholder="Search Driver Name, Vehicle Number, Phone, or ID..."
-                  className="w-full bg-black text-white pl-9 pr-3 py-2 rounded-xl border border-zinc-800 focus:border-amber-500 focus:outline-none font-mono"
+                  className={`w-full pl-9 pr-3 py-2 rounded-xl border focus:border-amber-500 focus:outline-none font-mono ${
+                    isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                  }`}
                 />
               </div>
 
@@ -894,7 +1012,9 @@ export const AdminConsole: React.FC = () => {
                 <select
                   value={driverTypeFilter}
                   onChange={(e) => setDriverTypeFilter(e.target.value)}
-                  className="bg-black text-white px-3 py-2 rounded-xl border border-zinc-800 focus:border-amber-500 focus:outline-none font-mono"
+                  className={`px-3 py-2 rounded-xl border focus:border-amber-500 focus:outline-none font-mono ${
+                    isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                  }`}
                 >
                   <option value="ALL">All Classifications</option>
                   <option value="Advanced Cardiac Life Support (ACLS)">ACLS</option>
@@ -905,7 +1025,9 @@ export const AdminConsole: React.FC = () => {
                 <select
                   value={driverSort}
                   onChange={(e) => setDriverSort(e.target.value as any)}
-                  className="bg-black text-white px-3 py-2 rounded-xl border border-zinc-800 focus:border-amber-500 focus:outline-none font-mono"
+                  className={`px-3 py-2 rounded-xl border focus:border-amber-500 focus:outline-none font-mono ${
+                    isDark ? 'bg-black/60 text-white border-zinc-800' : 'bg-white text-slate-900 border-slate-200'
+                  }`}
                 >
                   <option value="NAME">Sort by Driver Name</option>
                   <option value="VEHICLE">Sort by Vehicle Number</option>
@@ -915,7 +1037,7 @@ export const AdminConsole: React.FC = () => {
 
             {/* Drivers List */}
             {filteredDrivers.length === 0 ? (
-              <div className="bg-[#09090b] border border-zinc-800 rounded-3xl p-16 text-center text-zinc-500 text-xs">
+              <div className={`rounded-3xl p-16 text-center text-xs macos-glass ${isDark ? 'macos-glass-dark text-zinc-500' : 'macos-glass-light text-slate-400'}`}>
                 No ambulance drivers registered yet. Drivers onboarding with Google in the Driver Portal will be cataloged here automatically.
               </div>
             ) : (
@@ -925,18 +1047,24 @@ export const AdminConsole: React.FC = () => {
                   return (
                     <div
                       key={drv.vehicleNumber}
-                      className={`bg-[#09090b] border rounded-3xl p-6 space-y-4 transition ${
-                        isSuspended ? 'border-red-900 bg-red-950/10' : 'border-zinc-800 hover:border-zinc-700'
+                      className={`rounded-3xl p-6 space-y-4 transition macos-glass-inner border ${
+                        isSuspended
+                          ? isDark ? 'border-red-900 bg-red-950/20' : 'border-red-300 bg-red-50/70'
+                          : isDark ? 'macos-glass-inner-dark hover:border-zinc-600' : 'macos-glass-inner-light hover:border-slate-300 shadow-xs'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center space-x-3.5">
-                          <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 text-amber-500 flex items-center justify-center shrink-0">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${
+                            isDark ? 'bg-zinc-900 border-zinc-800 text-amber-500' : 'bg-amber-50 border-amber-200 text-amber-600'
+                          }`}>
                             <Ambulance className="w-6 h-6" />
                           </div>
                           <div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-[10px] font-mono font-bold bg-zinc-900 border border-zinc-700 text-amber-400 px-2 py-0.5 rounded-md">
+                              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${
+                                isDark ? 'bg-zinc-900 border-zinc-700 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-800'
+                              }`}>
                                 {drv.driverId}
                               </span>
                               {isSuspended && (
@@ -945,32 +1073,34 @@ export const AdminConsole: React.FC = () => {
                                 </span>
                               )}
                             </div>
-                            <h4 className="text-base font-black text-white mt-0.5">{drv.driverName}</h4>
-                            <p className="text-xs font-mono text-zinc-400">{drv.phone}</p>
+                            <h4 className={`text-base font-black mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{drv.driverName}</h4>
+                            <p className={`text-xs font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>{drv.phone}</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="bg-black border border-zinc-800/80 p-3.5 rounded-2xl text-xs font-mono space-y-1">
-                        <div className="flex items-center justify-between text-zinc-400">
+                      <div className={`p-3.5 rounded-2xl text-xs font-mono space-y-1 border ${
+                        isDark ? 'bg-black/50 border-zinc-800/80' : 'bg-white border-slate-200 shadow-2xs'
+                      }`}>
+                        <div className={`flex items-center justify-between ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                           <span>Vehicle Registration:</span>
-                          <strong className="text-white font-black">{drv.vehicleNumber}</strong>
+                          <strong className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{drv.vehicleNumber}</strong>
                         </div>
-                        <div className="flex items-center justify-between text-zinc-400">
+                        <div className={`flex items-center justify-between ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                           <span>Classification:</span>
-                          <span className="text-amber-400 font-bold">{drv.vehicleType}</span>
+                          <span className="text-amber-500 font-bold">{drv.vehicleType}</span>
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center justify-end space-x-2 pt-2 border-t border-zinc-800/80">
+                      <div className={`flex items-center justify-end space-x-2 pt-2 border-t ${isDark ? 'border-zinc-800/80' : 'border-slate-200'}`}>
                         <button
                           type="button"
                           onClick={() => handleToggleSuspendDriver(drv)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border cursor-pointer flex items-center space-x-1.5 ${
                             isSuspended
-                              ? 'bg-emerald-950 hover:bg-emerald-900 border-emerald-800 text-emerald-300'
-                              : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-amber-300'
+                              ? isDark ? 'bg-emerald-950 hover:bg-emerald-900 border-emerald-800 text-emerald-300' : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
+                              : isDark ? 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-amber-300' : 'bg-white hover:bg-amber-50 border-slate-200 text-amber-700 shadow-2xs'
                           }`}
                         >
                           <Ban className="w-3.5 h-3.5" />
@@ -980,7 +1110,9 @@ export const AdminConsole: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleDeleteDriver(drv)}
-                          className="px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border bg-red-950/80 hover:bg-red-900 border-red-800 text-red-300 cursor-pointer flex items-center space-x-1.5"
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition border cursor-pointer flex items-center space-x-1.5 ${
+                            isDark ? 'bg-red-950/80 hover:bg-red-900 border-red-800 text-red-300' : 'bg-red-50 hover:bg-red-100 border-red-200 text-red-700 shadow-2xs'
+                          }`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Delete</span>

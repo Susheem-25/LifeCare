@@ -67,6 +67,7 @@ interface EmergencyContextType {
   updateHospitalBeds: (hospitalId: string, bedsUpdate: Partial<Hospital['beds']>) => void;
   updateDoctorStatus: (hospitalId: string, doctorId: string, status: Doctor['status'], currentBay?: string) => void;
   addDoctor: (hospitalId: string, doctor: Omit<Doctor, 'id'>) => void;
+  updateDoctorDetails: (hospitalId: string, doctorId: string, updates: Partial<Doctor>) => void;
   removeDoctor: (hospitalId: string, doctorId: string) => void;
   updateEquipmentStatus: (hospitalId: string, equipmentId: string, status: Equipment['status'], qtyAvailable?: number) => void;
   addEquipment: (hospitalId: string, equipment: Omit<Equipment, 'id'>) => void;
@@ -1238,6 +1239,20 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     broadcastState(activeBooking, allBookings, updated);
   };
 
+  const updateDoctorDetails = (hospitalId: string, doctorId: string, updates: Partial<Doctor>) => {
+    const updated = hospitals.map((h) => {
+      if (h.id === hospitalId) {
+        return {
+          ...h,
+          doctors: h.doctors.map((d) => (d.id === doctorId ? { ...d, ...updates } : d)),
+        };
+      }
+      return h;
+    });
+    saveHospitals(updated);
+    broadcastState(activeBooking, allBookings, updated);
+  };
+
   const updateEquipmentStatus = (hospitalId: string, equipmentId: string, status: Equipment['status'], qtyAvailable?: number) => {
     const updated = hospitals.map((h) => {
       if (h.id === hospitalId) {
@@ -1536,6 +1551,7 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         updateHospitalBeds,
         updateDoctorStatus,
         addDoctor,
+        updateDoctorDetails,
         removeDoctor,
         updateEquipmentStatus,
         addEquipment,
