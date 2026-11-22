@@ -63,8 +63,10 @@ const MainAppContent: React.FC = () => {
     return <AdminConsole />;
   }
 
+  const isDarkWelcome = !currentUser || currentRole === 'welcome';
+
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col font-sans antialiased relative">
+    <div className={`min-h-screen w-full max-w-full overflow-x-hidden ${isDarkWelcome ? 'bg-[#03060d] text-zinc-100 selection:bg-red-500 selection:text-white' : 'bg-slate-50 text-slate-900'} flex flex-col font-sans antialiased relative transition-colors duration-300`}>
       {/* Top Application Navigation */}
       <Navbar />
 

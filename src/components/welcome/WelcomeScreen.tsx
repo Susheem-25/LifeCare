@@ -12,7 +12,9 @@ import {
   Zap, 
   FileCheck,
   Loader2,
-  ShieldAlert
+  ShieldAlert,
+  Activity,
+  Radio
 } from 'lucide-react';
 import type { AppRole } from '../../types';
 
@@ -72,32 +74,64 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
   };
 
   return (
-    <div className="w-full space-y-10 py-6 sm:py-10 animate-fadeIn px-1 sm:px-2">
-      {/* Hero Welcome Header */}
-      <div className="text-center space-y-4 max-w-3xl mx-auto px-4">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-semibold shadow-2xs">
-          <HeartPulse className="w-4 h-4 text-red-600 animate-pulse" />
-          <span>Zero-Wait Emergency Healthcare Operating System</span>
+    <div className="w-full space-y-8 py-4 sm:py-6 animate-fadeIn text-zinc-100">
+      {/* 1. TOP OPERATIONAL TELEMETRY HUD */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-[#080d19]/90 border border-zinc-800/80 backdrop-blur-md text-[11px] font-mono shadow-2xl">
+        <div className="flex items-center space-x-2.5">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span className="text-zinc-200 font-bold uppercase tracking-wider">
+            NATIONAL EMERGENCY HEALTHCARE GRID
+          </span>
+          <span className="hidden sm:inline text-zinc-600">•</span>
+          <span className="hidden sm:inline text-zinc-400">NODE: IND-NCR-PRIME</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight">
-          Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-rose-600 to-amber-600">LifeCare</span>
+        <div className="flex items-center space-x-4 text-[10px]">
+          <span className="flex items-center space-x-1.5">
+            <span className="text-zinc-500">ATOMIC LATENCY:</span>
+            <span className="text-emerald-400 font-bold">&lt;10ms</span>
+          </span>
+          <span className="hidden md:flex items-center space-x-1.5">
+            <span className="text-zinc-500">PROTOCOL:</span>
+            <span className="text-cyan-400 font-bold">HL7 / FHIR R4</span>
+          </span>
+          <span className="flex items-center space-x-1.5">
+            <span className="text-zinc-500">DATA PLANE:</span>
+            <span className="text-amber-400 font-bold">AES-256 E2E</span>
+          </span>
+        </div>
+      </div>
+
+      {/* 2. HERO OS IDENTITY */}
+      <div className="text-center space-y-4 max-w-4xl mx-auto px-4 pt-2">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-950/60 border border-red-800/70 text-red-400 text-[11px] font-mono font-bold tracking-widest uppercase">
+          <Activity className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+          <span>AUTONOMOUS EMERGENCY HEALTHCARE OPERATING SYSTEM</span>
+        </div>
+
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight font-mono">
+          LIFE<span className="text-red-500">CARE</span> <span className="text-zinc-500 font-light text-2xl sm:text-4xl">/ OS</span>
         </h1>
-        <p className="text-lg sm:text-2xl font-medium text-slate-600 font-sans">
+
+        <p className="text-base sm:text-xl font-medium text-zinc-300 max-w-2xl mx-auto">
           Caring for Lives. Every Second Saved Is a Life Preserved.
         </p>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
-          Select your portal to proceed. Seamlessly connecting citizen guardians, 108 emergency ambulance drivers, and hospital trauma centers with AI triage and atomic bed reservation.
+
+        <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+          Select an operational cockpit to initialize. Real-time synchronicity linking citizen bystanders, 108 mobile ICU ambulances, and hospital ER trauma command with atomic bed reservations.
         </p>
       </div>
 
-      {/* Authentication Error Feedback Alert */}
+      {/* Authentication Error Banner */}
       {authError && (
-        <div className="max-w-xl mx-auto px-4 -mb-4">
-          <div className="bg-red-50 border-2 border-red-300 text-red-800 rounded-2xl p-4 flex items-center space-x-3 text-xs shadow-sm">
-            <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="bg-red-950/70 border border-red-800 text-red-200 rounded-2xl p-4 flex items-center space-x-3 text-xs shadow-xl animate-fadeIn">
+            <ShieldAlert className="w-5 h-5 text-red-400 shrink-0" />
             <div>
-              <strong className="font-bold block text-red-900">Authentication Required</strong>
+              <strong className="font-bold block text-red-300">Access Restricted</strong>
               <span>{authError}</span>
             </div>
           </div>
@@ -106,354 +140,379 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
       {/* Authenticated Role Status Banner */}
       {currentUser && (
-        <div className="max-w-xl mx-auto px-4 -mb-4">
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between gap-3 text-xs">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="bg-[#090d19] border border-emerald-800/80 rounded-2xl p-4 flex items-center justify-between gap-3 text-xs shadow-lg">
             <div className="flex items-center space-x-2.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-slate-800 font-medium">
-                Authenticated as <strong className="text-slate-900">{currentUser.displayName}</strong> ({currentUser.uniqueRoleId})
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="text-zinc-200">
+                Active Session: <strong className="text-white font-mono">{currentUser.displayName}</strong> ({currentUser.uniqueRoleId})
               </span>
             </div>
-            <span className="text-[10px] font-mono font-bold bg-white border border-emerald-300 text-emerald-800 px-2.5 py-0.5 rounded-full capitalize shrink-0">
-              {currentUser.role} Account
+            <span className="text-[10px] font-mono font-bold bg-emerald-950 border border-emerald-700 text-emerald-300 px-3 py-1 rounded-full uppercase shrink-0">
+              {currentUser.role} Authenticated
             </span>
           </div>
         </div>
       )}
 
-      {/* Role Selection Cards Grid - Strictly isolated by authenticated role */}
+      {/* 3. THREE OPERATIONAL COCKPIT TERMINALS */}
       <div className={currentUser ? "max-w-xl mx-auto px-4" : "grid grid-cols-1 md:grid-cols-3 gap-6 px-4"}>
-        {/* Card 1: Guardian */}
+        
+        {/* ========================================================
+            TERMINAL 01: CITIZEN GUARDIAN
+            ======================================================== */}
         {(!currentUser || currentUser.role === 'guardian') && (
-        <div 
-          onClick={() => handleSelectRole('guardian')}
-          className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-red-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -z-0 opacity-60 group-hover:scale-110 transition-transform"></div>
-          
-          <div className="relative z-10 space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-105 transition-transform">
-              <HeartPulse className="w-7 h-7" />
+          <div
+            onClick={() => handleSelectRole('guardian')}
+            className="group relative bg-[#090d16] border border-zinc-800 hover:border-red-500/80 rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-2xl cursor-pointer hover:shadow-red-950/20 hover:shadow-2xl overflow-hidden"
+          >
+            {/* Ambient Corner Accents */}
+            <div className="absolute top-0 right-0 w-36 h-36 bg-red-600/10 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            <div className="absolute top-3 right-3 text-[10px] font-mono text-zinc-600 select-none">
+              [ 01 // CITIZEN ]
             </div>
 
-            <div>
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
-                Citizen Portal
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
-                Guardian Portal
-              </h2>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Emergency reporting for families and bystanders. Track active patients or register a new emergency with Sarvam AI voice triage.
-              </p>
-            </div>
+            <div className="space-y-5 relative z-10">
+              {/* Terminal Badge & Status */}
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 text-red-500 flex items-center justify-center shadow-inner group-hover:scale-105 group-hover:border-red-500/50 transition-all">
+                  <HeartPulse className="w-6 h-6" />
+                </div>
+                <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-red-950/60 border border-red-800/60 text-red-400 text-[10px] font-mono font-bold">
+                  <Radio className="w-3 h-3 animate-pulse text-red-400" />
+                  <span>RAPID TRIAGE</span>
+                </div>
+              </div>
 
-            <ul className="space-y-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                <span>Track existing patient by <strong>Patient ID</strong></span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                <span>Register new patient with <strong>Sarvam AI Voice</strong></span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                <span>Nearest priority hospital with available beds</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                <span>Atomic hospital bed reservation & direct 108 dialer</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
-            <button
-              type="button"
-              disabled={authenticatingRole !== null}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectRole('guardian');
-              }}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-red-600/25 cursor-pointer"
-            >
-              {authenticatingRole === 'guardian' ? (
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
-              ) : currentUser ? (
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              ) : (
-                <GoogleIcon className="w-4 h-4" />
-              )}
-              <span>
-                {authenticatingRole === 'guardian'
-                  ? 'Authenticating with Google...'
-                  : currentUser
-                  ? 'Enter Guardian Portal'
-                  : 'Sign in with Google (Guardian)'}
-              </span>
-            </button>
-            <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
-              <span className="flex items-center space-x-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>{currentUser?.role === 'guardian' ? currentUser.uniqueRoleId : 'Google Auth Required'}</span>
-              </span>
-              {currentUser ? (
-                <span className="text-emerald-700 font-bold inline-flex items-center">
-                  <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
-                  <span>Authorized</span>
+              {/* Title & Description */}
+              <div>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
+                  TERMINAL_01 // PUBLIC ADMISSION
                 </span>
-              ) : (
-                <span className="text-slate-400 font-medium">Secured with Google OAuth</span>
-              )}
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  Guardian Portal
+                </h2>
+                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                  Emergency triage for family members & bystanders. Instant ABHA history uplink, Sarvam AI voice diagnosis, and nearest bed lock.
+                </p>
+              </div>
+
+              {/* Module Specs Grid */}
+              <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono text-zinc-400">
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[AI_TRIAGE]</span>
+                  <span className="text-zinc-200 font-semibold">Sarvam Voice (7 Lang)</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[BED_LOCK]</span>
+                  <span className="text-emerald-400 font-semibold">&lt;10ms Atomic Lock</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[ABHA_SYNC]</span>
+                  <span className="text-zinc-200 font-semibold">Instant Health ID</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[ROUTE]</span>
+                  <span className="text-zinc-200 font-semibold">Priority ER Corridor</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Terminal Action Button */}
+            <div className="relative z-10 mt-6 pt-4 border-t border-zinc-800/80 space-y-2.5">
+              <button
+                type="button"
+                disabled={authenticatingRole !== null}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectRole('guardian');
+                }}
+                className="w-full bg-red-600 hover:bg-red-500 text-white py-3 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition shadow-lg shadow-red-600/25 cursor-pointer disabled:opacity-60"
+              >
+                {authenticatingRole === 'guardian' ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : currentUser ? (
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                ) : (
+                  <GoogleIcon className="w-4 h-4" />
+                )}
+                <span>
+                  {authenticatingRole === 'guardian'
+                    ? 'Connecting to Google...'
+                    : currentUser
+                    ? 'Enter Guardian Terminal'
+                    : 'Initialize Guardian Session'}
+                </span>
+              </button>
+
+              <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 px-1">
+                <span>AUTH: GOOGLE OAUTH 2.0</span>
+                <span className="text-emerald-400 font-bold">ENCRYPTED</span>
+              </div>
             </div>
           </div>
-        </div>
         )}
 
-        {/* Card 2: Driver */}
+        {/* ========================================================
+            TERMINAL 02: 108 AMBULANCE COCKPIT
+            ======================================================== */}
         {(!currentUser || currentUser.role === 'driver') && (
-        <div 
-          onClick={() => handleSelectRole('driver')}
-          className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-amber-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-full -z-0 opacity-60 group-hover:scale-110 transition-transform"></div>
-          
-          <div className="relative z-10 space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
-              <Ambulance className="w-7 h-7" />
+          <div
+            onClick={() => handleSelectRole('driver')}
+            className="group relative bg-[#090d16] border border-zinc-800 hover:border-amber-500/80 rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-2xl cursor-pointer hover:shadow-amber-950/20 hover:shadow-2xl overflow-hidden"
+          >
+            {/* Ambient Corner Accents */}
+            <div className="absolute top-0 right-0 w-36 h-36 bg-amber-600/10 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            <div className="absolute top-3 right-3 text-[10px] font-mono text-zinc-600 select-none">
+              [ 02 // AMBULANCE ]
             </div>
 
-            <div>
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                108 Emergency Network
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
-                108 Driver Portal
-              </h2>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Paramedic cockpit interface. Direct mission navigation to allocated hospital ER bays, in-transit telemetry, and patient tracking.
-              </p>
-            </div>
+            <div className="space-y-5 relative z-10">
+              {/* Terminal Badge & Status */}
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 text-amber-500 flex items-center justify-center shadow-inner group-hover:scale-105 group-hover:border-amber-500/50 transition-all">
+                  <Ambulance className="w-6 h-6" />
+                </div>
+                <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-amber-950/60 border border-amber-800/60 text-amber-400 text-[10px] font-mono font-bold">
+                  <Radio className="w-3 h-3 animate-pulse text-amber-400" />
+                  <span>FLEET TELEMETRY</span>
+                </div>
+              </div>
 
-            <ul className="space-y-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                <span>Driver Unique ID authentication</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                <span>Enter/Link Patient ID for instant mission</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                <span>Live map straight to destination ER bay</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                <span>Turn-by-turn routing with Google Maps</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
-            <button
-              type="button"
-              disabled={authenticatingRole !== null}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectRole('driver');
-              }}
-              className="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-amber-600/25 cursor-pointer"
-            >
-              {authenticatingRole === 'driver' ? (
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
-              ) : currentUser ? (
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              ) : (
-                <GoogleIcon className="w-4 h-4" />
-              )}
-              <span>
-                {authenticatingRole === 'driver'
-                  ? 'Authenticating with Google...'
-                  : currentUser
-                  ? 'Enter Driver Cockpit'
-                  : 'Sign in with Google (Driver)'}
-              </span>
-            </button>
-            <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
-              <span className="flex items-center space-x-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>{currentUser?.role === 'driver' ? currentUser.uniqueRoleId : 'Google Auth Required'}</span>
-              </span>
-              {currentUser ? (
-                <span className="text-emerald-700 font-bold inline-flex items-center">
-                  <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
-                  <span>Authorized</span>
+              {/* Title & Description */}
+              <div>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
+                  TERMINAL_02 // PARAMEDIC MOBILE ICU
                 </span>
-              ) : (
-                <span className="text-slate-400 font-medium">Secured with Google OAuth</span>
-              )}
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  108 Driver Cockpit
+                </h2>
+                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                  Paramedic tactical navigation console. Turn-by-turn emergency routing, in-transit vital signs telemetry, and direct ER bay bypass.
+                </p>
+              </div>
+
+              {/* Module Specs Grid */}
+              <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono text-zinc-400">
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[CORRIDOR]</span>
+                  <span className="text-zinc-200 font-semibold">Priority GPS Routing</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[TELEMETRY]</span>
+                  <span className="text-cyan-400 font-semibold">Real-Time Vitals Stream</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[BAY_BYPASS]</span>
+                  <span className="text-emerald-400 font-semibold">Zero-Wait Gate Admission</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[VEHICLE_ID]</span>
+                  <span className="text-zinc-200 font-semibold">ACLS / BLS Verified</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Terminal Action Button */}
+            <div className="relative z-10 mt-6 pt-4 border-t border-zinc-800/80 space-y-2.5">
+              <button
+                type="button"
+                disabled={authenticatingRole !== null}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectRole('driver');
+                }}
+                className="w-full bg-amber-600 hover:bg-amber-500 text-black py-3 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition shadow-lg shadow-amber-600/25 cursor-pointer disabled:opacity-60"
+              >
+                {authenticatingRole === 'driver' ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-black" />
+                ) : currentUser ? (
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                ) : (
+                  <GoogleIcon className="w-4 h-4" />
+                )}
+                <span>
+                  {authenticatingRole === 'driver'
+                    ? 'Connecting to Google...'
+                    : currentUser
+                    ? 'Enter Driver Cockpit'
+                    : 'Initialize 108 Cockpit'}
+                </span>
+              </button>
+
+              <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 px-1">
+                <span>AUTH: GOOGLE OAUTH 2.0</span>
+                <span className="text-emerald-400 font-bold">FLEET VERIFIED</span>
+              </div>
             </div>
           </div>
-        </div>
         )}
 
-        {/* Card 3: Hospital */}
+        {/* ========================================================
+            TERMINAL 03: HOSPITAL ER COMMAND
+            ======================================================== */}
         {(!currentUser || currentUser.role === 'hospital') && (
-        <div 
-          onClick={() => handleSelectRole('hospital')}
-          className="group relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-slate-200 hover:border-emerald-500 hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-0 opacity-60 group-hover:scale-110 transition-transform"></div>
-          
-          <div className="relative z-10 space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform">
-              <Building2 className="w-7 h-7" />
+          <div
+            onClick={() => handleSelectRole('hospital')}
+            className="group relative bg-[#090d16] border border-zinc-800 hover:border-emerald-500/80 rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-2xl cursor-pointer hover:shadow-emerald-950/20 hover:shadow-2xl overflow-hidden"
+          >
+            {/* Ambient Corner Accents */}
+            <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-600/10 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            <div className="absolute top-3 right-3 text-[10px] font-mono text-zinc-600 select-none">
+              [ 03 // HOSPITAL ]
             </div>
 
-            <div>
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                ER Command Center
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
-                Hospital Portal
-              </h2>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Hospital staff portal. Manage editable beds, doctor rosters (Free/Busy/Absent), equipment, and patient admissions.
-              </p>
-            </div>
+            <div className="space-y-5 relative z-10">
+              {/* Terminal Badge & Status */}
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 text-emerald-400 flex items-center justify-center shadow-inner group-hover:scale-105 group-hover:border-emerald-500/50 transition-all">
+                  <Building2 className="w-6 h-6" />
+                </div>
+                <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 text-[10px] font-mono font-bold">
+                  <Radio className="w-3 h-3 animate-pulse text-emerald-400" />
+                  <span>COMMAND HEADQUARTERS</span>
+                </div>
+              </div>
 
-            <ul className="space-y-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>Editable Bed counts (Total, ICU, Free)</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>Doctors: Free, Busy, Absent + Add Doctor</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>Facilities & Machines: Add / Remove</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>Patient tabs: Incoming, Admitted, Discharged</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 space-y-2">
-            <button
-              type="button"
-              disabled={authenticatingRole !== null}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectRole('hospital');
-              }}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white py-3 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-emerald-600/25 cursor-pointer"
-            >
-              {authenticatingRole === 'hospital' ? (
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
-              ) : currentUser ? (
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              ) : (
-                <GoogleIcon className="w-4 h-4" />
-              )}
-              <span>
-                {authenticatingRole === 'hospital'
-                  ? 'Authenticating with Google...'
-                  : currentUser
-                  ? 'Enter Hospital Staff Portal'
-                  : 'Sign in with Google (Hospital)'}
-              </span>
-            </button>
-            <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono px-1">
-              <span className="flex items-center space-x-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>{currentUser?.role === 'hospital' ? currentUser.uniqueRoleId : 'Google Auth Required'}</span>
-              </span>
-              {currentUser ? (
-                <span className="text-emerald-700 font-bold inline-flex items-center">
-                  <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
-                  <span>Authorized</span>
+              {/* Title & Description */}
+              <div>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
+                  TERMINAL_03 // TRAUMA CENTER
                 </span>
-              ) : (
-                <span className="text-slate-400 font-medium">Secured with Google OAuth</span>
-              )}
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  Hospital ER Command
+                </h2>
+                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                  Emergency department command center. Real-time ICU/ventilator capacity, on-duty specialist doctor rosters, and pre-arrival telemetry.
+                </p>
+              </div>
+
+              {/* Module Specs Grid */}
+              <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono text-zinc-400">
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[BED_MESH]</span>
+                  <span className="text-emerald-400 font-semibold">Live ICU / ER Capacity</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[DOCTOR_GRID]</span>
+                  <span className="text-zinc-200 font-semibold">On-Duty Specialist Roster</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[EQUIPMENT]</span>
+                  <span className="text-zinc-200 font-semibold">Life-Support Machinery</span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-zinc-800/60">
+                  <span className="text-zinc-500">[PRE_ALERT]</span>
+                  <span className="text-cyan-400 font-semibold">Incoming Telemetry Feed</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Terminal Action Button */}
+            <div className="relative z-10 mt-6 pt-4 border-t border-zinc-800/80 space-y-2.5">
+              <button
+                type="button"
+                disabled={authenticatingRole !== null}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectRole('hospital');
+                }}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-600/25 cursor-pointer disabled:opacity-60"
+              >
+                {authenticatingRole === 'hospital' ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : currentUser ? (
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                ) : (
+                  <GoogleIcon className="w-4 h-4" />
+                )}
+                <span>
+                  {authenticatingRole === 'hospital'
+                    ? 'Connecting to Google...'
+                    : currentUser
+                    ? 'Enter Hospital Command'
+                    : 'Initialize Hospital Terminal'}
+                </span>
+              </button>
+
+              <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 px-1">
+                <span>AUTH: GOOGLE OAUTH 2.0</span>
+                <span className="text-emerald-400 font-bold">TRAUMA VALIDATED</span>
+              </div>
             </div>
           </div>
-        </div>
         )}
       </div>
 
-      {/* Trust & Architecture Capability Banner */}
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 mx-4 shadow-xs space-y-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      {/* 4. SYSTEM SPECIFICATIONS & NATIONAL GRID TELEMETRY */}
+      <div className="bg-[#090d16] border border-zinc-800/80 rounded-3xl p-6 sm:p-8 mx-4 shadow-2xl space-y-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-5 border-b border-zinc-800/80">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-red-600" />
-              <span>National Healthcare Grid Integration</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Powered by Sarvam AI Indic Speech and Cloud Real-Time Resource Engine
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <h3 className="text-base font-black text-white font-mono tracking-tight">
+                NATIONAL HEALTHCARE GRID SPECIFICATION
+              </h3>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1 font-mono">
+              Autonomous Cloud Resource Engine • Multi-Region Firestore Cluster • HL7/FHIR Telemetry
             </p>
           </div>
 
-          <div className="flex items-center space-x-3 text-xs">
+          <div className="flex items-center space-x-2.5 text-xs font-mono">
             <a
               href="tel:108"
-              className="inline-flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl font-bold transition shadow-xs"
+              className="inline-flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white px-3.5 py-2 rounded-xl font-bold transition shadow-md shadow-red-600/30"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-white animate-pulse" />
-              <span>Ambulance 108</span>
+              <PhoneCall className="w-3.5 h-3.5 animate-pulse" />
+              <span>DISPATCH: 108</span>
             </a>
             <a
               href="tel:112"
-              className="inline-flex items-center space-x-1.5 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-xl font-bold border border-red-200 transition"
+              className="inline-flex items-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-red-400 border border-red-900/80 px-3.5 py-2 rounded-xl font-bold transition"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-red-600" />
-              <span>Emergency 112</span>
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>HELPLINE: 112</span>
             </a>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
-            <div className="flex items-center space-x-1.5 text-red-600 font-bold font-mono text-[11px]">
+        {/* 4 Metric Telemetry Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs font-mono">
+          <div className="bg-black/60 p-4 rounded-2xl border border-zinc-800/70 space-y-1.5">
+            <div className="flex items-center space-x-1.5 text-red-400 text-[11px] font-bold">
               <Zap className="w-3.5 h-3.5" />
-              <span>&lt;10ms Cloud Lock</span>
+              <span>ATOMIC BED MESH</span>
             </div>
-            <div className="text-slate-900 font-extrabold text-sm">Cloud Firestore</div>
-            <p className="text-[11px] text-slate-500">Atomic bed, doctor & machine reservation</p>
+            <div className="text-white font-black text-sm">&lt;10ms Latency</div>
+            <p className="text-[10px] text-zinc-400">Deterministic cloud resource reservation</p>
           </div>
 
-          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
-            <div className="flex items-center space-x-1.5 text-emerald-600 font-bold font-mono text-[11px]">
+          <div className="bg-black/60 p-4 rounded-2xl border border-zinc-800/70 space-y-1.5">
+            <div className="flex items-center space-x-1.5 text-emerald-400 text-[11px] font-bold">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>0% Gate Rejection</span>
+              <span>LIVE TRAUMA BEDS</span>
             </div>
-            <div className="text-slate-900 font-extrabold text-sm">{totalFreeBeds} ER Beds Live</div>
-            <p className="text-[11px] text-slate-500">Across 3 top trauma hospitals in Delhi NCR</p>
+            <div className="text-white font-black text-sm">{totalFreeBeds} Beds Online</div>
+            <p className="text-[10px] text-zinc-400">Aggregated across all registered centers</p>
           </div>
 
-          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
-            <div className="flex items-center space-x-1.5 text-blue-600 font-bold font-mono text-[11px]">
+          <div className="bg-black/60 p-4 rounded-2xl border border-zinc-800/70 space-y-1.5">
+            <div className="flex items-center space-x-1.5 text-cyan-400 text-[11px] font-bold">
               <Mic className="w-3.5 h-3.5" />
-              <span>Sarvam AI Engine</span>
+              <span>SARVAM INDIC AI</span>
             </div>
-            <div className="text-slate-900 font-extrabold text-sm">Voice STT & TTS</div>
-            <p className="text-[11px] text-slate-500">Bhashini Indic voice triage in 7 languages</p>
+            <div className="text-white font-black text-sm">7 Indian Langs</div>
+            <p className="text-[10px] text-zinc-400">Sub-second emergency speech-to-triage</p>
           </div>
 
-          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
-            <div className="flex items-center space-x-1.5 text-purple-600 font-bold font-mono text-[11px]">
+          <div className="bg-black/60 p-4 rounded-2xl border border-zinc-800/70 space-y-1.5">
+            <div className="flex items-center space-x-1.5 text-purple-400 text-[11px] font-bold">
               <FileCheck className="w-3.5 h-3.5" />
-              <span>Voice-to-QR Intake</span>
+              <span>ZERO-WAIT RECEPTION</span>
             </div>
-            <div className="text-slate-900 font-extrabold text-sm">0 Sec Intake</div>
-            <p className="text-[11px] text-slate-500">Autonomous reception intake & triage</p>
+            <div className="text-white font-black text-sm">Instant QR Intake</div>
+            <p className="text-[10px] text-zinc-400">Contactless reception ER gate clearance</p>
           </div>
         </div>
       </div>
