@@ -29,37 +29,96 @@ export const Navbar: React.FC = () => {
   return (
     <header className={`sticky top-0 z-50 w-full backdrop-blur-2xl border-b transition-colors duration-300 ${isDarkTheme ? 'bg-[#060913]/90 border-zinc-800/80 text-white shadow-2xl' : 'bg-white/95 border-slate-200/80 text-slate-900 shadow-xs'}`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="min-h-14 sm:min-h-16 py-1.5 sm:py-2 flex items-center justify-between gap-2">
-          {/* Brand & Home Navigation */}
-          <div
-            onClick={() => {
-              if (currentUser) {
-                setCurrentRole(currentUser.role);
-              } else {
-                setCurrentRole('welcome');
-              }
-            }}
-            className="flex items-center space-x-2.5 cursor-pointer group shrink-0"
-            title={currentUser ? `LifeCare ${currentUser.role === 'guardian' ? 'Guardian' : currentUser.role === 'driver' ? 'Driver' : 'Hospital'} Portal` : 'Go to LifeCare Welcome Home'}
-          >
-            <div className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-b from-red-500 to-red-600 text-white shadow-md shadow-red-500/25 group-hover:scale-105 transition-transform">
-              <HeartPulse className="w-4.5 h-4.5 text-white" />
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
+        <div className="min-h-14 sm:min-h-16 py-1.5 sm:py-2 flex items-center justify-between gap-1.5 sm:gap-2">
+          {/* Brand & Home Navigation with Left-to-Right ECG Pulse Waves */}
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            {/* Left Pulse Beam Animation (Flowing Left to Right) */}
+            <div className="hidden xs:flex items-center select-none pointer-events-none opacity-85 sm:opacity-100 shrink-0" title="Vital Signs Heartbeat Telemetry">
+              <svg className="w-9 sm:w-14 h-5 sm:h-6 overflow-visible" viewBox="0 0 60 20" fill="none">
+                <path
+                  d="M0 10 H16 L20 4 L25 16 L29 2 L35 18 L39 10 H60"
+                  stroke={isDarkTheme ? "rgba(239, 68, 68, 0.28)" : "rgba(239, 68, 68, 0.22)"}
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M0 10 H16 L20 4 L25 16 L29 2 L35 18 L39 10 H60"
+                  stroke="url(#pulse-gradient-left)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="ecg-line-left"
+                />
+                <defs>
+                  <linearGradient id="pulse-gradient-left" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#ef4444" stopOpacity="0.1" />
+                    <stop offset="50%" stopColor="#ef4444" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.4" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center space-x-1.5">
-                <span className={`text-base sm:text-lg font-bold tracking-tight font-mono leading-none ${isDarkTheme ? 'text-white' : 'text-slate-900'}`}>
-                  Life<span className="text-red-500">Care</span>
-                </span>
-                <span className={`hidden sm:inline-flex items-center text-[10px] font-mono px-1.5 py-0.2 rounded-md font-semibold ${isDarkTheme ? 'bg-red-950/70 text-red-400 border border-red-800/80' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                  Caring for Lives
-                </span>
+
+            {/* LifeCare in Between */}
+            <div
+              onClick={() => {
+                if (currentUser) {
+                  setCurrentRole(currentUser.role);
+                } else {
+                  setCurrentRole('welcome');
+                }
+              }}
+              className="flex items-center space-x-2 cursor-pointer group shrink-0"
+              title={currentUser ? `LifeCare ${currentUser.role === 'guardian' ? 'Guardian' : currentUser.role === 'driver' ? 'Driver' : 'Hospital'} Portal` : 'Go to LifeCare Welcome Home'}
+            >
+              <div className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-b from-red-500 to-red-600 text-white shadow-md shadow-red-500/25 group-hover:scale-105 transition-transform">
+                <HeartPulse className="w-4.5 h-4.5 text-white" />
+                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
               </div>
-              <div className={`flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-[11px] font-mono ${isDarkTheme ? 'text-zinc-400' : 'text-slate-500'}`}>
-                <span className="font-medium truncate max-w-[200px] sm:max-w-none">
-                  Autonomous Emergency Healthcare Network
-                </span>
+              <div className="flex flex-col justify-center">
+                <div className="flex items-center space-x-1.5">
+                  <span className={`text-base sm:text-lg font-bold tracking-tight font-mono leading-none ${isDarkTheme ? 'text-white' : 'text-slate-900'}`}>
+                    Life<span className="text-red-500">Care</span>
+                  </span>
+                  <span className={`hidden sm:inline-flex items-center text-[10px] font-mono px-1.5 py-0.2 rounded-md font-semibold ${isDarkTheme ? 'bg-red-950/70 text-red-400 border border-red-800/80' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    Caring for Lives
+                  </span>
+                </div>
+                <div className={`hidden sm:flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-[11px] font-mono ${isDarkTheme ? 'text-zinc-400' : 'text-slate-500'}`}>
+                  <span className="font-medium truncate max-w-[200px] sm:max-w-none">
+                    Autonomous Emergency Healthcare Network
+                  </span>
+                </div>
               </div>
+            </div>
+
+            {/* Right Pulse Beam Animation (Flowing Left to Right) */}
+            <div className="hidden md:flex items-center select-none pointer-events-none opacity-85 sm:opacity-100 shrink-0" title="Vital Signs Heartbeat Telemetry">
+              <svg className="w-10 sm:w-16 h-5 sm:h-6 overflow-visible" viewBox="0 0 65 20" fill="none">
+                <path
+                  d="M0 10 H18 L22 15 L26 3 L31 18 L36 2 L41 12 L45 10 H65"
+                  stroke={isDarkTheme ? "rgba(239, 68, 68, 0.28)" : "rgba(239, 68, 68, 0.22)"}
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M0 10 H18 L22 15 L26 3 L31 18 L36 2 L41 12 L45 10 H65"
+                  stroke="url(#pulse-gradient-right)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="ecg-line-right"
+                />
+                <defs>
+                  <linearGradient id="pulse-gradient-right" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.3" />
+                    <stop offset="50%" stopColor="#ef4444" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.4" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </div>
 
@@ -102,12 +161,30 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+          <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+            {/* Theme Toggle Button - ALWAYS visible first on all devices */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={`p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer shadow-2xs flex items-center justify-center shrink-0 ${isDarkTheme
+                  ? 'bg-zinc-900/90 hover:bg-zinc-800 text-amber-400 border-zinc-800 hover:border-zinc-700'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+              title={`Switch to ${isDarkTheme ? 'Light' : 'Dark'} Mode`}
+              aria-label="Toggle Theme"
+            >
+              {isDarkTheme ? (
+                <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-700" />
+              )}
+            </button>
+
             {/* Google Authentication & Role Unique ID Pill */}
             <button
               type="button"
               onClick={() => setIsAuthModalOpen(true)}
-              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-mono font-bold transition cursor-pointer shadow-2xs ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 border-zinc-800' : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'}`}
+              className={`flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1 rounded-xl border text-[11px] font-mono font-bold transition cursor-pointer shadow-2xs shrink-0 ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 border-zinc-800' : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'}`}
               title="Firebase Google Authentication & Unique Role ID"
             >
               {currentUser?.photoURL ? (
@@ -116,7 +193,7 @@ export const Navbar: React.FC = () => {
                 <User className="w-3.5 h-3.5 text-blue-500" />
               )}
               <span className="hidden xs:inline">
-                {currentUser?.uniqueRoleId || 'Google Login'}
+                {currentUser?.uniqueRoleId || 'Login'}
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             </button>
@@ -132,45 +209,30 @@ export const Navbar: React.FC = () => {
               </div>
             )}
 
+            {/* Call 108 Emergency */}
             <a
               href="tel:108"
-              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-red-600 hover:bg-red-500 text-[11px] font-mono text-white font-bold transition cursor-pointer shadow-md shadow-red-600/30"
+              className="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1 rounded-xl bg-red-600 hover:bg-red-500 text-[11px] font-mono text-white font-bold transition cursor-pointer shadow-md shadow-red-600/30 shrink-0"
               title="Call 108 Ambulance Dispatch"
             >
               <PhoneCall className="w-3 h-3 text-white animate-pulse" />
-              <span>Call 108</span>
+              <span className="hidden xs:inline">Call </span><span>108</span>
             </a>
 
+            {/* Call 112 (Hidden on very narrow mobile screens to avoid overflow) */}
             <a
               href="tel:112"
-              className={`flex items-center space-x-1 px-2.5 py-1 rounded-xl border text-[11px] font-mono font-bold transition cursor-pointer shadow-2xs ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-red-400 border-red-900/80' : 'bg-rose-50 hover:bg-rose-100 text-red-700 border-red-200'}`}
+              className={`hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-xl border text-[11px] font-mono font-bold transition cursor-pointer shadow-2xs shrink-0 ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-red-400 border-red-900/80' : 'bg-rose-50 hover:bg-rose-100 text-red-700 border-red-200'}`}
               title="National Emergency Helpline"
             >
               <PhoneCall className="w-3 h-3 text-red-500" />
               <span>112</span>
             </a>
 
-            {/* Theme Toggle Button */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className={`p-1.5 rounded-xl border transition-all cursor-pointer shadow-2xs flex items-center justify-center ${isDarkTheme
-                  ? 'bg-zinc-900/90 hover:bg-zinc-800 text-amber-400 border-zinc-800 hover:border-zinc-700'
-                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                }`}
-              title={`Switch to ${isDarkTheme ? 'Light' : 'Dark'} Mode`}
-              aria-label="Toggle Theme"
-            >
-              {isDarkTheme ? (
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-              ) : (
-                <Moon className="w-3.5 h-3.5 text-slate-700" />
-              )}
-            </button>
-
+            {/* Reset Button (Hidden on very narrow mobile screens) */}
             <button
               onClick={resetEmergencyState}
-              className={`p-1.5 rounded-xl border transition cursor-pointer shadow-2xs ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800' : 'bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 border-slate-200'}`}
+              className={`hidden sm:flex p-1.5 rounded-xl border transition cursor-pointer shadow-2xs shrink-0 ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800' : 'bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 border-slate-200'}`}
               title="Reset Emergency Session"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -181,39 +243,51 @@ export const Navbar: React.FC = () => {
         {/* Mobile Navigation Bar - Single active portal indicator */}
         {currentRole !== 'welcome' && (
           <div className="sm:hidden pb-2.5 pt-0.5">
-            <div className="flex items-center justify-between bg-slate-100 p-1.5 rounded-xl border border-slate-200 w-full gap-2 text-xs">
+            <div className={`flex items-center justify-between p-1.5 rounded-xl border w-full gap-2 text-xs ${isDarkTheme ? 'bg-zinc-900/80 border-zinc-800' : 'bg-slate-100 border-slate-200'}`}>
               {!currentUser ? (
                 <button
                   type="button"
                   onClick={() => setCurrentRole('welcome')}
-                  className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-white text-slate-700 font-bold shadow-xs hover:bg-slate-50 transition cursor-pointer"
+                  className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg font-bold shadow-xs transition cursor-pointer ${isDarkTheme ? 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Home</span>
                 </button>
               ) : (
-                <span className="font-mono text-[11px] font-bold text-slate-600 px-2">
+                <span className={`font-mono text-[11px] font-bold px-2 ${isDarkTheme ? 'text-zinc-300' : 'text-slate-600'}`}>
                   {currentUser.uniqueRoleId}
                 </span>
               )}
-              <div
-                className={`px-3 py-1.5 rounded-lg text-white font-bold flex items-center space-x-1.5 shadow-xs ${currentRole === 'guardian'
-                    ? 'bg-red-600'
-                    : currentRole === 'driver'
-                      ? 'bg-amber-600'
-                      : 'bg-emerald-600'
-                  }`}
-              >
-                {currentRole === 'guardian' && <HeartPulse className="w-3.5 h-3.5 text-white" />}
-                {currentRole === 'driver' && <Ambulance className="w-3.5 h-3.5 text-white" />}
-                {currentRole === 'hospital' && <Building2 className="w-3.5 h-3.5 text-white" />}
-                <span>
-                  {currentRole === 'guardian'
-                    ? 'Guardian'
-                    : currentRole === 'driver'
-                      ? '108 Driver'
-                      : 'Hospital'}
-                </span>
+
+              <div className="flex items-center gap-1.5">
+                {/* Mobile Reset & Portal Pill */}
+                <button
+                  onClick={resetEmergencyState}
+                  className={`p-1.5 rounded-lg border transition cursor-pointer ${isDarkTheme ? 'bg-zinc-800 text-zinc-400 border-zinc-700' : 'bg-white text-slate-500 border-slate-200'}`}
+                  title="Reset Emergency Session"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                </button>
+
+                <div
+                  className={`px-3 py-1.5 rounded-lg text-white font-bold flex items-center space-x-1.5 shadow-xs ${currentRole === 'guardian'
+                      ? 'bg-red-600'
+                      : currentRole === 'driver'
+                        ? 'bg-amber-600'
+                        : 'bg-emerald-600'
+                    }`}
+                >
+                  {currentRole === 'guardian' && <HeartPulse className="w-3.5 h-3.5 text-white" />}
+                  {currentRole === 'driver' && <Ambulance className="w-3.5 h-3.5 text-white" />}
+                  {currentRole === 'hospital' && <Building2 className="w-3.5 h-3.5 text-white" />}
+                  <span>
+                    {currentRole === 'guardian'
+                      ? 'Guardian'
+                      : currentRole === 'driver'
+                        ? '108 Driver'
+                        : 'Hospital'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

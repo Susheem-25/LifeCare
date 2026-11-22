@@ -81,7 +81,7 @@ export interface Doctor {
   status: 'AVAILABLE_AND_FREE' | 'IN_SURGERY' | 'OFF_DUTY' | 'FREE' | 'BUSY' | 'ABSENT';
   currentBay?: string;
   avatar: string;
-  phone: string;
+  phone?: string;
 }
 
 export interface Equipment {

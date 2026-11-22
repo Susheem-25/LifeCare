@@ -51,7 +51,7 @@ export const DriverPortal: React.FC = () => {
 
   // Driver Onboarding Form State (after Google Sign-In)
   const [onboardingName, setOnboardingName] = useState(currentUser?.displayName || '');
-  const [onboardingPhone, setOnboardingPhone] = useState('+91-98101-08108');
+  const [onboardingPhone, setOnboardingPhone] = useState('9810108108');
   const [onboardingVehicle, setOnboardingVehicle] = useState('DL-01-AMB-402');
   const [onboardingType, setOnboardingType] = useState('Advanced Cardiac Life Support (ACLS)');
   const [isOnboardingSubmitting, setIsOnboardingSubmitting] = useState(false);
@@ -84,8 +84,13 @@ export const DriverPortal: React.FC = () => {
   // Handle Driver Onboarding Submission
   const handleRegisterDriver = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!onboardingName.trim() || !onboardingPhone.trim() || !onboardingVehicle.trim()) {
+    const cleanPhone = onboardingPhone.replace(/\D/g, '');
+    if (!onboardingName.trim() || !cleanPhone || !onboardingVehicle.trim()) {
       setOnboardingError('Please enter driver name, phone number, and vehicle registration number.');
+      return;
+    }
+    if (cleanPhone.length !== 10) {
+      setOnboardingError('Driver contact phone must be exactly 10 digits (e.g. 9810108108).');
       return;
     }
     setIsOnboardingSubmitting(true);
@@ -93,7 +98,7 @@ export const DriverPortal: React.FC = () => {
     try {
       await registerDriverDetails({
         driverName: sanitizeText(onboardingName),
-        phone: sanitizeText(onboardingPhone),
+        phone: cleanPhone,
         vehicleNumber: sanitizeText(onboardingVehicle),
         vehicleType: sanitizeText(onboardingType),
       });
@@ -220,9 +225,10 @@ export const DriverPortal: React.FC = () => {
                 <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 <input
                   type="tel"
+                  maxLength={10}
                   value={onboardingPhone}
-                  onChange={(e) => setOnboardingPhone(e.target.value)}
-                  placeholder="e.g. +91-98188-72619"
+                  onChange={(e) => setOnboardingPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="10-digit phone (e.g. 9810108108)"
                   className="w-full bg-slate-50 text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-amber-500 focus:bg-white focus:outline-none font-mono"
                   required
                 />

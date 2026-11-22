@@ -154,7 +154,7 @@ export async function queryLifeCareKnowledgeBase(
         ? 'The user asked in Hindi or Hinglish. You MUST reply in fluent, respectful, grammatically correct Hindi (Devanagari script).'
         : 'The user asked in English. You MUST reply in authoritative, professional, clear English.';
 
-      const systemPrompt = `You are Niro — the official LifeCare Gen AI Copilot with complete, authoritative A to Z knowledge of LifeCare: Zero-Wait Emergency Healthcare Network.
+      const systemPrompt = `You are Niro — the official LifeCare Gen AI Copilot with complete, authoritative knowledge of LifeCare: Zero-Wait Emergency Healthcare Network.
       
       Language Directive: ${langInstruction}
       
@@ -216,7 +216,7 @@ LifeCare में जब कोई नागरिक Voice SOS के ज़�
 2. **0% Gate Rejection:** जब एम्बुलेंस अस्पताल पहुंचती है, तो पहले से बेड आरक्षित होने के कारण किसी मरीज़ को लौटाया नहीं जाता।
 3. **Live Sync:** फ़ायरस्टोर क्लस्टर के ज़रिए यह डेटा अस्पताल के ER Trauma Command और 108 Paramedic Cockpit में रीयल-टाइम अपडेट होता है।`;
     }
-    return `### ⚡ LifeCare <10ms Cloud Atomic Bed Mesh
+    return `### LifeCare <10ms Cloud Atomic Bed Mesh
 
 LifeCare solves emergency hospital bed chaos using **deterministic cloud resource locking** in under **10ms**:
 
@@ -236,7 +236,7 @@ LifeCare solves emergency hospital bed chaos using **deterministic cloud resourc
 2. **AES-GCM-256 Encrypted QR:** मरीज़ का मेडिकल डेटा एक एन्क्रिप्टेड QR कोड में पैक होता है।
 3. **Contactless Gate Clearance:** अस्पताल रिसेप्शन पर लगे स्कैनर से QR कोड स्कैन करते ही **0 सेकंड** में आपातकालीन भर्ती हो जाती है—बिना किसी कागजी कार्रवाई के!`;
     }
-    return `### 🛡️ 0-Second Reception Bypass & ABDM v3 ABHA Uplink
+    return `### 0-Second Reception Bypass & ABDM v3 ABHA Uplink
 
 LifeCare replaces the fatal 20–35 minute reception desk paperwork bottleneck with an automated **in-transit digital pre-admission pipeline**:
 
@@ -259,7 +259,7 @@ LifeCare में अस्पताल केवल नाम ही नही
   - ⚪ **Absent / Off Duty:** ड्यूटी पर अनुपस्थित।
 - **लाइव अपडेशन:** अस्पताल प्रशासन किसी भी समय डॉक्टर की डिग्रियों और विशेषज्ञता को एडिट और अपडेट कर सकता है।`;
     }
-    return `### 🩺 Specialist Doctor Rostering & Degree Verification
+    return `### Specialist Doctor Rostering & Degree Verification
 
 LifeCare enforces rigorous medical credentialing for all trauma center doctors:
 
@@ -282,7 +282,7 @@ LifeCare भारत के पहले इंडिक-फर्स्ट इ
 2. **Text-to-Speech (bulbul:v3):** ऐप मरीज़ और परिचारक को शांत आवाज़ में फ़र्स्ट-एड निर्देश और गोल्डन ऑवर सलाह बोलकर सुनाता है।
 3. **Indic Medical Triage:** बोली गई आवाज़ को तुरंत ICD-10 डायग्नोसिस और ESI 1–5 गंभीरता स्कोर में बदलता है।`;
     }
-    return `### 🎙️ Sarvam AI's Role in LifeCare
+    return `### Sarvam AI's Role in LifeCare
 
 LifeCare leverages **Sarvam AI** as its core Indian language voice and conversational engine:
 
@@ -300,7 +300,7 @@ LifeCare leverages **Sarvam AI** as its core Indian language voice and conversat
 2. **Live Vitals Telemetry:** रस्ते में पैरामेडिक मरीज़ का ब्लड प्रेशर, पल्स, SpO2 और GCS स्कोर अस्पताल के डॉक्टरों को लाइव भेजते हैं।
 3. **Bypass Protocol:** अस्पताल के सुरक्षा गेट को एम्बुलेंस की लाइव जीपीएस ट्रैकिंग दिखती है, जिससे गेट बिना रुके सीधे खुलते हैं।`;
     }
-    return `### 🚑 108 Driver Tactical Cockpit & Telemetry
+    return `### 108 Driver Tactical Cockpit & Telemetry
 
 The **108 Driver Portal** turns mobile ICU ambulances into high-tech connected corridors:
 
@@ -319,7 +319,7 @@ The **108 Driver Portal** turns mobile ICU ambulances into high-tech connected c
 - **Centralized Control:** मरीज़ों, अस्पतालों और 108 एम्बुलेंस ड्राइवरों को सस्पेंड, रीइन्स्टेट या डिलीट करने की पूर्ण सुविधा।
 - **Dual Theme:** डार्क OLED और लाइट मोड दोनों में उपलब्ध।`;
     }
-    return `### ⚡ LifeCare Super Admin Console (\`/admin\`)
+    return `### LifeCare Super Admin Console (\`/admin\`)
 
 The **Super Admin Console** provides national-level governance over the emergency healthcare grid:
 
@@ -329,9 +329,9 @@ The **Super Admin Console** provides national-level governance over the emergenc
 - **Liquid macOS Glass UI:** Seamlessly toggles between OLED Command Dark and Frost White Light themes.`;
   }
 
-  // Default A to Z Overview Answer
+  // Default Overview Answer
   if (isHindi) {
-    return `### 🌟 नमस्ते! मैं Niro हूँ — LifeCare का Gen AI कोपायलट
+    return `### नमस्ते! मैं Niro हूँ — LifeCare का Gen AI कोपायलट
 
 LifeCare भारत के आपातकालीन स्वास्थ्य तंत्र को 4 प्रमुख स्तंभों से क्रांतिकारी बनाता है:
 
@@ -343,7 +343,7 @@ LifeCare भारत के आपातकालीन स्वास्थ�
 आप मुझसे LifeCare के किसी भी फीचर, तकनीकी आर्किटेक्चर या मेडिकल प्रोटोकॉल के बारे में पूछ सकते हैं!`;
   }
 
-  return `### 🌟 Hello! I am Niro — Your LifeCare Gen AI Copilot
+  return `### Hello! I am Niro — Your LifeCare Gen AI Copilot
 
 LifeCare eliminates the fatal delays of the **Golden Hour** through four synchronized digital cockpits:
 

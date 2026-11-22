@@ -12,7 +12,9 @@ import {
   RefreshCw,
   Bot,
   User,
-  Radio
+  Radio,
+  Sun,
+  Moon
 } from 'lucide-react';
 import {
   queryLifeCareKnowledgeBase,
@@ -36,8 +38,9 @@ const getNowTimeStr = (): string => {
 
 /**
  * Parses inline bold (**text**) and inline backticks (`code`)
+ * Explicitly respects the active theme to avoid white-on-white text
  */
-const renderInlineSpans = (text: string): React.ReactNode[] => {
+const renderInlineSpans = (text: string, isDark: boolean): React.ReactNode[] => {
   const parts: React.ReactNode[] = [];
   const regex = /(\*\*.*?\*\*|`.*?`)/g;
   let lastIndex = 0;
@@ -50,7 +53,7 @@ const renderInlineSpans = (text: string): React.ReactNode[] => {
     const token = match[0];
     if (token.startsWith('**') && token.endsWith('**')) {
       parts.push(
-        <strong key={match.index} className="font-bold text-slate-900 dark:text-white">
+        <strong key={match.index} className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
           {token.slice(2, -2)}
         </strong>
       );
@@ -58,7 +61,11 @@ const renderInlineSpans = (text: string): React.ReactNode[] => {
       parts.push(
         <code
           key={match.index}
-          className="px-1.5 py-0.5 mx-0.5 rounded font-mono text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+          className={`px-1.5 py-0.5 mx-0.5 rounded font-mono text-[11px] font-semibold ${
+            isDark
+              ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}
         >
           {token.slice(1, -1)}
         </code>
@@ -76,11 +83,16 @@ const renderInlineSpans = (text: string): React.ReactNode[] => {
 
 /**
  * Renders structured markdown (headings, numbered lists, bullet lists, bold text)
+ * Strips noisy emoji symbols and guarantees high-contrast text
  */
-const renderFormattedText = (rawText: string): React.ReactNode => {
-  const lines = rawText.split('\n');
+const renderFormattedText = (rawText: string, isDark: boolean): React.ReactNode => {
+  const cleanHeader = rawText
+    .replace(/^###\s*(?:🌟|⚡|🛡️|🩺|🎙️|🚑)?\s*/gmu, '### ')
+    .replace(/(?:🌟|⚡)/gu, '');
+
+  const lines = cleanHeader.split('\n');
   return (
-    <div className="space-y-1.5 text-xs leading-relaxed">
+    <div className={`space-y-1.5 text-xs leading-relaxed break-words overflow-hidden ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
       {lines.map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) {
@@ -89,10 +101,11 @@ const renderFormattedText = (rawText: string): React.ReactNode => {
 
         // Heading 3 or bold heading (### ...)
         if (trimmed.startsWith('### ')) {
+          const headingText = trimmed.replace(/^###\s*/, '');
           return (
-            <div key={idx} className="font-extrabold text-[13px] text-red-600 dark:text-red-400 pt-1 pb-0.5 flex items-center gap-1.5">
-              <span className="w-1.5 h-3.5 bg-red-500 rounded-full inline-block"></span>
-              <span>{renderInlineSpans(trimmed.replace(/^###\s*/, ''))}</span>
+            <div key={idx} className={`font-extrabold text-[13px] pt-1.5 pb-0.5 flex items-center gap-1.5 ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+              <span className="w-1.5 h-3.5 bg-red-500 rounded-full inline-block shrink-0"></span>
+              <span>{renderInlineSpans(headingText, isDark)}</span>
             </div>
           );
         }
@@ -102,10 +115,12 @@ const renderFormattedText = (rawText: string): React.ReactNode => {
         if (numMatch) {
           return (
             <div key={idx} className="flex items-start gap-2 pl-0.5 my-1">
-              <span className="flex items-center justify-center w-4 h-4 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-mono font-bold text-[10px] shrink-0 mt-0.5 border border-red-500/20">
+              <span className={`flex items-center justify-center w-4 h-4 rounded-full font-mono font-bold text-[10px] shrink-0 mt-0.5 border ${
+                isDark ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-red-50 text-red-700 border border-red-200'
+              }`}>
                 {numMatch[1]}
               </span>
-              <div className="flex-1">{renderInlineSpans(numMatch[2])}</div>
+              <div className="flex-1">{renderInlineSpans(numMatch[2], isDark)}</div>
             </div>
           );
         }
@@ -116,7 +131,7 @@ const renderFormattedText = (rawText: string): React.ReactNode => {
           return (
             <div key={idx} className="flex items-start gap-2 pl-0.5 my-1">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5"></span>
-              <div className="flex-1">{renderInlineSpans(bulletContent)}</div>
+              <div className="flex-1">{renderInlineSpans(bulletContent, isDark)}</div>
             </div>
           );
         }
@@ -124,7 +139,7 @@ const renderFormattedText = (rawText: string): React.ReactNode => {
         // Normal paragraph
         return (
           <p key={idx} className="my-0.5">
-            {renderInlineSpans(trimmed)}
+            {renderInlineSpans(trimmed, isDark)}
           </p>
         );
       })}
@@ -133,7 +148,7 @@ const renderFormattedText = (rawText: string): React.ReactNode => {
 };
 
 export const LifeCareAiChatbot: React.FC = () => {
-  const { theme } = useEmergency();
+  const { theme, toggleTheme } = useEmergency();
   const isDark = theme === 'dark';
 
   const [isOpen, setIsOpen] = useState(false);
@@ -142,15 +157,15 @@ export const LifeCareAiChatbot: React.FC = () => {
     {
       id: 'welcome-1',
       sender: 'ai',
-      text: `### 🌟 Welcome! I am Niro
-I am **Niro**, your LifeCare Gen AI Clinical Copilot with complete **A to Z knowledge** of our Zero-Wait Emergency Healthcare Network.
+      text: `### Welcome! I am Niro
+I am **Niro**, your LifeCare Gen AI Clinical Copilot for our Zero-Wait Emergency Healthcare Network.
 
 **How I can assist you:**
 - **<10ms Atomic Resource Lock:** Deterministic reservation of ER bay, specialist doctor, and equipment simultaneously.
 - **0-Second ER Reception Bypass:** Contactless ABDM v3, ABHA health records, and PM-JAY verification.
 - **108 Paramedic GPS Corridor:** Turn-by-turn emergency routing and continuous live vitals streaming.
 - **Specialist Doctor Rostering:** Verified medical qualifications (MBBS, MD, DM, FRCS) and bay allocation.
-- **Super Admin Governance (/admin):** Zero-trust audit logging and centralized directory control.
+- **Super Admin Governance:** Zero-trust audit logging and centralized directory control.
 
 Tap any question below or ask me anything in **English** or **हिन्दी**!`,
       timestamp: 'Just now',
@@ -233,11 +248,13 @@ Tap any question below or ask me anything in **English** or **हिन्दी
     // Auto-detect language of the specific text so it always plays in authentic native voice
     const msgLang = detectLanguage(text) || preferredLang;
 
-    // Strip markdown formatting for cleaner speech synthesis
+    // Strip markdown formatting and noisy emoji glyphs for clean natural speech synthesis
     const cleanSpeech = text
       .replace(/[#*`_~[\]()]/g, '')
       .replace(/###/g, '')
       .replace(/[-•*]\s*/g, '')
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+      .trim()
       .slice(0, 450);
 
     setIsSpeakingId(msgId);
@@ -353,7 +370,7 @@ Tap any question below or ask me anything in **English** or **हिन्दी
                 <p className={`text-[11px] font-mono flex items-center gap-1.5 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                   <span>Sarvam Indic AI</span>
                   <span>•</span>
-                  <span>A-to-Z Project Knowledge</span>
+                  <span>Clinical Intelligence</span>
                 </p>
               </div>
             </div>
@@ -371,6 +388,25 @@ Tap any question below or ask me anything in **English** or **हिन्दी
                 title="Toggle Language: English / हिन्दी"
               >
                 {preferredLang === 'en' ? 'EN' : 'हिन्दी'}
+              </button>
+
+              {/* Theme Toggle Button inside Niro for Phone & Desktop */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className={`p-1.5 rounded-xl border transition cursor-pointer flex items-center justify-center ${
+                  isDark
+                    ? 'bg-zinc-900 text-amber-400 border-zinc-700 hover:text-white'
+                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                }`}
+                title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+                aria-label="Toggle Theme"
+              >
+                {isDark ? (
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                ) : (
+                  <Moon className="w-3.5 h-3.5 text-slate-700" />
+                )}
               </button>
 
               <button
@@ -456,7 +492,7 @@ Tap any question below or ask me anything in **English** or **हिन्दी
                       {isUser ? (
                         <p className="font-medium">{msg.text}</p>
                       ) : (
-                        renderFormattedText(msg.text)
+                        renderFormattedText(msg.text, isDark)
                       )}
                     </div>
 

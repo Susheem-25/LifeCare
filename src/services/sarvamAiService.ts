@@ -54,6 +54,18 @@ export async function speakTextWithSarvam(
   }
   stopSpeaking();
 
+  // Strip emojis, markdown, and symbols from speech text
+  const cleanText = text
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+    .replace(/[#*`_~<>[\]()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!cleanText) {
+    if (options?.onEnd) options.onEnd();
+    return;
+  }
+
   if (apiKey) {
     try {
       if (options?.onStart) options.onStart();
@@ -65,7 +77,7 @@ export async function speakTextWithSarvam(
           'api-subscription-key': apiKey,
         },
         body: JSON.stringify({
-          inputs: [text.slice(0, 500)],
+          inputs: [cleanText.slice(0, 480)],
           target_language_code: lang.includes('-') ? lang : `${lang}-IN`,
           speaker: options?.speaker || 'priya',
           pitch: 0,
@@ -94,14 +106,20 @@ export async function speakTextWithSarvam(
           if (options?.onEnd) options.onEnd();
         };
 
-        audio.onerror = (e) => {
-          console.warn('Sarvam audio playback failed, falling back to Web Speech API', e);
+        audio.onerror = () => {
           activeAudioElement = null;
-          fallbackSpeechSynthesis(text, options);
+          fallbackSpeechSynthesis(cleanText, options);
         };
 
-        await audio.play();
-        return;
+        try {
+          await audio.play();
+          return;
+        } catch (playErr) {
+          console.warn('Direct audio.play() prevented, falling back to speech synthesis:', playErr);
+          activeAudioElement = null;
+          fallbackSpeechSynthesis(cleanText, options);
+          return;
+        }
       }
     } catch (err) {
       console.warn('Sarvam AI TTS API request failed, falling back to browser speech:', err);
@@ -109,10 +127,18 @@ export async function speakTextWithSarvam(
   }
 
   // Fallback to browser SpeechSynthesis
-  fallbackSpeechSynthesis(text, options);
+  fallbackSpeechSynthesis(cleanText, options);
 }
 
 function fallbackSpeechSynthesis(text: string, options?: SarvamTtsOptions) {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    } catch {
+      // ignore
+    }
+  }
   speakText(text, {
     langCode: options?.langCode || 'hi',
     onStart: options?.onStart,

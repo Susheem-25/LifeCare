@@ -103,7 +103,6 @@ export const HospitalPortal: React.FC = () => {
   const [newDocSpec, setNewDocSpec] = useState('');
   const [newDocExp, setNewDocExp] = useState<number | ''>('');
   const [newDocBay, setNewDocBay] = useState('');
-  const [newDocPhone, setNewDocPhone] = useState('');
 
   // Inline add equipment drawer state for onboarding - starts completely clean
   const [isAddingMachInline, setIsAddingMachInline] = useState(false);
@@ -124,7 +123,6 @@ export const HospitalPortal: React.FC = () => {
       status: 'AVAILABLE_AND_FREE',
       currentBay: sanitizeText(newDocBay) || 'Emergency Bay',
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
-      phone: sanitizeText(newDocPhone) || 'Hospital PBX',
     };
     setOnboardDoctors((prev) => [...prev, newDoc]);
     setNewDocName('');
@@ -132,7 +130,6 @@ export const HospitalPortal: React.FC = () => {
     setNewDocSpec('');
     setNewDocExp('');
     setNewDocBay('');
-    setNewDocPhone('');
     setIsAddingDocInline(false);
   };
 
@@ -159,10 +156,37 @@ export const HospitalPortal: React.FC = () => {
   // Handle Hospital Registration Form Submission
   const handleRegisterHospital = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!onboardHospName.trim() || !onboardAddress.trim() || !onboardPhone.trim()) {
+    const cleanPhone = onboardPhone.replace(/\D/g, '');
+    if (!onboardHospName.trim() || !onboardAddress.trim() || !cleanPhone) {
       setOnboardingError('Please enter Hospital Name, Address, and Emergency Contact Phone.');
       return;
     }
+
+    if (cleanPhone.length !== 10) {
+      setOnboardingError('Emergency Contact Phone must be exactly 10 digits (e.g. 9811023451).');
+      return;
+    }
+
+    const icuTotal = Number(onboardIcuTotal) || 0;
+    const icuFree = Number(onboardIcuFree) || 0;
+    const emergTotal = Number(onboardEmergTotal) || 0;
+    const emergFree = Number(onboardEmergFree) || 0;
+    const ventTotal = Number(onboardVentTotal) || 0;
+    const ventFree = Number(onboardVentFree) || 0;
+
+    if (icuTotal < icuFree) {
+      setOnboardingError('Total ICU beds must be greater than or equal to free ICU beds.');
+      return;
+    }
+    if (emergTotal < emergFree) {
+      setOnboardingError('Total Emergency beds must be greater than or equal to free Emergency beds.');
+      return;
+    }
+    if (ventTotal < ventFree) {
+      setOnboardingError('Total Ventilator beds must be greater than or equal to free Ventilator beds.');
+      return;
+    }
+
     setIsOnboardingSubmitting(true);
     setOnboardingError('');
     try {
@@ -171,14 +195,14 @@ export const HospitalPortal: React.FC = () => {
         type: onboardHospType,
         address: sanitizeText(onboardAddress),
         city: sanitizeText(onboardCity),
-        phone: sanitizeText(onboardPhone),
+        phone: cleanPhone,
         beds: {
-          icuTotal: Number(onboardIcuTotal) || 0,
-          icuFree: Number(onboardIcuFree) || 0,
-          emergencyTotal: Number(onboardEmergTotal) || 0,
-          emergencyFree: Number(onboardEmergFree) || 0,
-          ventilatorTotal: Number(onboardVentTotal) || 0,
-          ventilatorFree: Number(onboardVentFree) || 0,
+          icuTotal,
+          icuFree,
+          emergencyTotal: emergTotal,
+          emergencyFree: emergFree,
+          ventilatorTotal: ventTotal,
+          ventilatorFree: ventFree,
         },
         doctors: onboardDoctors,
         equipments: onboardEquipments,
@@ -202,7 +226,6 @@ export const HospitalPortal: React.FC = () => {
   const [docSpec, setDocSpec] = useState<string>('Interventional Cardiology & Electrophysiology');
   const [docQual, setDocQual] = useState<string>('');
   const [docExp, setDocExp] = useState<number | ''>('');
-  const [docPhone, setDocPhone] = useState<string>('');
   const [docInitialStatus, setDocInitialStatus] = useState<Doctor['status']>('AVAILABLE_AND_FREE');
 
   // Edit Doctor Modal State (in Dashboard)
@@ -211,7 +234,6 @@ export const HospitalPortal: React.FC = () => {
   const [editDocSpec, setEditDocSpec] = useState<string>('');
   const [editDocQual, setEditDocQual] = useState<string>('');
   const [editDocExp, setEditDocExp] = useState<number | ''>('');
-  const [editDocPhone, setEditDocPhone] = useState<string>('');
   const [editDocStatus, setEditDocStatus] = useState<Doctor['status']>('AVAILABLE_AND_FREE');
 
   const handleOpenEditDoctor = (doc: Doctor) => {
@@ -220,7 +242,6 @@ export const HospitalPortal: React.FC = () => {
     setEditDocSpec(doc.specialization);
     setEditDocQual(doc.qualifications || '');
     setEditDocExp(doc.experienceYears);
-    setEditDocPhone(doc.phone || '');
     setEditDocStatus(doc.status);
   };
 
@@ -233,7 +254,6 @@ export const HospitalPortal: React.FC = () => {
       specialization: sanitizeText(editDocSpec) || editingDoctor.specialization,
       qualifications: sanitizeText(editDocQual) || 'MBBS, MD',
       experienceYears: Number(editDocExp) || 0,
-      phone: sanitizeText(editDocPhone) || editingDoctor.phone,
       status: editDocStatus,
     });
 
@@ -282,7 +302,6 @@ export const HospitalPortal: React.FC = () => {
       specialization: docSpec,
       qualifications: docQual,
       experienceYears: Number(docExp),
-      phone: docPhone,
       status: docInitialStatus,
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
     });
@@ -428,9 +447,10 @@ export const HospitalPortal: React.FC = () => {
                     <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                     <input
                       type="tel"
+                      maxLength={10}
                       value={onboardPhone}
-                      onChange={(e) => setOnboardPhone(e.target.value)}
-                      placeholder="+91-11-2692-5858"
+                      onChange={(e) => setOnboardPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      placeholder="10-digit phone (e.g. 9811023451)"
                       className="w-full bg-slate-50 text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 focus:border-emerald-500 focus:bg-white focus:outline-none font-mono"
                       required
                     />
@@ -620,13 +640,6 @@ export const HospitalPortal: React.FC = () => {
                       value={newDocBay}
                       onChange={(e) => setNewDocBay(e.target.value)}
                       placeholder="Assigned Bay / Room (e.g. Trauma Bay 1)"
-                      className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
-                    />
-                    <input
-                      type="tel"
-                      value={newDocPhone}
-                      onChange={(e) => setNewDocPhone(e.target.value)}
-                      placeholder="Doctor Phone (e.g. +91-98110-23451)"
                       className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
                     />
                     <div className="flex gap-2 sm:col-span-2">
@@ -1186,6 +1199,10 @@ export const HospitalPortal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      if (loggedHospital.beds.emergencyFree >= loggedHospital.beds.emergencyTotal) {
+                        showToast(`Free emergency beds cannot exceed total capacity (${loggedHospital.beds.emergencyTotal}). Increase total first.`);
+                        return;
+                      }
                       updateHospitalBeds(loggedHospital.id, {
                         emergencyFree: loggedHospital.beds.emergencyFree + 1,
                       });
@@ -1205,6 +1222,10 @@ export const HospitalPortal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      if (loggedHospital.beds.emergencyTotal <= loggedHospital.beds.emergencyFree) {
+                        showToast(`Total capacity cannot be less than free beds (${loggedHospital.beds.emergencyFree}). Decrease free beds first.`);
+                        return;
+                      }
                       updateHospitalBeds(loggedHospital.id, {
                         emergencyTotal: Math.max(0, loggedHospital.beds.emergencyTotal - 1),
                       });
@@ -1260,6 +1281,10 @@ export const HospitalPortal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      if (loggedHospital.beds.icuFree >= loggedHospital.beds.icuTotal) {
+                        showToast(`Free ICU beds cannot exceed total ICU capacity (${loggedHospital.beds.icuTotal}). Increase total ICU first.`);
+                        return;
+                      }
                       updateHospitalBeds(loggedHospital.id, {
                         icuFree: loggedHospital.beds.icuFree + 1,
                       });
@@ -1279,6 +1304,10 @@ export const HospitalPortal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      if (loggedHospital.beds.icuTotal <= loggedHospital.beds.icuFree) {
+                        showToast(`Total ICU capacity cannot be less than free ICU beds (${loggedHospital.beds.icuFree}). Decrease free ICU first.`);
+                        return;
+                      }
                       updateHospitalBeds(loggedHospital.id, {
                         icuTotal: Math.max(0, loggedHospital.beds.icuTotal - 1),
                       });
@@ -1334,6 +1363,10 @@ export const HospitalPortal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      if (loggedHospital.beds.ventilatorFree >= loggedHospital.beds.ventilatorTotal) {
+                        showToast(`Free ventilators cannot exceed total ventilators (${loggedHospital.beds.ventilatorTotal}). Increase total first.`);
+                        return;
+                      }
                       updateHospitalBeds(loggedHospital.id, {
                         ventilatorFree: loggedHospital.beds.ventilatorFree + 1,
                       });
@@ -1353,6 +1386,10 @@ export const HospitalPortal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
+                      if (loggedHospital.beds.ventilatorTotal <= loggedHospital.beds.ventilatorFree) {
+                        showToast(`Total ventilators cannot be less than free ventilators (${loggedHospital.beds.ventilatorFree}). Decrease free ventilators first.`);
+                        return;
+                      }
                       updateHospitalBeds(loggedHospital.id, {
                         ventilatorTotal: Math.max(0, loggedHospital.beds.ventilatorTotal - 1),
                       });
@@ -1695,17 +1732,6 @@ export const HospitalPortal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Phone Number</label>
-                <input
-                  type="text"
-                  value={docPhone}
-                  onChange={(e) => setDocPhone(e.target.value)}
-                  placeholder="+91-98110-12345"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900"
-                />
-              </div>
-
-              <div>
                 <label className="block text-slate-600 font-bold mb-1">Initial Status</label>
                 <select
                   value={docInitialStatus}
@@ -1800,28 +1826,16 @@ export const HospitalPortal: React.FC = () => {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-slate-600 font-bold mb-1">Experience (Years)</label>
-                  <input
-                    type="number"
-                    value={editDocExp}
-                    onChange={(e) => setEditDocExp(e.target.value ? Number(e.target.value) : '')}
-                    min={0}
-                    max={60}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-600 font-bold mb-1">Phone Number</label>
-                  <input
-                    type="text"
-                    value={editDocPhone}
-                    onChange={(e) => setEditDocPhone(e.target.value)}
-                    placeholder="+91-98110-12345"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
-                  />
-                </div>
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">Experience (Years)</label>
+                <input
+                  type="number"
+                  value={editDocExp}
+                  onChange={(e) => setEditDocExp(e.target.value ? Number(e.target.value) : '')}
+                  min={0}
+                  max={60}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
+                />
               </div>
 
               <div>

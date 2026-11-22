@@ -1175,14 +1175,27 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   // Hospital staff resource management (100% reactive & persistent)
+  // Enforces fundamental invariant: Total capacity >= available / free beds
   const updateHospitalBeds = (hospitalId: string, bedsUpdate: Partial<Hospital['beds']>) => {
     const updated = hospitals.map((h) => {
       if (h.id === hospitalId) {
+        const merged = { ...h.beds, ...bedsUpdate };
+        const emergencyTotal = Math.max(0, merged.emergencyTotal ?? 0);
+        const emergencyFree = Math.min(emergencyTotal, Math.max(0, merged.emergencyFree ?? 0));
+        const icuTotal = Math.max(0, merged.icuTotal ?? 0);
+        const icuFree = Math.min(icuTotal, Math.max(0, merged.icuFree ?? 0));
+        const ventilatorTotal = Math.max(0, merged.ventilatorTotal ?? 0);
+        const ventilatorFree = Math.min(ventilatorTotal, Math.max(0, merged.ventilatorFree ?? 0));
+
         return {
           ...h,
           beds: {
-            ...h.beds,
-            ...bedsUpdate,
+            emergencyTotal,
+            emergencyFree,
+            icuTotal,
+            icuFree,
+            ventilatorTotal,
+            ventilatorFree,
           },
         };
       }
