@@ -100,8 +100,8 @@ export const AdminConsole: React.FC = () => {
     let isMounted = true;
     if (currentUser?.email && !isStaticAdmin) {
       checkIsAdminInFirestore(currentUser.email).then((isDbAdmin) => {
-        if (isMounted && isDbAdmin) {
-          setIsFirestoreAdmin(true);
+        if (isMounted) {
+          setIsFirestoreAdmin(isDbAdmin);
         }
       });
     }
@@ -110,7 +110,19 @@ export const AdminConsole: React.FC = () => {
     };
   }, [currentUser?.email, isStaticAdmin]);
 
-  const isAdmin = isStaticAdmin || isFirestoreAdmin;
+  const isAdmin = Boolean(currentUser && (isStaticAdmin || isFirestoreAdmin));
+
+  const handleAdminLogout = async () => {
+    setIsFirestoreAdmin(false);
+    setAuthError('');
+    try {
+      await signOutUser();
+    } catch {
+      // ignore
+    }
+    setCurrentUser(null);
+    await logoutUser();
+  };
 
   const handleAdminGoogleLogin = async () => {
     setAuthError('');
@@ -380,7 +392,7 @@ export const AdminConsole: React.FC = () => {
 
           <button
             type="button"
-            onClick={logoutUser}
+            onClick={handleAdminLogout}
             className="inline-flex items-center space-x-1.5 text-xs text-zinc-400 hover:text-red-400 bg-zinc-900 hover:bg-red-950/50 border border-zinc-800 hover:border-red-900 px-3 py-1.5 rounded-xl transition cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
