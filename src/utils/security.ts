@@ -4,7 +4,8 @@
  */
 
 /**
- * Strips dangerous HTML tags, javascript: protocols, control characters, and null bytes to prevent XSS.
+ * Strips dangerous HTML tags, javascript: protocols, control characters, null bytes,
+ * and prototype pollution vectors to prevent XSS and DOM clobbering.
  */
 export function sanitizeText(input: string, maxLength: number = 1000): string {
   if (!input || typeof input !== 'string') return '';
@@ -12,11 +13,13 @@ export function sanitizeText(input: string, maxLength: number = 1000): string {
   return input
     .slice(0, maxLength)
     .replace(/\0/g, '') // remove null bytes
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // strip script blocks
     .replace(/<[^>]*>/g, '') // strip HTML tags
     .replace(/javascript:/gi, '') // strip javascript: protocol
     .replace(/data:/gi, '') // strip data: protocol
     .replace(/vbscript:/gi, '') // strip vbscript: protocol
     .replace(/on\w+\s*=/gi, '') // strip event handlers like onerror=, onclick=
+    .replace(/\b(__proto__|constructor|prototype)\b/gi, '') // prevent prototype pollution vectors
     .trim();
 }
 
