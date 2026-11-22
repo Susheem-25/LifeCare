@@ -81,6 +81,9 @@ interface EmergencyContextType {
   userLocation: { lat: number; lng: number; address: string; isLiveGps: boolean };
   requestLiveLocation: () => void;
   resetEmergencyState: () => void;
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
+  setTheme: (theme: 'dark' | 'light') => void;
 }
 
 const STORAGE_KEY_HOSPITALS = 'lifecare_hospitals_data_v2';
@@ -111,6 +114,48 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return [];
     }
   });
+
+  // Theme state: 'dark' (next-gen medical OS) or 'light' (clinical white)
+  const [theme, setThemeState] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem('lifecare_theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      return 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  const toggleTheme = () => {
+    setThemeState((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('lifecare_theme', next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const setTheme = (newTheme: 'dark' | 'light') => {
+    setThemeState(newTheme);
+    try {
+      localStorage.setItem('lifecare_theme', newTheme);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [theme]);
 
   // Real registered drivers available in network
   const [availableDrivers, setAvailableDrivers] = useState<DriverAccount[]>([]);
@@ -1505,6 +1550,9 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         userLocation,
         requestLiveLocation,
         resetEmergencyState,
+        theme,
+        toggleTheme,
+        setTheme,
       }}
     >
       {children}

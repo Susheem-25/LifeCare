@@ -27,7 +27,8 @@ const MainAppContent: React.FC = () => {
     isAuthModalOpen, 
     setIsAuthModalOpen,
     isVoiceQrModalOpen,
-    setIsVoiceQrModalOpen
+    setIsVoiceQrModalOpen,
+    theme
   } = useEmergency();
 
   const [isAdminRoute, setIsAdminRoute] = useState<boolean>(() => {
@@ -63,10 +64,10 @@ const MainAppContent: React.FC = () => {
     return <AdminConsole />;
   }
 
-  const isDarkWelcome = !currentUser || currentRole === 'welcome';
+  const isDarkWelcome = theme === 'dark';
 
   return (
-    <div className={`min-h-screen w-full max-w-full overflow-x-hidden ${isDarkWelcome ? 'bg-[#03060d] text-zinc-100 selection:bg-red-500 selection:text-white' : 'bg-slate-50 text-slate-900'} flex flex-col font-sans antialiased relative transition-colors duration-300`}>
+    <div className={`min-h-screen w-full max-w-full overflow-x-hidden ${isDarkWelcome ? 'bg-[#03060d] text-zinc-100 selection:bg-red-500 selection:text-white' : 'bg-slate-50 text-slate-900 selection:bg-red-600 selection:text-white'} flex flex-col font-sans antialiased relative transition-colors duration-300`}>
       {/* Top Application Navigation */}
       <Navbar />
 

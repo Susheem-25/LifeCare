@@ -7,7 +7,9 @@ import {
   RotateCcw,
   PhoneCall,
   ArrowLeft,
-  User
+  User,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -17,10 +19,12 @@ export const Navbar: React.FC = () => {
     activeBooking,
     resetEmergencyState,
     currentUser,
-    setIsAuthModalOpen
+    setIsAuthModalOpen,
+    theme,
+    toggleTheme
   } = useEmergency();
 
-  const isDarkTheme = !currentUser || currentRole === 'welcome';
+  const isDarkTheme = theme === 'dark';
 
   return (
     <header className={`sticky top-0 z-50 w-full backdrop-blur-2xl border-b transition-colors duration-300 ${isDarkTheme ? 'bg-[#060913]/90 border-zinc-800/80 text-white shadow-2xl' : 'bg-white/95 border-slate-200/80 text-slate-900 shadow-xs'}`}>
@@ -145,6 +149,25 @@ export const Navbar: React.FC = () => {
               <PhoneCall className="w-3 h-3 text-red-500" />
               <span>112</span>
             </a>
+
+            {/* Theme Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-xl border transition-all cursor-pointer shadow-2xs flex items-center justify-center ${
+                isDarkTheme
+                  ? 'bg-zinc-900/90 hover:bg-zinc-800 text-amber-400 border-zinc-800 hover:border-zinc-700'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+              }`}
+              title={`Switch to ${isDarkTheme ? 'Light' : 'Dark'} Mode`}
+              aria-label="Toggle Theme"
+            >
+              {isDarkTheme ? (
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+              ) : (
+                <Moon className="w-3.5 h-3.5 text-slate-700" />
+              )}
+            </button>
 
             <button
               onClick={resetEmergencyState}

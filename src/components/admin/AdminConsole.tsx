@@ -27,7 +27,9 @@ import {
   LogOut,
   Stethoscope,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Sun,
+  Moon
 } from 'lucide-react';
 import type { Hospital, DriverAccount, EmergencyBooking } from '../../types';
 
@@ -46,7 +48,9 @@ export const AdminConsole: React.FC = () => {
     setCurrentUser,
     logoutUser,
     hospitals,
-    allBookings
+    allBookings,
+    theme,
+    toggleTheme
   } = useEmergency();
 
   const [activeTab, setActiveTab] = useState<'audit' | 'patients' | 'hospitals' | 'drivers'>('audit');
@@ -389,6 +393,20 @@ export const AdminConsole: React.FC = () => {
             <span className="text-xs font-bold text-white">{currentUser?.displayName}</span>
             <span className="text-[10px] font-mono text-emerald-400">{currentUser?.email}</span>
           </div>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex items-center space-x-1.5 text-xs text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-3 py-1.5 rounded-xl transition cursor-pointer"
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-3.5 h-3.5 text-amber-400" />
+            ) : (
+              <Moon className="w-3.5 h-3.5 text-slate-300" />
+            )}
+            <span className="hidden sm:inline">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
 
           <button
             type="button"
