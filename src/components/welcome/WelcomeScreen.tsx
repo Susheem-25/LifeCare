@@ -75,37 +75,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
   return (
     <div className="w-full space-y-8 py-4 sm:py-6 animate-fadeIn text-zinc-100">
-      {/* 1. TOP OPERATIONAL TELEMETRY HUD */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-[#080d19]/90 border border-zinc-800/80 backdrop-blur-md text-[11px] font-mono shadow-2xl">
-        <div className="flex items-center space-x-2.5">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span className="text-zinc-200 font-bold uppercase tracking-wider">
-            NATIONAL EMERGENCY HEALTHCARE GRID
-          </span>
-          <span className="hidden sm:inline text-zinc-600">•</span>
-          <span className="hidden sm:inline text-zinc-400">NODE: IND-NCR-PRIME</span>
-        </div>
-
-        <div className="flex items-center space-x-4 text-[10px]">
-          <span className="flex items-center space-x-1.5">
-            <span className="text-zinc-500">ATOMIC LATENCY:</span>
-            <span className="text-emerald-400 font-bold">&lt;10ms</span>
-          </span>
-          <span className="hidden md:flex items-center space-x-1.5">
-            <span className="text-zinc-500">PROTOCOL:</span>
-            <span className="text-cyan-400 font-bold">HL7 / FHIR R4</span>
-          </span>
-          <span className="flex items-center space-x-1.5">
-            <span className="text-zinc-500">DATA PLANE:</span>
-            <span className="text-amber-400 font-bold">AES-256 E2E</span>
-          </span>
-        </div>
-      </div>
-
-      {/* 2. HERO OS IDENTITY */}
+      {/* HERO OS IDENTITY */}
       <div className="text-center space-y-4 max-w-4xl mx-auto px-4 pt-2">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-950/60 border border-red-800/70 text-red-400 text-[11px] font-mono font-bold tracking-widest uppercase">
           <Activity className="w-3.5 h-3.5 text-red-400 animate-pulse" />
