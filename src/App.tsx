@@ -55,7 +55,7 @@ const MainAppContent: React.FC = () => {
   // Directly navigate to registered portal if user is already authenticated
   useEffect(() => {
     if (currentUser?.role && ['guardian', 'driver', 'hospital'].includes(currentUser.role)) {
-      if (currentRole !== currentUser.role) {
+      if (currentRole !== currentUser.role && currentRole === 'welcome') {
         setCurrentRole(currentUser.role);
       }
     }
@@ -74,10 +74,10 @@ const MainAppContent: React.FC = () => {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10 space-y-6">
         {/* ========================================================
-            PAGE 1: WELCOME & AUTHENTICATION SCREEN
-            Requires real Google Sign-In to proceed to any portal
+            PAGE 1: WELCOME & SEARCH SCREEN
+            Accessible whenever currentRole is 'welcome'
             ======================================================== */}
-        {!currentUser && (
+        {currentRole === 'welcome' && (
           <div className="animate-fadeIn">
             <WelcomeScreen
               onSelectRole={(role) => {
@@ -112,9 +112,9 @@ const MainAppContent: React.FC = () => {
         )}
 
         {/* ========================================================
-            PAGE 2: GUARDIAN PORTAL (Authenticated Google Guardians Only)
+            PAGE 2: GUARDIAN PORTAL (Instant Emergency Triage - Bypasses Auth on Search)
             ======================================================== */}
-        {currentUser && currentUser.role === 'guardian' && (
+        {currentRole === 'guardian' && (!currentUser || currentUser.role === 'guardian') && (
           <div className="animate-fadeIn">
             <GuardianPortal />
           </div>

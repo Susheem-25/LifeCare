@@ -53,7 +53,11 @@ const renderInlineSpans = (text: string, isDark: boolean): React.ReactNode[] => 
     const token = match[0];
     if (token.startsWith('**') && token.endsWith('**')) {
       parts.push(
-        <strong key={match.index} className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+        <strong
+          key={match.index}
+          className={`font-black ${isDark ? 'text-white' : 'text-slate-950'}`}
+          style={{ color: isDark ? '#ffffff' : '#090d16' }}
+        >
           {token.slice(2, -2)}
         </strong>
       );
@@ -61,11 +65,14 @@ const renderInlineSpans = (text: string, isDark: boolean): React.ReactNode[] => 
       parts.push(
         <code
           key={match.index}
-          className={`px-1.5 py-0.5 mx-0.5 rounded font-mono text-[11px] font-semibold ${
+          className={`px-1.5 py-0.5 mx-0.5 rounded font-mono text-[11px] font-bold ${
             isDark
               ? 'bg-red-500/20 text-red-300 border border-red-500/30'
               : 'bg-red-50 text-red-700 border border-red-200'
           }`}
+          style={{
+            color: isDark ? '#fca5a5' : '#b91c1c'
+          }}
         >
           {token.slice(1, -1)}
         </code>
@@ -467,13 +474,20 @@ Tap any question below or ask me anything in **English** or **हिन्दी
                     </div>
                   )}
 
-                  <div className={`max-w-[88%] rounded-2xl p-4 space-y-3 text-xs leading-relaxed ${
-                    isUser
-                      ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-br-none shadow-md shadow-red-600/20'
-                      : isDark
-                      ? 'bg-[#111728] border border-zinc-800 text-zinc-200 rounded-bl-none shadow-sm'
-                      : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm'
-                  }`}>
+                  <div
+                    className={`max-w-[88%] rounded-2xl p-4 space-y-3 text-xs leading-relaxed ${
+                      isUser
+                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-br-none shadow-md shadow-red-600/20'
+                        : isDark
+                        ? 'bg-[#111728] border border-zinc-800 text-zinc-100 rounded-bl-none shadow-sm'
+                        : 'bg-white border border-slate-200 text-slate-900 rounded-bl-none shadow-sm'
+                    }`}
+                    style={{
+                      backgroundColor: isUser ? undefined : isDark ? '#111728' : '#ffffff',
+                      color: isUser ? '#ffffff' : isDark ? '#f4f4f5' : '#0f172a',
+                      borderColor: isUser ? undefined : isDark ? '#27272a' : '#e2e8f0'
+                    }}
+                  >
                     {/* Header Label inside bubble */}
                     {!isUser && (
                       <div className="flex items-center justify-between pb-1.5 border-b border-red-500/10">
