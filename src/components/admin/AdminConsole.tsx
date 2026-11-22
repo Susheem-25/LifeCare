@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
-import { isAuthorizedAdminEmail, AUTHORIZED_ADMIN_EMAILS } from '../../config/adminConfig';
+import { isAuthorizedAdminEmail } from '../../config/adminConfig';
 import {
   deleteHospitalFromFirestore,
   toggleHospitalSuspendInFirestore,
@@ -9,6 +9,8 @@ import {
   deleteBookingFromFirestore,
   toggleBookingSuspendInFirestore,
   checkIsAdminInFirestore,
+  signInWithGoogle,
+  signOutUser,
 } from '../../services/firebase';
 import {
   ShieldAlert,
@@ -41,7 +43,7 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
 export const AdminConsole: React.FC = () => {
   const {
     currentUser,
-    loginWithGoogle,
+    setCurrentUser,
     logoutUser,
     hospitals,
     allBookings
@@ -114,15 +116,19 @@ export const AdminConsole: React.FC = () => {
     setAuthError('');
     setIsAuthenticating(true);
     try {
-      const user = await loginWithGoogle('hospital');
+      // Clear any prior non-admin Google session so the Google account selector screen opens directly
+      await signOutUser();
+      const user = await signInWithGoogle('hospital');
+      setCurrentUser(user);
+
       const isEmailAuthorized = isAuthorizedAdminEmail(user.email);
       const isDbAdmin = await checkIsAdminInFirestore(user.email);
 
       if (!isEmailAuthorized && !isDbAdmin) {
-        setAuthError(`Access Denied: Account "${user.email}" does not have Super Admin privileges. Please use an authorized administrator account.`);
+        setAuthError('Access Denied: The selected Google account does not have Super Admin clearance. Please sign in with an authorized administrator account.');
       } else {
         setIsFirestoreAdmin(true);
-        showNotice(`Super Admin Clearance Granted: ${user.email}`);
+        showNotice('Super Admin Clearance Granted.');
       }
     } catch (err: unknown) {
       setAuthError(err instanceof Error ? err.message : 'Google authentication cancelled or failed.');
@@ -315,7 +321,7 @@ export const AdminConsole: React.FC = () => {
               ) : (
                 <GoogleIcon className="w-4 h-4" />
               )}
-              <span>{isAuthenticating ? 'Verifying Admin Identity...' : 'Sign in with Authorized Google Account'}</span>
+              <span>{isAuthenticating ? 'Opening Google Sign-In...' : 'Continue with Google'}</span>
             </button>
 
             <a
@@ -326,15 +332,9 @@ export const AdminConsole: React.FC = () => {
             </a>
           </div>
 
-          <div className="pt-4 border-t border-zinc-900 text-center space-y-1.5">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">
-              Configured Super Admin Emails:
-            </span>
-            <div className="text-[11px] font-mono text-emerald-400 font-bold">
-              {AUTHORIZED_ADMIN_EMAILS.join(' • ')}
-            </div>
-            <p className="text-[10px] text-zinc-600">
-              Admin clearance is set in <code className="text-zinc-400">src/config/adminConfig.ts</code> or Firestore <code className="text-zinc-400">system_config/admins</code>
+          <div className="pt-4 border-t border-zinc-900 text-center">
+            <p className="text-[10px] font-mono text-zinc-600">
+              LifeCare Zero-Trust Architecture • All Admin Access Logs Monitored
             </p>
           </div>
         </div>
