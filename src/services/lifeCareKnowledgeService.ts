@@ -26,7 +26,7 @@ export const LIFECARE_KNOWLEDGE_BASE = {
     guardianPortal: `Citizen & Bystander Emergency Cockpit:
     - Bilingual Indic Voice SOS (Hindi & Indian English) powered by Sarvam AI Indic Speech-to-Text.
     - Sub-second AI Triage classifying speech into ICD-10 codes, ESI Level 1-5 urgency, and spoken first-aid instructions.
-    - Instant in-transit emergency pre-admission and PM-JAY check.
+    - Instant ABDM v3 in-transit ABHA & PM-JAY pre-admission check.
     - Real-time cloud atomic lock reserving an ICU/emergency trauma bed in <10ms.
     - Generates AES-GCM-256 E2EE Encrypted QR Packet for contactless 0-second gate intake.`,
 
@@ -57,7 +57,7 @@ export const LIFECARE_KNOWLEDGE_BASE = {
     databaseAndAuth: 'Firebase Firestore for multi-region synchronized real-time state, Firebase Google OAuth 2.0',
     aiVoiceAndSpeech: 'Sarvam AI (Indic Speech-to-Text saaras:v4, Text-to-Speech bulbul:v3, and Indic Conversational LLM)',
     triageIntelligence: 'Clinical Triage Engine mapped to Emergency Severity Index (ESI 1-5) and ICD-10 diagnostic classifications',
-    securityAndCryptography: 'AES-GCM 256-bit End-to-End Encryption, SHA-256 key fingerprinting, and HL7/FHIR compliance',
+    securityAndCryptography: 'AES-GCM 256-bit End-to-End Encryption, SHA-256 key fingerprinting, ABDM v3 & HL7/FHIR compliance',
     performanceBenchmarks: '<10ms Cloud Atomic Bed Reservation Latency, 0-Second Reception Admission, 100% Gate Rejection Elimination'
   },
 
@@ -165,7 +165,7 @@ export async function queryLifeCareKnowledgeBase(
       - Introduce yourself as Niro when appropriate.
       - Answer clearly, authoritatively, and professionally.
       - Use clean structured markdown formatting with bold points, numbered/bulleted lists, or metric highlights.
-      - Emphasize real metrics (<10ms atomic lock, 0-second reception bypass, ESI 1-5 triage, Sarvam AI voice integration).
+      - Emphasize real metrics (<10ms atomic lock, 0-second reception bypass, ESI 1-5 triage, ABDM v3, Sarvam AI voice integration).
       - Always be helpful, concise, and clinically sound.`;
 
       const response = await fetch('https://api.sarvam.ai/v1/chat/completions', {
@@ -225,22 +225,22 @@ LifeCare solves emergency hospital bed chaos using **deterministic cloud resourc
 - **Bidirectional Sync:** The reservation status is instantly synchronized across the **Guardian Portal**, **108 Paramedic Cockpit**, and the destination **Hospital ER Command Center**.`;
   }
 
-  // Topic: 0-Second Reception / QR / Pre-Admission
-  if (query.includes('reception') || query.includes('qr') || query.includes('bypass') || query.includes('paper')) {
+  // Topic: 0-Second Reception / QR / ABDM / ABHA
+  if (query.includes('reception') || query.includes('qr') || query.includes('bypass') || query.includes('paper') || query.includes('abha') || query.includes('abdm')) {
     if (isHindi) {
-      return `**0-सेकंड रिसेप्शन बायपास और डिजिटल एडमिशन:**
+      return `**0-सेकंड रिसेप्शन बायपास और ABHA इंटीग्रेशन:**
 
 पारंपरिक अस्पतालों में मरीज़ के पहुँचने पर 20-30 मिनट पर्ची कटाने और फ़ॉर्म भरने में बर्बाद होते हैं। LifeCare इसे पूरी तरह समाप्त करता है:
 
-1. **In-Transit Pre-Admission:** एम्बुलेंस यात्रा के दौरान ही मरीज़ का **PM-JAY ₹5 लाख कैशलेस कवर** और मेडिकल इतिहास डिजिटल रूप से सत्यापित हो जाता है।
+1. **In-Transit Pre-Admission:** एम्बुलेंस यात्रा के दौरान ही मरीज़ का **ABHA Health ID** और **PM-JAY ₹5 लाख कैशलेस कवर** डिजिटल रूप से सत्यापित हो जाता है।
 2. **AES-GCM-256 Encrypted QR:** मरीज़ का मेडिकल डेटा एक एन्क्रिप्टेड QR कोड में पैक होता है।
 3. **Contactless Gate Clearance:** अस्पताल रिसेप्शन पर लगे स्कैनर से QR कोड स्कैन करते ही **0 सेकंड** में आपातकालीन भर्ती हो जाती है—बिना किसी कागजी कार्रवाई के!`;
     }
-    return `### 0-Second Reception Bypass & Digital Pre-Admission Uplink
+    return `### 0-Second Reception Bypass & ABDM v3 ABHA Uplink
 
 LifeCare replaces the fatal 20–35 minute reception desk paperwork bottleneck with an automated **in-transit digital pre-admission pipeline**:
 
-1. **In-Transit PM-JAY Verification:** While the ambulance is on the road, the patient's emergency coverage and critical clinical history are verified digitally.
+1. **ABDM v3 & PM-JAY Verification:** While the ambulance is on the road, the patient's Ayushman Bharat Health Account (ABHA) and PM-JAY ₹5 Lakh emergency coverage are verified digitally.
 2. **AES-GCM 256-Bit Encrypted QR Packet:** All vital triage info and allergy histories are packed into an end-to-end encrypted QR token signed with a SHA-256 master key fingerprint.
 3. **Zero-Wait Gate Admission:** The hospital ER scans the QR via the built-in LifeCare Reception Scanner, and the patient is wheeled straight into Trauma Bay 1 with zero gate delay!`;
   }
@@ -335,7 +335,7 @@ The **Super Admin Console** provides national-level governance over the emergenc
 
 LifeCare भारत के आपातकालीन स्वास्थ्य तंत्र को 4 प्रमुख स्तंभों से क्रांतिकारी बनाता है:
 
-1. **Guardian Portal:** हिन्दी व अंग्रेज़ी में Sarvam Voice SOS, <10ms में एटॉमिक बेड लॉक, और सुरक्षित डिजिटल ई-हेल्थ रिकॉर्ड्स।
+1. **Guardian Portal:** हिन्दी व अंग्रेज़ी में Sarvam Voice SOS, <10ms में एटॉमिक बेड लॉक, और ABHA ई-हेल्थ रिकॉर्ड्स।
 2. **108 Driver Cockpit:** प्राथमिक जीपीएस नेविगेशन, लाइव वाइटल्स टेलीमेट्री, और ज़ीरो-वेट गेट एंट्री।
 3. **Hospital ER Command:** रीयल-टाइम आईसीयू/वेंटिलेटर बेड मेष, सत्यापित डॉक्टर डिग्रियाँ (MBBS, MD, DM), और QR रिसेप्शन बाईपास।
 4. **Super Admin Console (/admin):** ज़ीरो-ट्रस्ट सुरक्षा, राष्ट्रीय ऑडिट ट्रेल, और डायरेक्टरी नियंत्रण।

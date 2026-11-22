@@ -1,24 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
 import { 
+  Ambulance, 
+  Building2, 
   ShieldCheck, 
   ArrowRight, 
   Mic, 
-  Search, 
-  ShieldAlert, 
-  Activity, 
+  Search,
+  Loader2,
+  ShieldAlert,
+  Activity,
   X
 } from 'lucide-react';
 import { startVoiceSos, stopVoiceSos } from '../../utils/speechService';
 import type { AppRole } from '../../types';
+
+const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+    />
+  </svg>
+);
 
 interface WelcomeScreenProps {
   onSelectRole: (role: AppRole) => void;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) => {
-  const { hospitals, currentUser, searchEmergency, theme } = useEmergency();
-  const [authError] = useState<string>('');
+  const { hospitals, currentUser, loginWithGoogle, searchEmergency, theme } = useEmergency();
+  const [authenticatingRole, setAuthenticatingRole] = useState<AppRole | null>(null);
+  const [authError, setAuthError] = useState<string>('');
 
   // Search & Speech-to-Text State
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -85,6 +110,28 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
     });
   };
 
+  const handleSelectRole = async (role: AppRole) => {
+    setAuthError('');
+    if (currentUser) {
+      if (currentUser.role === role) {
+        onSelectRole(role);
+      }
+      return;
+    }
+
+    setAuthenticatingRole(role);
+    try {
+      await loginWithGoogle(role);
+      onSelectRole(role);
+    } catch (err: unknown) {
+      console.warn('[WelcomeScreen] Google Sign-In error:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Google Sign-In failed or was cancelled.';
+      setAuthError(errorMsg);
+    } finally {
+      setAuthenticatingRole(null);
+    }
+  };
+
   const quickSymptoms = [
     { label: 'Chest Pain (Heart Attack)', icon: '⚡', query: 'Severe Acute Chest Pain Heart Attack Cardiac Arrest' },
     { label: 'Road Accident / Polytrauma', icon: '🚨', query: 'Road Traffic Accident Severe Trauma Blood Loss Fracture' },
@@ -95,10 +142,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
   ];
 
   return (
-    <div className={`w-full space-y-6 sm:space-y-8 py-4 sm:py-8 animate-fadeIn transition-colors duration-300 ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>
-      
+    <div className={`w-full space-y-6 sm:space-y-8 py-3 sm:py-6 animate-fadeIn transition-colors duration-300 ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>
       {/* 1. HERO BRANDING */}
-      <div className="text-center space-y-3 sm:space-y-4 max-w-4xl mx-auto px-4 pt-2 sm:pt-4">
+      <div className="text-center space-y-3 sm:space-y-4 max-w-4xl mx-auto px-4 pt-1 sm:pt-2">
         <div className={`inline-flex items-center space-x-2 px-3.5 py-1 rounded-full text-[11px] font-mono font-bold tracking-widest uppercase border ${
           isDark
             ? 'bg-red-950/60 border-red-800/70 text-red-400'
@@ -170,13 +216,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
             {/* Language Switcher Badge */}
             <button
               type="button"
-              onClick={() => {
-                const next = voiceLang === 'en-IN' ? 'hi-IN' : 'en-IN';
-                setVoiceLang(next);
-                try {
-                  localStorage.setItem('lifecare_guardian_language', next);
-                } catch {}
-              }}
+              onClick={() => setVoiceLang(voiceLang === 'en-IN' ? 'hi-IN' : 'en-IN')}
               className={`hidden xs:inline-flex items-center px-2 py-1 rounded-full text-[10px] font-mono font-extrabold border transition cursor-pointer ${
                 isDark
                   ? 'bg-zinc-800/90 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
@@ -307,6 +347,131 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
           </div>
         </div>
       )}
+
+      {/* 3. BEAUTIFUL SMALL CARDS FOR DRIVER LOGIN & HOSPITAL LOGIN */}
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center justify-center space-x-2">
+          <span className="h-px w-12 bg-slate-200 dark:bg-zinc-800"></span>
+          <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-slate-400 dark:text-zinc-500">
+            Specialized Fleet & ER Command Portals
+          </span>
+          <span className="h-px w-12 bg-slate-200 dark:bg-zinc-800"></span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto px-4 w-full">
+          {/* ========================================================
+              SMALL CARD 1: 108 AMBULANCE DRIVER COCKPIT
+              ======================================================== */}
+          <div className={`rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 border backdrop-blur-xl ${
+            isDark
+              ? 'bg-gradient-to-b from-amber-950/25 via-[#0b101e]/95 to-[#070b14] border-amber-500/25 hover:border-amber-400/60 shadow-lg'
+              : 'bg-gradient-to-b from-amber-50/50 via-white to-slate-50/80 border-amber-200/90 hover:border-amber-400 shadow-sm'
+          }`}>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-md shadow-amber-500/30">
+                  <Ambulance className="w-5 h-5 text-white" />
+                </div>
+                <span className={`text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full border ${
+                  isDark ? 'bg-amber-950/70 border-amber-800/80 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'
+                }`}>
+                  108 FLEET
+                </span>
+              </div>
+
+              <div>
+                <span className={`text-[9px] font-mono uppercase tracking-widest block font-bold mb-0.5 ${isDark ? 'text-amber-400/90' : 'text-amber-600/90'}`}>
+                  TERMINAL_02 // PARAMEDIC MOBILE ICU
+                </span>
+                <h3 className={`text-base sm:text-lg font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  108 Driver Cockpit
+                </h3>
+                <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                  Paramedic tactical navigation console. Turn-by-turn ER corridor routing & vitals telemetry.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-2 border-t border-slate-100 dark:border-zinc-800/80">
+              <button
+                type="button"
+                disabled={authenticatingRole !== null}
+                onClick={() => handleSelectRole('driver')}
+                className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 hover:from-amber-500 hover:to-orange-400 text-white font-mono font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-amber-600/25 cursor-pointer transition active:scale-95 disabled:opacity-60"
+              >
+                {authenticatingRole === 'driver' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                ) : (
+                  <GoogleIcon className="w-3.5 h-3.5" />
+                )}
+                <span>
+                  {authenticatingRole === 'driver'
+                    ? 'Connecting to Google...'
+                    : currentUser?.role === 'driver'
+                    ? 'Enter Driver Cockpit'
+                    : 'Initialize 108 Cockpit'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* ========================================================
+              SMALL CARD 2: HOSPITAL ER COMMAND
+              ======================================================== */}
+          <div className={`rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 border backdrop-blur-xl ${
+            isDark
+              ? 'bg-gradient-to-b from-emerald-950/25 via-[#0b101e]/95 to-[#070b14] border-emerald-500/25 hover:border-emerald-400/60 shadow-lg'
+              : 'bg-gradient-to-b from-emerald-50/50 via-white to-slate-50/80 border-emerald-200/90 hover:border-emerald-400 shadow-sm'
+          }`}>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-600/30">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <span className={`text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full border ${
+                  isDark ? 'bg-emerald-950/70 border-emerald-800/80 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                }`}>
+                  COMMAND HQ
+                </span>
+              </div>
+
+              <div>
+                <span className={`text-[9px] font-mono uppercase tracking-widest block font-bold mb-0.5 ${isDark ? 'text-emerald-400/90' : 'text-emerald-600/90'}`}>
+                  TERMINAL_03 // TRAUMA CENTER
+                </span>
+                <h3 className={`text-base sm:text-lg font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Hospital ER Command
+                </h3>
+                <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                  Trauma center command. Live ICU capacity, specialist doctor rosters & 15s trauma siren.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-2 border-t border-slate-100 dark:border-zinc-800/80">
+              <button
+                type="button"
+                disabled={authenticatingRole !== null}
+                onClick={() => handleSelectRole('hospital')}
+                className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-mono font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/25 cursor-pointer transition active:scale-95 disabled:opacity-60"
+              >
+                {authenticatingRole === 'hospital' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                ) : (
+                  <GoogleIcon className="w-3.5 h-3.5" />
+                )}
+                <span>
+                  {authenticatingRole === 'hospital'
+                    ? 'Connecting to Google...'
+                    : currentUser?.role === 'hospital'
+                    ? 'Enter Hospital Terminal'
+                    : 'Initialize Hospital Terminal'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

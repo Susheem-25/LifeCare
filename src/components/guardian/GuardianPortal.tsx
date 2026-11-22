@@ -105,14 +105,7 @@ export const GuardianPortal: React.FC = () => {
   const [emergencyBrief, setEmergencyBrief] = useState<string>(() => currentTriage?.detectedCondition || '');
   const [isListening, setIsListening] = useState<boolean>(false);
   const [voiceNotice, setVoiceNotice] = useState<string>('');
-  const [voiceLanguage, setVoiceLanguage] = useState<'hi-IN' | 'en-IN'>(() => {
-    try {
-      const saved = localStorage.getItem('lifecare_guardian_language');
-      return saved === 'hi-IN' || saved === 'en-IN' ? saved : 'hi-IN';
-    } catch {
-      return 'hi-IN';
-    }
-  });
+  const [voiceLanguage, setVoiceLanguage] = useState<'hi-IN' | 'en-IN'>('hi-IN');
   const [isSpeakingTts, setIsSpeakingTts] = useState<boolean>(false);
   const [triageAnalysis, setTriageAnalysis] = useState<AITriageAnalysis | null>(currentTriage);
   const [prevTriage, setPrevTriage] = useState<AITriageAnalysis | null>(currentTriage);
@@ -141,7 +134,7 @@ export const GuardianPortal: React.FC = () => {
     };
   }, []);
 
-  // Hospital Selection & Resource Allocation State
+  // Hospital Selection & Neo4j State
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [generatedPatientId, setGeneratedPatientId] = useState<string | null>(null);
   const [isGraphProcessing, setIsGraphProcessing] = useState<boolean>(false);
@@ -290,7 +283,7 @@ export const GuardianPortal: React.FC = () => {
         : emergencyBrief);
 
     speakTextWithSarvam(text, {
-      langCode: voiceLanguage,
+      langCode: 'hi-IN',
       onStart: () => setIsSpeakingTts(true),
       onEnd: () => setIsSpeakingTts(false),
       onError: () => setIsSpeakingTts(false),
@@ -342,18 +335,9 @@ export const GuardianPortal: React.FC = () => {
     setTrackedBooking(booking);
     setTrackPatientIdInput(booking.patientUniqueId);
 
-    const lockSpokenNotice = voiceLanguage === 'hi-IN'
-      ? `${hospital.name} में आपातकालीन बेड सुरक्षित कर लिया गया है। पेशेंट आईडी ${booking.patientUniqueId} सिस्टम में दर्ज है। ट्रॉमा कक्ष तैयार है।`
-      : `Emergency hospital bed successfully locked at ${hospital.name}. Patient ID ${booking.patientUniqueId} is confirmed. Immediate ER trauma bay preparation initiated.`;
-
     speakTextWithSarvam(
-      lockSpokenNotice,
-      {
-        langCode: voiceLanguage,
-        onStart: () => setIsSpeakingTts(true),
-        onEnd: () => setIsSpeakingTts(false),
-        onError: () => setIsSpeakingTts(false),
-      }
+      `Hospital locked at ${hospital.name}. Patient ID ${booking.patientUniqueId} saved to database.`,
+      { langCode: 'hi-IN' }
     );
 
     setTimeout(() => {
@@ -1100,7 +1084,7 @@ export const GuardianPortal: React.FC = () => {
               </div>
               <h3 className="text-xl font-black tracking-tight">Sign In to Lock Hospital Bed</h3>
               <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-xs mx-auto leading-relaxed">
-                Google Authentication is required to link your verified emergency reservation at <strong>{pendingLockHospital.name}</strong> and issue your Unique Patient ID.
+                Google Authentication is required to link your verified ABHA emergency reservation at <strong>{pendingLockHospital.name}</strong> and issue your Unique Patient ID.
               </p>
             </div>
 

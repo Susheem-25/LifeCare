@@ -29,8 +29,7 @@ import {
   RefreshCw,
   AlertTriangle,
   Sun,
-  Moon,
-  ArrowLeft
+  Moon
 } from 'lucide-react';
 import type { Hospital, DriverAccount, EmergencyBooking } from '../../types';
 
@@ -373,17 +372,14 @@ export const AdminConsole: React.FC = () => {
               <span>{isAuthenticating ? 'Opening Google Sign-In...' : 'Continue with Google'}</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                window.location.replace('/');
-              }}
-              className={`w-full text-xs font-medium py-2 block text-center transition cursor-pointer ${
+            <a
+              href="/"
+              className={`w-full text-xs font-medium py-2 block text-center transition ${
                 isDark ? 'text-zinc-400 hover:text-zinc-200' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               ← Return to Citizen Public Grid
-            </button>
+            </a>
           </div>
 
           <div className={`pt-4 border-t text-center ${isDark ? 'border-zinc-800/80 text-zinc-500' : 'border-slate-200 text-slate-400'}`}>
@@ -456,22 +452,6 @@ export const AdminConsole: React.FC = () => {
               <Moon className="w-3.5 h-3.5 text-slate-500" />
             )}
             <span className="hidden sm:inline">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              window.location.replace('/');
-            }}
-            className={`inline-flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-xl transition cursor-pointer border ${
-              isDark
-                ? 'text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border-zinc-800'
-                : 'text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
-            }`}
-            title="Return to Main LifeCare Website"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Exit Admin</span>
           </button>
 
           <button
@@ -945,11 +925,6 @@ export const AdminConsole: React.FC = () => {
                           <h4 className={`text-base font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{h.name}</h4>
                           <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>{h.address}, {h.city}</p>
                           <p className={`text-xs font-mono ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>Phone: {h.phone}</p>
-                          {(h.associatedEmail || h.email) && (
-                            <p className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold truncate">
-                              ✉ {h.associatedEmail || h.email}
-                            </p>
-                          )}
                         </div>
                       </div>
 
@@ -1100,11 +1075,6 @@ export const AdminConsole: React.FC = () => {
                             </div>
                             <h4 className={`text-base font-black mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{drv.driverName}</h4>
                             <p className={`text-xs font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>{drv.phone}</p>
-                            {(drv.associatedEmail || drv.email) && (
-                              <p className="text-xs font-mono text-amber-600 dark:text-amber-400 font-bold truncate">
-                                ✉ {drv.associatedEmail || drv.email}
-                              </p>
-                            )}
                           </div>
                         </div>
                       </div>

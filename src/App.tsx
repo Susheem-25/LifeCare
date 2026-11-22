@@ -32,21 +32,23 @@ const MainAppContent: React.FC = () => {
     theme
   } = useEmergency();
 
-  // Only accessible strictly through full explicit direct URL: /admin
   const [isAdminRoute, setIsAdminRoute] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
     const p = window.location.pathname.toLowerCase();
-    return p === '/admin' || p === '/admin/';
+    const h = window.location.hash.toLowerCase();
+    return p === '/admin' || p.startsWith('/admin') || h === '#/admin' || h.startsWith('#/admin');
   });
 
   useEffect(() => {
     const handleRouteChange = () => {
       const p = window.location.pathname.toLowerCase();
-      setIsAdminRoute(p === '/admin' || p === '/admin/');
+      const h = window.location.hash.toLowerCase();
+      setIsAdminRoute(p === '/admin' || p.startsWith('/admin') || h === '#/admin' || h.startsWith('#/admin'));
     };
     window.addEventListener('popstate', handleRouteChange);
+    window.addEventListener('hashchange', handleRouteChange);
     return () => {
       window.removeEventListener('popstate', handleRouteChange);
+      window.removeEventListener('hashchange', handleRouteChange);
     };
   }, []);
 

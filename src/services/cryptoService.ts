@@ -1,7 +1,7 @@
 /**
  * LifeCare End-to-End Encryption (E2EE) & Zero-PII Shield Layer
  * Implements Web Crypto API (AES-GCM-256) for secure, privacy-preserving
- * transmission of clinical records directly to receiving Hospital ER bays.
+ * transmission of clinical records from DigiLocker directly to receiving Hospital ER bays.
  * 
  * Strict Zero-PII Guarantee:
  * Decouples identity completely. NO name, phone number, or DOB is ever processed,
@@ -76,7 +76,7 @@ export async function getEmergencyGridCryptoKey(): Promise<CryptoKey> {
   }
   const keyMaterial = await window.crypto.subtle.digest(
     'SHA-256',
-    new TextEncoder().encode('LIFECARE_EMERGENCY_GRID_E2EE_MASTER_KEY_2026')
+    new TextEncoder().encode('LIFECARE_ABDM_EMERGENCY_GRID_E2EE_MASTER_KEY_2026')
   );
   return await window.crypto.subtle.importKey(
     'raw',
@@ -123,7 +123,7 @@ export function maskAbha(abha?: string): string {
 }
 
 /**
- * Encrypts purely clinical medical details.
+ * Encrypts purely clinical medical details fetched from DigiLocker.
  * Strictly strips any personal identifiers before encryption.
  */
 export async function encryptMedicalRecord(
@@ -134,6 +134,7 @@ export async function encryptMedicalRecord(
   // Ensure ZERO personal identifiers exist in the sanitized clinical payload
   const sanitizedClinicalPayload = {
     uniqueRecordId: record.uniqueRecordId,
+    abhaId: record.abhaId,
     bloodGroup: record.bloodGroup,
     knownAllergies: record.knownAllergies,
     chronicConditions: record.chronicConditions,
@@ -143,7 +144,7 @@ export async function encryptMedicalRecord(
     pmjayEligible: record.pmjayEligible,
     pmjayCardNumber: record.pmjayCardNumber,
     coverageAmountINR: record.coverageAmountINR,
-    isVerified: record.isVerified ?? true,
+    verifiedWithABDM: record.verifiedWithABDM,
     ingestionTimestamp: new Date().toISOString(),
   };
 

@@ -38,6 +38,7 @@ export interface PatientVoiceRegistration {
   currentMedications: string;
   medicalHistory: string;
   guardianPhone: string;
+  optionalAbhaId?: string;
   createdAt: string;
   isDecrypted?: boolean;
   keyFingerprint?: string;
@@ -67,13 +68,13 @@ export interface CompactRegistrationQRPacket {
   med: string;
   mh: string;
   gp: string;
+  abha?: string;
   ts: number;
 }
 
 export interface Doctor {
   id: string;
   name: string;
-  gender?: 'Male' | 'Female' | 'Other';
   specialization: string;
   qualifications: string;
   experienceYears: number;
@@ -100,8 +101,6 @@ export interface DriverAccount {
   phone: string;
   vehicleNumber: string;
   vehicleType: string;
-  email?: string;
-  associatedEmail?: string;
 }
 
 export interface Hospital {
@@ -109,8 +108,6 @@ export interface Hospital {
   hospitalCode: string;
   password: string;
   name: string;
-  email?: string;
-  associatedEmail?: string;
   type: 'Trauma Center Level 1' | 'Super Speciality' | 'Multispeciality ER' | 'Cardiac Center';
   address: string;
   city: string;
@@ -166,18 +163,19 @@ export interface PatientVitals {
   recordedAt: string;
 }
 
-export interface PatientMedicalRecord {
+export interface ABHAMedicalRecord {
   uniqueRecordId: string; // Anonymous generated Unique ID (e.g. UID-MED-3921) to decouple identity from clinical data
+  abhaId: string;
   bloodGroup: string;
   knownAllergies: string[];
   chronicConditions: string[];
   currentMedications: string[];
   pastSurgeries: string[];
   insuranceProvider: string;
-  pmjayEligible: boolean; // Cashless Emergency Health Cover
+  pmjayEligible: boolean; // PM-JAY Ayushman Bharat (Slide 2, 3, 4, 5)
   pmjayCardNumber?: string;
   coverageAmountINR: number;
-  isVerified?: boolean; // Cryptographically signed clinical verification
+  verifiedWithABDM: boolean; // ABDM Sandbox v3
   // Optional legacy fields strictly omitted in Zero-PII mode
   fullName?: string;
   age?: number;
@@ -190,8 +188,6 @@ export interface PatientMedicalRecord {
   };
   photoUrl?: string;
 }
-
-export type ABHAMedicalRecord = PatientMedicalRecord;
 
 export interface EmergencyBooking {
   patientUniqueId: string;
@@ -283,38 +279,34 @@ export interface VoiceTriageResult {
 }
 export type SarvamTranslationResult = VoiceTriageResult;
 
-// Deterministic Graph Mesh Engine Types (<10ms Atomic Resource Locking)
-export type MeshNodeType = 'PATIENT' | 'HOSPITAL' | 'DOCTOR' | 'SPECIALTY' | 'EQUIPMENT' | 'BED' | 'ALLERGY';
-export type Neo4jNodeType = MeshNodeType;
+// Neo4j AuraDB Graph Engine Types (<9ms Atomic Resource Locking)
+export type Neo4jNodeType = 'PATIENT' | 'HOSPITAL' | 'DOCTOR' | 'SPECIALTY' | 'EQUIPMENT' | 'BED' | 'ALLERGY';
 
-export interface MeshNode {
+export interface Neo4jNode {
   id: string;
   label: string;
-  type: MeshNodeType;
+  type: Neo4jNodeType;
   properties: Record<string, string | number | boolean>;
   x?: number;
   y?: number;
 }
-export type Neo4jNode = MeshNode;
 
-export interface MeshRelationship {
+export interface Neo4jRelationship {
   id: string;
   source: string;
   target: string;
   type: string;
   label: string;
 }
-export type Neo4jRelationship = MeshRelationship;
 
-export interface MeshGraphPayload {
-  nodes: MeshNode[];
-  relationships: MeshRelationship[];
+export interface Neo4jGraphPayload {
+  nodes: Neo4jNode[];
+  relationships: Neo4jRelationship[];
   cypherQuery: string;
   executionTimeMs: number;
   matchCount: number;
   transactionId?: string;
 }
-export type Neo4jGraphPayload = MeshGraphPayload;
 
 // System Metadata & Mission Standards
 export const SYSTEM_INFO = {

@@ -4,13 +4,12 @@ import {
   HeartPulse,
   Ambulance,
   Building2,
+  RotateCcw,
   PhoneCall,
   ArrowLeft,
   User,
   Sun,
-  Moon,
-  Activity,
-  LogOut
+  Moon
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -18,28 +17,22 @@ export const Navbar: React.FC = () => {
     currentRole,
     setCurrentRole,
     activeBooking,
+    resetEmergencyState,
     currentUser,
     setIsAuthModalOpen,
     theme,
-    toggleTheme,
-    loginWithGoogle,
-    logoutUser
+    toggleTheme
   } = useEmergency();
 
   const isDarkTheme = theme === 'dark';
 
   return (
-    <header className={`sticky top-0 z-50 w-full backdrop-blur-2xl border-b transition-all duration-300 ${
-      isDarkTheme
-        ? 'bg-[#060913]/90 border-zinc-800/80 text-white shadow-[0_10px_35px_rgba(0,0,0,0.6)]'
-        : 'bg-white/95 border-slate-200/90 text-slate-900 shadow-[0_4px_20px_rgba(15,23,42,0.04)]'
-    }`}>
+    <header className={`sticky top-0 z-50 w-full backdrop-blur-2xl border-b transition-colors duration-300 ${isDarkTheme ? 'bg-[#060913]/90 border-zinc-800/80 text-white shadow-2xl' : 'bg-white/95 border-slate-200/80 text-slate-900 shadow-xs'}`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="min-h-16 py-2 flex items-center justify-between gap-2 sm:gap-4">
-          {/* ========================================================
-              LEFT: EXECUTIVE BRAND IDENTITY
-              ======================================================== */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="min-h-14 sm:min-h-16 py-1.5 sm:py-2 flex items-center justify-between gap-1.5 sm:gap-2">
+          {/* Brand & Home Navigation (Header pulse removed per user request) */}
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            {/* LifeCare in Between */}
             <div
               onClick={() => {
                 if (currentUser) {
@@ -48,237 +41,198 @@ export const Navbar: React.FC = () => {
                   setCurrentRole('welcome');
                 }
               }}
-              className="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer group shrink-0"
+              className="flex items-center space-x-2 cursor-pointer group shrink-0"
               title={currentUser ? `LifeCare ${currentUser.role === 'guardian' ? 'Guardian' : currentUser.role === 'driver' ? 'Driver' : 'Hospital'} Portal` : 'Go to LifeCare Welcome Home'}
             >
-              {/* Luminous Cardiac Icon Badge */}
-              <div className="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-red-600 via-rose-500 to-red-600 text-white shadow-md shadow-red-600/35 ring-1 ring-white/20 group-hover:scale-105 transition-transform">
-                <HeartPulse className="w-5 h-5 text-white" />
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#060913] animate-pulse"></span>
+              <div className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-b from-red-500 to-red-600 text-white shadow-md shadow-red-500/25 group-hover:scale-105 transition-transform">
+                <HeartPulse className="w-4.5 h-4.5 text-white" />
+                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
               </div>
-
-              {/* Brand Typography & Status Pill */}
               <div className="flex flex-col justify-center">
-                <div className="flex items-center space-x-2">
-                  <span className={`text-lg sm:text-xl font-black tracking-tight font-mono leading-none ${isDarkTheme ? 'text-white' : 'text-slate-900'}`}>
-                    Life<span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-500 to-red-600">Care</span>
+                <div className="flex items-center space-x-1.5">
+                  <span className={`text-base sm:text-lg font-bold tracking-tight font-mono leading-none ${isDarkTheme ? 'text-white' : 'text-slate-900'}`}>
+                    Life<span className="text-red-500">Care</span>
                   </span>
-                  <span className={`hidden sm:inline-flex items-center space-x-1 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold border ${
-                    isDarkTheme
-                      ? 'bg-red-950/70 text-red-400 border-red-800/80'
-                      : 'bg-red-50 text-red-700 border-red-200'
-                  }`}>
-                    <Activity className="w-3 h-3 text-red-500 animate-pulse" />
-                    <span>EMERGENCY GRID</span>
+                  <span className={`hidden sm:inline-flex items-center text-[10px] font-mono px-1.5 py-0.2 rounded-md font-semibold ${isDarkTheme ? 'bg-red-950/70 text-red-400 border border-red-800/80' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    Caring for Lives
                   </span>
                 </div>
-                <div className={`hidden sm:flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-[11px] font-mono ${
-                  isDarkTheme ? 'text-zinc-400' : 'text-slate-500'
-                }`}>
-                  <span className="font-medium">
-                    Zero-Wait Emergency Healthcare Network
+                <div className={`hidden sm:flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-[11px] font-mono ${isDarkTheme ? 'text-zinc-400' : 'text-slate-500'}`}>
+                  <span className="font-medium truncate max-w-[200px] sm:max-w-none">
+                    Autonomous Emergency Healthcare Network
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ========================================================
-              CENTER: ACTIVE PORTAL INDICATOR (Desktop)
-              ======================================================== */}
-          <nav className="hidden md:flex items-center space-x-2 text-xs">
+          {/* Center Navigation / Role Indicator (Desktop) - No unauthorized cross-role switcher on normal pages */}
+          <nav className="hidden sm:flex items-center space-x-2 text-xs">
             {currentUser ? (
-              <div className={`flex items-center space-x-2 p-1 rounded-2xl border ${
-                isDarkTheme ? 'bg-zinc-900/80 border-zinc-800' : 'bg-slate-100/90 border-slate-200'
-              }`}>
+              <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
                 {currentUser.role === 'guardian' && (
-                  <div className="flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-red-600 text-white font-bold text-xs shadow-xs">
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-xs shadow-xs">
                     <HeartPulse className="w-3.5 h-3.5 text-white" />
                     <span>Guardian Portal</span>
                   </div>
                 )}
                 {currentUser.role === 'driver' && (
-                  <div className="flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-amber-600 text-white font-bold text-xs shadow-xs">
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs shadow-xs">
                     <Ambulance className="w-3.5 h-3.5 text-white" />
                     <span>108 Driver Cockpit</span>
                   </div>
                 )}
                 {currentUser.role === 'hospital' && (
-                  <div className="flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs">
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-xs">
                     <Building2 className="w-3.5 h-3.5 text-white" />
                     <span>Hospital ER Command</span>
                   </div>
                 )}
               </div>
             ) : currentRole !== 'welcome' ? (
-              <button
-                type="button"
-                onClick={() => setCurrentRole('welcome')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full border text-xs font-mono font-bold transition-all cursor-pointer ${
-                  isDarkTheme
-                    ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs'
-                }`}
-                title="Return to Welcome Portal"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Return Home</span>
-              </button>
+              <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setCurrentRole('welcome')}
+                  className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white transition cursor-pointer font-bold text-xs"
+                  title="Back to Welcome Portal"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Home</span>
+                </button>
+              </div>
             ) : null}
           </nav>
 
-          {/* ========================================================
-              RIGHT: TOP RIGHT CAPSULE PILL & CONTROLS
-              ======================================================== */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-            {/* Top Right Capsule Pill for Driver Login & Hospital Login */}
-            {!currentUser && (
-              <div className={`inline-flex items-center p-0.5 sm:p-1 rounded-full border shadow-sm backdrop-blur-xl transition-all ${
-                isDarkTheme
-                  ? 'bg-zinc-900/90 border-zinc-800 ring-1 ring-white/5'
-                  : 'bg-white/95 border-slate-200/90 shadow-2xs ring-1 ring-slate-900/5'
-              }`}>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      const u = await loginWithGoogle('driver');
-                      if (u) setCurrentRole('driver');
-                    } catch (err) {
-                      console.warn('Driver login error:', err);
-                    }
-                  }}
-                  className={`flex items-center space-x-1 sm:space-x-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold transition-all cursor-pointer ${
-                    isDarkTheme
-                      ? 'text-amber-400 hover:bg-amber-950/70 hover:text-amber-300'
-                      : 'text-amber-700 hover:bg-amber-50 hover:text-amber-800'
-                  }`}
-                  title="108 Ambulance Driver Cockpit Login"
-                >
-                  <Ambulance className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="hidden xs:inline">108 </span><span>Driver</span>
-                </button>
-                <span className={`w-px h-3.5 sm:h-4 mx-0.5 sm:mx-1 ${isDarkTheme ? 'bg-zinc-800' : 'bg-slate-200'}`}></span>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      const u = await loginWithGoogle('hospital');
-                      if (u) setCurrentRole('hospital');
-                    } catch (err) {
-                      console.warn('Hospital login error:', err);
-                    }
-                  }}
-                  className={`flex items-center space-x-1 sm:space-x-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold transition-all cursor-pointer ${
-                    isDarkTheme
-                      ? 'text-emerald-400 hover:bg-emerald-950/70 hover:text-emerald-300'
-                      : 'text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800'
-                  }`}
-                  title="Hospital ER Command Center Login"
-                >
-                  <Building2 className="w-3.5 h-3.5 text-emerald-500" />
-                  <span className="hidden xs:inline">Hospital </span><span>ER</span>
-                </button>
-              </div>
-            )}
-
-            {/* Authenticated User Status Pill */}
-            {currentUser && (
-              <div className={`inline-flex items-center p-0.5 sm:p-1 rounded-full border shadow-2xs ${
-                isDarkTheme ? 'bg-zinc-900/90 border-zinc-800' : 'bg-white border-slate-200'
-              }`}>
-                <button
-                  type="button"
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className={`flex items-center space-x-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[11px] font-mono font-bold transition cursor-pointer ${
-                    isDarkTheme ? 'text-zinc-200 hover:text-white' : 'text-slate-800 hover:text-slate-900'
-                  }`}
-                  title="Account Details & Role Information"
-                >
-                  {currentUser.photoURL ? (
-                    <img src={currentUser.photoURL} alt="" className="w-4 h-4 rounded-full object-cover" />
-                  ) : (
-                    <User className="w-4 h-4 text-blue-500" />
-                  )}
-                  <span className="font-bold">{currentUser.uniqueRoleId}</span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                </button>
-                <span className={`w-px h-3.5 mx-1 ${isDarkTheme ? 'bg-zinc-800' : 'bg-slate-200'}`}></span>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await logoutUser();
-                    setCurrentRole('welcome');
-                  }}
-                  className="p-1 rounded-full text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition cursor-pointer"
-                  title="Sign Out"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-
-            {/* Emergency 108 Dispatch Pill */}
-            <a
-              href="tel:108"
-              className="inline-flex items-center space-x-1 sm:space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-[11px] sm:text-xs font-mono text-white font-bold transition shadow-md shadow-red-600/30 cursor-pointer active:scale-95 shrink-0"
-              title="Call 108 Emergency Ambulance Dispatch"
-            >
-              <PhoneCall className="w-3.5 h-3.5 text-white animate-pulse" />
-              <span>108</span>
-            </a>
-
-            {/* Dark / Light Theme Toggle Pill */}
+          {/* Right Action Buttons */}
+          <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+            {/* Theme Toggle Button - ALWAYS visible first on all devices */}
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2 rounded-full border transition-all cursor-pointer shadow-2xs flex items-center justify-center shrink-0 ${
-                isDarkTheme
-                  ? 'bg-zinc-900/90 hover:bg-zinc-800 text-amber-400 border-zinc-800 hover:border-zinc-700'
-                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-              }`}
+              className={`p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer shadow-2xs flex items-center justify-center shrink-0 ${isDarkTheme
+                ? 'bg-zinc-900/90 hover:bg-zinc-800 text-amber-400 border-zinc-800 hover:border-zinc-700'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
               title={`Switch to ${isDarkTheme ? 'Light' : 'Dark'} Mode`}
               aria-label="Toggle Theme"
             >
               {isDarkTheme ? (
-                <Sun className="w-4 h-4 text-amber-400" />
+                <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
               ) : (
-                <Moon className="w-4 h-4 text-slate-700" />
+                <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-700" />
               )}
+            </button>
+
+            {/* Google Authentication & Role Unique ID Pill */}
+            <button
+              type="button"
+              onClick={() => setIsAuthModalOpen(true)}
+              className={`flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1 rounded-xl border text-[11px] font-mono font-bold transition cursor-pointer shadow-2xs shrink-0 ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 border-zinc-800' : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'}`}
+              title="Firebase Google Authentication & Unique Role ID"
+            >
+              {currentUser?.photoURL ? (
+                <img src={currentUser.photoURL} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
+              ) : (
+                <User className="w-3.5 h-3.5 text-blue-500" />
+              )}
+              <span className="hidden xs:inline">
+                {currentUser?.uniqueRoleId || 'Login'}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            </button>
+
+            {/* Active Patient ID Pill */}
+            {activeBooking?.patientUniqueId && (
+              <div
+                className="hidden md:inline-flex items-center space-x-1.5 bg-emerald-950/80 border border-emerald-800 text-emerald-300 px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold"
+                title="Active patient mission"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>ID: {activeBooking.patientUniqueId}</span>
+              </div>
+            )}
+
+            {/* Call 108 Emergency */}
+            <a
+              href="tel:108"
+              className="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1 rounded-xl bg-red-600 hover:bg-red-500 text-[11px] font-mono text-white font-bold transition cursor-pointer shadow-md shadow-red-600/30 shrink-0"
+              title="Call 108 Ambulance Dispatch"
+            >
+              <PhoneCall className="w-3 h-3 text-white animate-pulse" />
+              <span className="hidden xs:inline">Call </span><span>108</span>
+            </a>
+
+            {/* Call 112 (Hidden on very narrow mobile screens to avoid overflow) */}
+            <a
+              href="tel:112"
+              className={`hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-xl border text-[11px] font-mono font-bold transition cursor-pointer shadow-2xs shrink-0 ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-red-400 border-red-900/80' : 'bg-rose-50 hover:bg-rose-100 text-red-700 border-red-200'}`}
+              title="National Emergency Helpline"
+            >
+              <PhoneCall className="w-3 h-3 text-red-500" />
+              <span>112</span>
+            </a>
+
+            {/* Reset Button (Hidden on very narrow mobile screens) */}
+            <button
+              onClick={resetEmergencyState}
+              className={`hidden sm:flex p-1.5 rounded-xl border transition cursor-pointer shadow-2xs shrink-0 ${isDarkTheme ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800' : 'bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 border-slate-200'}`}
+              title="Reset Emergency Session"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Indicator Bar (When not on welcome screen) */}
+        {/* Mobile Navigation Bar - Single active portal indicator */}
         {currentRole !== 'welcome' && (
-          <div className="md:hidden pb-2.5 pt-0.5">
-            <div className={`flex items-center justify-between p-1.5 rounded-xl border w-full gap-2 text-xs ${
-              isDarkTheme ? 'bg-zinc-900/80 border-zinc-800' : 'bg-slate-100 border-slate-200'
-            }`}>
-              <button
-                type="button"
-                onClick={() => setCurrentRole('welcome')}
-                className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg font-bold shadow-xs transition cursor-pointer ${
-                  isDarkTheme ? 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700' : 'bg-white text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Return to Home</span>
-              </button>
-
-              {currentUser && (
-                <span className={`font-mono text-[11px] font-bold px-2 ${
-                  isDarkTheme ? 'text-emerald-400' : 'text-emerald-700'
-                }`}>
-                  {currentUser.role.toUpperCase()} // {currentUser.uniqueRoleId}
+          <div className="sm:hidden pb-2.5 pt-0.5">
+            <div className={`flex items-center justify-between p-1.5 rounded-xl border w-full gap-2 text-xs ${isDarkTheme ? 'bg-zinc-900/80 border-zinc-800' : 'bg-slate-100 border-slate-200'}`}>
+              {!currentUser ? (
+                <button
+                  type="button"
+                  onClick={() => setCurrentRole('welcome')}
+                  className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg font-bold shadow-xs transition cursor-pointer ${isDarkTheme ? 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Home</span>
+                </button>
+              ) : (
+                <span className={`font-mono text-[11px] font-bold px-2 ${isDarkTheme ? 'text-zinc-300' : 'text-slate-600'}`}>
+                  {currentUser.uniqueRoleId}
                 </span>
               )}
 
-              {activeBooking?.patientUniqueId && (
-                <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  ID: {activeBooking.patientUniqueId}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5">
+                {/* Mobile Reset & Portal Pill */}
+                <button
+                  onClick={resetEmergencyState}
+                  className={`p-1.5 rounded-lg border transition cursor-pointer ${isDarkTheme ? 'bg-zinc-800 text-zinc-400 border-zinc-700' : 'bg-white text-slate-500 border-slate-200'}`}
+                  title="Reset Emergency Session"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                </button>
+
+                <div
+                  className={`px-3 py-1.5 rounded-lg text-white font-bold flex items-center space-x-1.5 shadow-xs ${currentRole === 'guardian'
+                    ? 'bg-red-600'
+                    : currentRole === 'driver'
+                      ? 'bg-amber-600'
+                      : 'bg-emerald-600'
+                    }`}
+                >
+                  {currentRole === 'guardian' && <HeartPulse className="w-3.5 h-3.5 text-white" />}
+                  {currentRole === 'driver' && <Ambulance className="w-3.5 h-3.5 text-white" />}
+                  {currentRole === 'hospital' && <Building2 className="w-3.5 h-3.5 text-white" />}
+                  <span>
+                    {currentRole === 'guardian'
+                      ? 'Guardian'
+                      : currentRole === 'driver'
+                        ? '108 Driver'
+                        : 'Hospital'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}

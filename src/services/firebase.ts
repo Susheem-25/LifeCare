@@ -138,10 +138,9 @@ export async function signInWithGoogle(role: AppRole): Promise<UserProfile> {
     throw new Error('Google Sign-In did not return a valid user credential.');
   }
 
-  const userEmail = fbUser.email || 'user@emergency.gov.in';
   const profile: UserProfile = {
     uid: fbUser.uid,
-    email: userEmail,
+    email: fbUser.email || 'user@emergency.gov.in',
     displayName: fbUser.displayName || `Emergency Responder (${assignedUniqueId})`,
     photoURL: fbUser.photoURL || undefined,
     role,
@@ -153,10 +152,7 @@ export async function signInWithGoogle(role: AppRole): Promise<UserProfile> {
 
   if (db) {
     try {
-      await setDoc(doc(db, 'users', profile.uid), {
-        ...profile,
-        associatedEmail: userEmail,
-      }, { merge: true });
+      await setDoc(doc(db, 'users', profile.uid), profile, { merge: true });
     } catch (dbErr) {
       console.warn('[Firestore] Profile write deferred or offline:', dbErr);
     }
@@ -337,18 +333,11 @@ export async function syncVitalsToFirestore(
  */
 export async function syncDriverProfileToFirestore(
   uid: string,
-  driver: DriverAccount,
-  associatedEmail?: string
+  driver: DriverAccount
 ): Promise<void> {
-  const driverEmail = associatedEmail || driver.email || driver.associatedEmail || auth.currentUser?.email || '';
-  const enrichedDriver: DriverAccount = {
-    ...driver,
-    email: driverEmail,
-    associatedEmail: driverEmail,
-  };
   try {
-    localStorage.setItem(`lifecare_driver_profile_${uid}`, JSON.stringify(enrichedDriver));
-    localStorage.setItem('lifecare_logged_driver_v2', JSON.stringify(enrichedDriver));
+    localStorage.setItem(`lifecare_driver_profile_${uid}`, JSON.stringify(driver));
+    localStorage.setItem('lifecare_logged_driver_v2', JSON.stringify(driver));
   } catch {
     // ignore
   }
@@ -356,10 +345,8 @@ export async function syncDriverProfileToFirestore(
   if (db && isRealFirebaseConfigured()) {
     try {
       await setDoc(doc(db, 'drivers', uid), {
-        ...enrichedDriver,
+        ...driver,
         uid,
-        email: driverEmail,
-        associatedEmail: driverEmail,
         updatedAt: new Date().toISOString(),
       }, { merge: true });
     } catch (err) {
@@ -483,17 +470,10 @@ export async function toggleBookingSuspendInFirestore(bookingCode: string, isSus
  */
 export async function syncHospitalProfileToFirestore(
   uid: string,
-  hospital: Hospital,
-  associatedEmail?: string
+  hospital: Hospital
 ): Promise<void> {
-  const hospitalEmail = associatedEmail || hospital.email || hospital.associatedEmail || auth.currentUser?.email || '';
-  const enrichedHospital: Hospital = {
-    ...hospital,
-    email: hospitalEmail,
-    associatedEmail: hospitalEmail,
-  };
   try {
-    localStorage.setItem(`lifecare_hospital_profile_${uid}`, JSON.stringify(enrichedHospital));
+    localStorage.setItem(`lifecare_hospital_profile_${uid}`, JSON.stringify(hospital));
     localStorage.setItem('lifecare_logged_hosp_id_v2', hospital.id);
   } catch {
     // ignore
@@ -502,10 +482,8 @@ export async function syncHospitalProfileToFirestore(
   if (db && isRealFirebaseConfigured()) {
     try {
       await setDoc(doc(db, 'hospitals', hospital.id), {
-        ...enrichedHospital,
+        ...hospital,
         ownerUid: uid,
-        email: hospitalEmail,
-        associatedEmail: hospitalEmail,
         updatedAt: new Date().toISOString(),
       }, { merge: true });
     } catch (err) {

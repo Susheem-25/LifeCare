@@ -438,6 +438,26 @@ export const ReceptionQrScannerModal: React.FC<ReceptionQrScannerModalProps> = (
                 />
               </div>
 
+              {/* Optional ABHA ID */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-mono uppercase text-slate-500 font-bold">
+                    ABHA ID (DigiLocker):
+                  </label>
+                  {hasAutoFilled && (
+                    <span className="text-[9px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-0.2 rounded font-bold">
+                      ✓ From Voice QR
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={scannedData.optionalAbhaId || '91-4820-9182-3921'}
+                  onChange={(e) => handleFieldChange('optionalAbhaId', e.target.value)}
+                  className="w-full bg-emerald-50/30 border border-emerald-300 rounded-xl px-2.5 py-1.5 font-mono text-slate-900 focus:outline-none focus:border-emerald-500 text-xs"
+                />
+              </div>
+
               {/* Chief Complaint (Spans 2 cols) */}
               <div className="sm:col-span-2 space-y-1">
                 <div className="flex items-center justify-between">

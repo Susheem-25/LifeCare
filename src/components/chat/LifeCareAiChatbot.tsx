@@ -169,7 +169,7 @@ I am **Niro**, your LifeCare Gen AI Clinical Copilot for our Zero-Wait Emergency
 
 **How I can assist you:**
 - **<10ms Atomic Resource Lock:** Deterministic reservation of ER bay, specialist doctor, and equipment simultaneously.
-- **0-Second ER Reception Bypass:** Contactless digital QR, instant medical records, and cashless insurance verification.
+- **0-Second ER Reception Bypass:** Contactless ABDM v3, ABHA health records, and PM-JAY verification.
 - **108 Paramedic GPS Corridor:** Turn-by-turn emergency routing and continuous live vitals streaming.
 - **Specialist Doctor Rostering:** Verified medical qualifications (MBBS, MD, DM, FRCS) and bay allocation.
 - **Super Admin Governance:** Zero-trust audit logging and centralized directory control.
@@ -235,8 +235,8 @@ Tap any question below or ask me anything in **English** or **हिन्दी
         id: getUniqueId('ai-err'),
         sender: 'ai',
         text: activeLang === 'hi'
-          ? 'अस्थायी कनेक्शन समस्या आई है। LifeCare <10ms एटॉमिक लॉकिंग, ज़ीरो-वेट रिसेप्शन और Sarvam AI वॉइस ट्रायज पर काम करता है। कृपया पुनः पूछें।'
-          : 'I encountered a temporary connection issue. LifeCare operates on <10ms atomic locking, zero-wait admission, and Sarvam AI voice triage. Please ask again!',
+          ? 'अस्थायी कनेक्शन समस्या आई है। LifeCare <10ms एटॉमिक लॉकिंग, ABDM v3 ज़ीरो-वेट रिसेप्शन और Sarvam AI वॉइस ट्रायज पर काम करता है। कृपया पुनः पूछें।'
+          : 'I encountered a temporary connection issue. LifeCare operates on <10ms atomic locking, ABDM v3 zero-wait admission, and Sarvam AI voice triage. Please ask again!',
         timestamp: getNowTimeStr()
       };
       setMessages((prev) => [...prev, fallbackMsg]);
@@ -645,7 +645,7 @@ Tap any question below or ask me anything in **English** or **हिन्दी
                 placeholder={
                   preferredLang === 'hi'
                     ? 'Niro से LifeCare के बारे में कुछ भी पूछें...'
-                    : 'Ask Niro about atomic lock, triage, doctors, 108...'
+                    : 'Ask Niro about atomic lock, ABDM, doctors, 108...'
                 }
                 className={`flex-1 px-3.5 py-2.5 rounded-xl text-xs font-medium border outline-none transition ${
                   isDark

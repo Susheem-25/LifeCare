@@ -102,7 +102,6 @@ export const HospitalPortal: React.FC = () => {
   // Inline add doctor drawer state for onboarding - starts completely clean
   const [isAddingDocInline, setIsAddingDocInline] = useState(false);
   const [newDocName, setNewDocName] = useState('');
-  const [newDocGender, setNewDocGender] = useState<'Male' | 'Female' | 'Other'>('Male');
   const [newDocDegrees, setNewDocDegrees] = useState('');
   const [newDocSpec, setNewDocSpec] = useState('');
   const [newDocExp, setNewDocExp] = useState<number | ''>('');
@@ -118,26 +117,18 @@ export const HospitalPortal: React.FC = () => {
   // Handle adding doctor during onboarding
   const handleAddDoctorInline = () => {
     if (!newDocName.trim()) return;
-    const avatar = newDocGender === 'Female'
-      ? 'https://images.unsplash.com/photo-1594824813511-5369c09c3131?w=150&auto=format&fit=crop&q=80'
-      : newDocGender === 'Other'
-      ? 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=150&auto=format&fit=crop&q=80'
-      : 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80';
-
     const newDoc: Doctor = {
       id: `doc-${Date.now()}`,
       name: sanitizeText(newDocName),
-      gender: newDocGender,
       specialization: sanitizeText(newDocSpec) || 'Emergency Specialist',
       qualifications: sanitizeText(newDocDegrees) || 'MBBS, MD',
       experienceYears: Number(newDocExp) || 0,
       status: 'AVAILABLE_AND_FREE',
       currentBay: sanitizeText(newDocBay) || 'Emergency Bay',
-      avatar,
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
     };
     setOnboardDoctors((prev) => [...prev, newDoc]);
     setNewDocName('');
-    setNewDocGender('Male');
     setNewDocDegrees('');
     setNewDocSpec('');
     setNewDocExp('');
@@ -235,7 +226,6 @@ export const HospitalPortal: React.FC = () => {
   // Add Doctor Modal State (in Dashboard)
   const [showAddDoctorModal, setShowAddDoctorModal] = useState<boolean>(false);
   const [docName, setDocName] = useState<string>('');
-  const [docGender, setDocGender] = useState<'Male' | 'Female' | 'Other'>('Male');
   const [docSpec, setDocSpec] = useState<string>('Interventional Cardiology & Electrophysiology');
   const [docQual, setDocQual] = useState<string>('');
   const [docExp, setDocExp] = useState<number | ''>('');
@@ -244,7 +234,6 @@ export const HospitalPortal: React.FC = () => {
   // Edit Doctor Modal State (in Dashboard)
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
   const [editDocName, setEditDocName] = useState<string>('');
-  const [editDocGender, setEditDocGender] = useState<'Male' | 'Female' | 'Other'>('Male');
   const [editDocSpec, setEditDocSpec] = useState<string>('');
   const [editDocQual, setEditDocQual] = useState<string>('');
   const [editDocExp, setEditDocExp] = useState<number | ''>('');
@@ -253,7 +242,6 @@ export const HospitalPortal: React.FC = () => {
   const handleOpenEditDoctor = (doc: Doctor) => {
     setEditingDoctor(doc);
     setEditDocName(doc.name);
-    setEditDocGender(doc.gender || 'Male');
     setEditDocSpec(doc.specialization);
     setEditDocQual(doc.qualifications || '');
     setEditDocExp(doc.experienceYears);
@@ -266,7 +254,6 @@ export const HospitalPortal: React.FC = () => {
 
     updateDoctorDetails(loggedHospital.id, editingDoctor.id, {
       name: sanitizeText(editDocName),
-      gender: editDocGender,
       specialization: sanitizeText(editDocSpec) || editingDoctor.specialization,
       qualifications: sanitizeText(editDocQual) || 'MBBS, MD',
       experienceYears: Number(editDocExp) || 0,
@@ -274,7 +261,7 @@ export const HospitalPortal: React.FC = () => {
     });
 
     setEditingDoctor(null);
-    showToast(`Updated Dr. ${editDocName}'s profile and gender!`);
+    showToast(`Updated Dr. ${editDocName}'s degrees and details!`);
   };
 
   // Add Machine Modal State (in Dashboard)
@@ -308,15 +295,15 @@ export const HospitalPortal: React.FC = () => {
     (b) => b.status === 'DISCHARGED'
   );
 
-  // 15-Second Emergency Siren for Incoming Patient Reservation (100% Real Automatic Trauma Alert)
+  // 15-Second Emergency Siren for Incoming Patient Reservation
   const [sirenActive, setSirenActive] = useState<boolean>(false);
   const [sirenCountdown, setSirenCountdown] = useState<number>(15);
   const [sirenPatientNotice, setSirenPatientNotice] = useState<string | null>(null);
-  const alarmedCodesRef = useRef<Set<string>>(new Set());
+  const previousIncomingCodesRef = useRef<Set<string>>(new Set());
+  const isFirstMountRef = useRef<boolean>(true);
 
-  // Trigger 15-second trauma siren automatically
+  // Trigger 15-second trauma siren
   const triggerSirenAlert = (patientLabel: string) => {
-    soundEffects.unlockAudio();
     setSirenPatientNotice(patientLabel);
     setSirenActive(true);
     setSirenCountdown(15);
@@ -346,71 +333,49 @@ export const HospitalPortal: React.FC = () => {
     return () => clearInterval(interval);
   }, [sirenActive]);
 
-  // Listen to incoming patient list changes to trigger 15-second siren automatically on new reservations
+  // Listen to incoming patient list changes to trigger 15-second siren on new reservations
   useEffect(() => {
     if (!loggedHospital) return;
 
-    const unalarmedRecent = incomingPatients.filter((p) => {
-      const isRecent = Date.now() - new Date(p.createdAt).getTime() < 90000;
-      return isRecent && !alarmedCodesRef.current.has(p.bookingCode);
-    });
+    const currentCodes = new Set(incomingPatients.map((p) => p.bookingCode));
 
-    if (unalarmedRecent.length > 0) {
-      const latest = unalarmedRecent[0];
-      alarmedCodesRef.current.add(latest.bookingCode);
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      previousIncomingCodesRef.current = currentCodes;
+      return;
+    }
+
+    const newArrivals = incomingPatients.filter(
+      (p) => !previousIncomingCodesRef.current.has(p.bookingCode)
+    );
+
+    if (newArrivals.length > 0) {
+      const latest = newArrivals[0];
       triggerSirenAlert(`${latest.patientName || 'Incoming Patient'} (${latest.bookingCode})`);
     }
 
-    incomingPatients.forEach((p) => {
-      if (Date.now() - new Date(p.createdAt).getTime() >= 90000) {
-        alarmedCodesRef.current.add(p.bookingCode);
-      }
-    });
+    previousIncomingCodesRef.current = currentCodes;
   }, [incomingPatients, loggedHospital]);
 
-  // Zero-latency cross-tab & storage listeners for real-time trauma siren
+  // BroadcastChannel listener for zero-latency cross-tab notification
   useEffect(() => {
     let channel: BroadcastChannel | null = null;
     try {
       channel = new BroadcastChannel('lifecare_sync_channel');
       channel.onmessage = (event) => {
+        if (!loggedHospital) return;
         if (
           event.data?.type === 'NEW_EMERGENCY_RESERVATION' &&
-          (!loggedHospital || event.data.hospitalId === loggedHospital.id)
+          event.data.hospitalId === loggedHospital.id
         ) {
-          const code = event.data.bookingCode || 'RESERVED';
-          if (!alarmedCodesRef.current.has(code)) {
-            alarmedCodesRef.current.add(code);
-            triggerSirenAlert(
-              `${event.data.patientName || 'Incoming Patient'} (${code})`
-            );
-          }
+          triggerSirenAlert(
+            `${event.data.patientName || 'Incoming Patient'} (${event.data.bookingCode || 'RESERVED'})`
+          );
         }
       };
     } catch {
       // fallback
     }
-
-    const handleStorageEvent = (event: StorageEvent) => {
-      if (event.key === 'lifecare_emergency_siren_trigger' && event.newValue) {
-        try {
-          const data = JSON.parse(event.newValue);
-          if (!loggedHospital || data.hospitalId === loggedHospital.id) {
-            const code = data.bookingCode || 'RESERVED';
-            if (!alarmedCodesRef.current.has(code)) {
-              alarmedCodesRef.current.add(code);
-              triggerSirenAlert(
-                `${data.patientName || 'Incoming Patient'} (${code})`
-              );
-            }
-          }
-        } catch {
-          // ignore
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageEvent);
 
     return () => {
       try {
@@ -418,7 +383,6 @@ export const HospitalPortal: React.FC = () => {
       } catch {
         // ignore
       }
-      window.removeEventListener('storage', handleStorageEvent);
       soundEffects.stopEmergencySiren();
     };
   }, [loggedHospital]);
@@ -428,24 +392,16 @@ export const HospitalPortal: React.FC = () => {
     e.preventDefault();
     if (!loggedHospital || !docName.trim()) return;
 
-    const avatar = docGender === 'Female'
-      ? 'https://images.unsplash.com/photo-1594824813511-5369c09c3131?w=150&auto=format&fit=crop&q=80'
-      : docGender === 'Other'
-      ? 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=150&auto=format&fit=crop&q=80'
-      : 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80';
-
     addDoctor(loggedHospital.id, {
       name: docName.trim(),
-      gender: docGender,
       specialization: docSpec,
       qualifications: docQual,
       experienceYears: Number(docExp),
       status: docInitialStatus,
-      avatar,
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
     });
 
     setDocName('');
-    setDocGender('Male');
     setShowAddDoctorModal(false);
     showToast(`Added ${docName} to doctor roster!`);
   };
@@ -781,7 +737,7 @@ export const HospitalPortal: React.FC = () => {
                       placeholder="Assigned Bay / Room (e.g. Trauma Bay 1)"
                       className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium"
                     />
-                    <div className="flex flex-col sm:flex-row gap-2 sm:col-span-2">
+                    <div className="flex gap-2 sm:col-span-2">
                       <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs flex-1 max-w-[210px]">
                         <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap">Years of Exp:</span>
                         <input
@@ -794,29 +750,12 @@ export const HospitalPortal: React.FC = () => {
                           className="w-16 bg-transparent text-slate-900 text-xs font-bold focus:outline-none"
                         />
                       </div>
-                      <div className="flex items-center gap-1 bg-white border border-slate-300 px-2 py-1.5 rounded-xl text-xs">
-                        <span className="text-[11px] font-bold text-slate-500 mr-1">Gender:</span>
-                        {(['Male', 'Female', 'Other'] as const).map((g) => (
-                          <button
-                            key={g}
-                            type="button"
-                            onClick={() => setNewDocGender(g)}
-                            className={`px-2 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
-                              newDocGender === g
-                                ? 'bg-emerald-600 text-white shadow-2xs'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
-                          >
-                            {g === 'Male' ? '♂ M' : g === 'Female' ? '♀ F' : '⚧ O'}
-                          </button>
-                        ))}
-                      </div>
                       <button
                         type="button"
                         onClick={handleAddDoctorInline}
                         className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs py-2 transition cursor-pointer"
                       >
-                        Save Doctor
+                        Add to List
                       </button>
                     </div>
                   </div>
@@ -1050,6 +989,16 @@ export const HospitalPortal: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-2 w-full md:w-auto justify-end">
+          <button
+            type="button"
+            onClick={() => triggerSirenAlert('Drill Simulation (LC-DRILL)')}
+            className="inline-flex items-center space-x-1.5 text-xs text-red-700 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 px-3.5 py-2 rounded-xl transition cursor-pointer font-bold shadow-2xs"
+            title="Simulate 15-Second Emergency Siren Sound"
+          >
+            <Volume2 className="w-3.5 h-3.5" />
+            <span>ER Siren Test (15s)</span>
+          </button>
+
           <button
             type="button"
             onClick={logoutHospital}
@@ -1645,14 +1594,7 @@ export const HospitalPortal: React.FC = () => {
                         className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-2xs"
                       />
                       <div>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h3 className="font-extrabold text-slate-900 text-sm">{doctor.name}</h3>
-                          {doctor.gender && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
-                              {doctor.gender === 'Female' ? '♀ Female' : doctor.gender === 'Other' ? '⚧ Other' : '♂ Male'}
-                            </span>
-                          )}
-                        </div>
+                        <h3 className="font-extrabold text-slate-900 text-sm">{doctor.name}</h3>
                         <p className="text-xs text-slate-500 font-medium">{doctor.specialization}</p>
                         <p className="text-[10px] text-slate-400 font-mono">{doctor.qualifications} • {doctor.experienceYears}y exp</p>
                       </div>
@@ -1875,27 +1817,6 @@ export const HospitalPortal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Gender</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['Male', 'Female', 'Other'] as const).map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setDocGender(g)}
-                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center space-x-1.5 ${
-                        docGender === g
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
-                          : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span>{g === 'Male' ? '♂' : g === 'Female' ? '♀' : '⚧'}</span>
-                      <span>{g}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
                 <label className="block text-slate-600 font-bold mb-1">Specialization</label>
                 <select
                   value={docSpec}
@@ -2001,27 +1922,6 @@ export const HospitalPortal: React.FC = () => {
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-semibold"
                   required
                 />
-              </div>
-
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Gender</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['Male', 'Female', 'Other'] as const).map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setEditDocGender(g)}
-                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center justify-center space-x-1.5 ${
-                        editDocGender === g
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
-                          : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span>{g === 'Male' ? '♂' : g === 'Female' ? '♀' : '⚧'}</span>
-                      <span>{g}</span>
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div>

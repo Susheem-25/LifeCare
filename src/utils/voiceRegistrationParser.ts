@@ -192,6 +192,13 @@ export function parseSpokenRegistration(
     guardianPhone = phoneMatch[2] ? `+91-${phoneMatch[2]}` : `+91-${phoneMatch[1]}`;
   }
 
+  // 10. Optional ABHA ID extraction
+  let optionalAbhaId = existing?.optionalAbhaId || '';
+  const abhaMatch = clean.match(/\b(\d{2}-\d{4}-\d{4}-\d{4})\b/);
+  if (abhaMatch) {
+    optionalAbhaId = abhaMatch[1];
+  }
+
   return {
     patientId,
     fullName: fullName || '',
@@ -203,6 +210,7 @@ export function parseSpokenRegistration(
     currentMedications,
     medicalHistory,
     guardianPhone,
+    optionalAbhaId: optionalAbhaId || undefined,
     createdAt: new Date().toISOString(),
   };
 }
@@ -264,6 +272,7 @@ export function packRegistrationToQR(data: PatientVoiceRegistration): string {
     med: data.currentMedications,
     mh: data.medicalHistory,
     gp: data.guardianPhone,
+    abha: data.optionalAbhaId,
     ts: Date.now(),
   };
 
@@ -314,6 +323,7 @@ export async function unpackEncryptedRegistrationFromQR(raw: string): Promise<Pa
         currentMedications: sanitizeText(decryptedData.currentMedications || 'None'),
         medicalHistory: sanitizeText(decryptedData.medicalHistory || 'None reported'),
         guardianPhone: sanitizeText(decryptedData.guardianPhone || '+91-98104-55678'),
+        optionalAbhaId: decryptedData.optionalAbhaId ? sanitizeIdentifier(decryptedData.optionalAbhaId) : undefined,
         createdAt: decryptedData.createdAt || new Date().toISOString(),
         isDecrypted: true,
         keyFingerprint: parsed.fprint || 'SHA256:7F3A9182...B8C1',
@@ -350,6 +360,7 @@ export function unpackRegistrationFromQR(raw: string): PatientVoiceRegistration 
         currentMedications: sanitizeText(parsed.med || 'None'),
         medicalHistory: sanitizeText(parsed.mh || 'None reported'),
         guardianPhone: sanitizeText(parsed.gp || '+91-98104-55678'),
+        optionalAbhaId: parsed.abha ? sanitizeIdentifier(parsed.abha) : undefined,
         createdAt: new Date().toISOString(),
       };
     }
@@ -367,6 +378,7 @@ export function unpackRegistrationFromQR(raw: string): PatientVoiceRegistration 
         currentMedications: sanitizeText(parsed.currentMedications || 'None'),
         medicalHistory: sanitizeText(parsed.medicalHistory || 'None reported'),
         guardianPhone: sanitizeText(parsed.guardianPhone || '+91-98104-55678'),
+        optionalAbhaId: parsed.optionalAbhaId ? sanitizeIdentifier(parsed.optionalAbhaId) : undefined,
         createdAt: new Date().toISOString(),
       };
     }
