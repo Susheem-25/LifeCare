@@ -425,7 +425,7 @@ export const AdminConsole: React.FC = () => {
               </span>
             </div>
             <p className={`text-[11px] font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-              Zero-Wait Emergency Operating System • Live National Telemetry
+              Zero-Wait Emergency Network • Live National Telemetry
             </p>
           </div>
         </div>

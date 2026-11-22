@@ -57,7 +57,7 @@ export const Navbar: React.FC = () => {
               </div>
               <div className={`flex items-center gap-1.5 mt-0.5 text-[10px] sm:text-[11px] font-mono ${isDarkTheme ? 'text-zinc-400' : 'text-slate-500'}`}>
                 <span className="font-medium truncate max-w-[200px] sm:max-w-none">
-                  Autonomous Emergency Healthcare Operating System
+                  Autonomous Emergency Healthcare Network
                 </span>
               </div>
             </div>

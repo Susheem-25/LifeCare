@@ -49,7 +49,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
           </div>
 
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            LifeCare: Zero-Wait Emergency Healthcare Operating System
+            LifeCare: Zero-Wait Emergency Healthcare Network
           </h2>
 
           <p className="text-xs sm:text-sm text-slate-500">
@@ -489,7 +489,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
                     <tr>
                       <th className="p-3">Metric</th>
                       <th className="p-3 text-red-600">Traditional Ecosystem</th>
-                      <th className="p-3 text-emerald-700">LifeCare OS</th>
+                      <th className="p-3 text-emerald-700">LifeCare</th>
                       <th className="p-3 text-slate-500">Clinical Impact</th>
                     </tr>
                   </thead>
@@ -590,7 +590,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
         {/* Footer Actions */}
         <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="text-slate-500 font-mono text-[11px]">
-            LifeCare: Zero-Wait Emergency Healthcare Operating System
+            LifeCare: Zero-Wait Emergency Healthcare Network
           </div>
           <button
             onClick={onClose}

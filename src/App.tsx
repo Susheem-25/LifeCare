@@ -8,6 +8,7 @@ import { HospitalPortal } from './components/hospital/HospitalPortal';
 import { AdminConsole } from './components/admin/AdminConsole';
 import { GoogleAuthModal } from './components/auth/GoogleAuthModal';
 import { VoiceToQrModal } from './components/common/VoiceToQrModal';
+import { LifeCareAiChatbot } from './components/chat/LifeCareAiChatbot';
 import {
   HeartPulse,
   Sparkles,
@@ -289,12 +290,15 @@ const MainAppContent: React.FC = () => {
                   : 'bg-emerald-50 border-emerald-200 text-emerald-700'
               }`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Emergency OS Online
+                Emergency Grid Online
               </span>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* LifeCare A-to-Z Gen AI Copilot (Powered by Sarvam AI) */}
+      <LifeCareAiChatbot />
 
       {/* Firebase Google Authentication Modal */}
       <GoogleAuthModal

@@ -85,7 +85,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
             : 'bg-red-50 border-red-200 text-red-700'
         }`}>
           <Activity className="w-3.5 h-3.5 text-red-500 animate-pulse" />
-          <span>AUTONOMOUS EMERGENCY HEALTHCARE OPERATING SYSTEM</span>
+          <span>AUTONOMOUS EMERGENCY HEALTHCARE NETWORK</span>
         </div>
 
         <h1 className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
