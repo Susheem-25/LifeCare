@@ -297,7 +297,7 @@ export const AdminConsole: React.FC = () => {
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-black text-slate-100 flex items-center justify-center p-4 antialiased selection:bg-red-500 selection:text-white">
-        <div className="w-full max-w-md bg-[#0a0a0c] border border-zinc-800 rounded-3xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
+        <div className="w-full max-w-md macos-glass macos-glass-dark rounded-3xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-40 h-40 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="text-center space-y-3">

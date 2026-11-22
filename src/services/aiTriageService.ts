@@ -67,7 +67,7 @@ export function analyzeEmergencyBrief(text: string): AITriageAnalysis {
       ],
       icdCodeEstimate: 'ICD-10 I21.9 (Acute Myocardial Infarction)',
       aiConfidenceScore: 98,
-      bhashiniLanguage: 'Indic Bhashini STT (7 Indian Languages)',
+      bhashiniLanguage: 'Sarvam Indic STT (Hindi & English)',
       groqModel: 'Groq Llama 3.3 70B Versatile',
       atomicLockTimeMs: 7.8,
       gateRejectionRisk: '0% (Graph Locked)',

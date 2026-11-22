@@ -212,13 +212,6 @@ const MainAppContent: React.FC = () => {
                 <Sparkles className="w-3.5 h-3.5 text-red-500" />
                 Sarvam AI Voice Powered
               </span>
-              <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl font-mono border shadow-2xs ${
-                isDarkWelcome
-                  ? 'bg-zinc-900 border-zinc-800 text-zinc-300'
-                  : 'bg-white border-slate-200 text-slate-600'
-              }`}>
-                National 108 Emergency Grid
-              </span>
               <a
                 href="tel:108"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white shadow-md shadow-red-600/30 font-mono font-bold transition"

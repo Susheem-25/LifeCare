@@ -223,7 +223,7 @@ export const EmergencySearch: React.FC = () => {
                 <span>Step 1: Speak SOS</span>
               </span>
               <span className="text-[11px] font-mono text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
-                Bhashini Indic STT • 7 Languages
+                Sarvam AI STT • Hindi & English
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
@@ -234,7 +234,7 @@ export const EmergencySearch: React.FC = () => {
             </p>
           </div>
 
-          {/* 7 Indian Languages Selector */}
+          {/* Hindi & English Language Selector */}
           <div className="flex items-center gap-1.5 text-xs text-slate-700 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl self-start sm:self-center shadow-2xs">
             <Languages className="w-3.5 h-3.5 text-red-600 shrink-0" />
             <span className="text-[11px] font-mono text-slate-500 hidden xs:inline">Bhashini:</span>

@@ -184,7 +184,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                   <div className="font-bold text-slate-900">Callers & Families</div>
-                  <div className="text-slate-500 mt-0.5">SOS in their own language; 7 Indian languages supported.</div>
+                  <div className="text-slate-500 mt-0.5">SOS in Hindi and English with instant voice triage.</div>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                   <div className="font-bold text-slate-900">Paramedics & 108</div>
@@ -308,7 +308,7 @@ export const HackFrontTrackModal: React.FC<Props> = ({ isOpen, onClose, onNaviga
                   Regional speech converted into ICD-10 codes and an ESI 1-5 severity score, with spoken first-aid guidance.
                 </p>
                 <div className="pt-2 border-t border-slate-200 text-red-700 font-bold font-mono text-[11px]">
-                  7 languages | ESI 1-5
+                  Hindi & English | ESI 1-5
                 </div>
               </div>
 

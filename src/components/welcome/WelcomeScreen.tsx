@@ -88,8 +88,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
           <span>AUTONOMOUS EMERGENCY HEALTHCARE OPERATING SYSTEM</span>
         </div>
 
-        <h1 className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
-          LIFE<span className="text-red-500">CARE</span>
+        <h1 className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          Life<span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-500 to-red-600">Care</span>
         </h1>
 
         <p className={`text-base sm:text-xl font-medium max-w-2xl mx-auto ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
@@ -140,14 +140,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
         {(!currentUser || currentUser.role === 'guardian') && (
           <div
             onClick={() => handleSelectRole('guardian')}
-            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-xl cursor-pointer overflow-hidden border ${
+            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden macos-glass ${
               isDark
-                ? 'bg-[#090d16] border-zinc-800 hover:border-red-500/80 text-zinc-100 hover:shadow-red-950/20'
-                : 'bg-white border-slate-200 hover:border-red-500 hover:shadow-2xl text-slate-900'
+                ? 'macos-glass-dark hover:border-red-500/70 hover:shadow-red-500/20'
+                : 'macos-glass-light hover:border-red-400 hover:shadow-red-500/10'
             }`}
           >
             {/* Ambient Corner Accents */}
-            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-red-600/10' : 'bg-red-50'}`}></div>
+            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-red-600/10' : 'bg-red-500/5'}`}></div>
             <div className={`absolute top-3 right-3 text-[10px] font-mono select-none ${isDark ? 'text-zinc-600' : 'text-slate-400'}`}>
               [ 01 // CITIZEN ]
             </div>
@@ -157,7 +157,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
               <div className="flex items-center justify-between">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-all border ${
                   isDark
-                    ? 'bg-zinc-900 border-zinc-800 text-red-500 group-hover:border-red-500/50'
+                    ? 'bg-zinc-900/80 border-zinc-800 text-red-500 group-hover:border-red-500/50'
                     : 'bg-red-50 border-red-200 text-red-600'
                 }`}>
                   <HeartPulse className="w-6 h-6" />
@@ -185,19 +185,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
               {/* Module Specs Grid */}
               <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono">
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[AI_TRIAGE]</span>
-                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Sarvam Voice (7 Lang)</span>
+                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Sarvam Voice (Hindi / Eng)</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[BED_LOCK]</span>
                   <span className="text-emerald-500 font-semibold">&lt;10ms Atomic Lock</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[ABHA_SYNC]</span>
                   <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Instant Health ID</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[ROUTE]</span>
                   <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Priority ER Corridor</span>
                 </div>
@@ -245,14 +245,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
         {(!currentUser || currentUser.role === 'driver') && (
           <div
             onClick={() => handleSelectRole('driver')}
-            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-xl cursor-pointer overflow-hidden border ${
+            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden macos-glass ${
               isDark
-                ? 'bg-[#090d16] border-zinc-800 hover:border-amber-500/80 text-zinc-100 hover:shadow-amber-950/20'
-                : 'bg-white border-slate-200 hover:border-amber-500 hover:shadow-2xl text-slate-900'
+                ? 'macos-glass-dark hover:border-amber-500/70 hover:shadow-amber-500/20'
+                : 'macos-glass-light hover:border-amber-400 hover:shadow-amber-500/10'
             }`}
           >
             {/* Ambient Corner Accents */}
-            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-amber-600/10' : 'bg-amber-50'}`}></div>
+            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-amber-600/10' : 'bg-amber-500/5'}`}></div>
             <div className={`absolute top-3 right-3 text-[10px] font-mono select-none ${isDark ? 'text-zinc-600' : 'text-slate-400'}`}>
               [ 02 // AMBULANCE ]
             </div>
@@ -262,7 +262,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
               <div className="flex items-center justify-between">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-all border ${
                   isDark
-                    ? 'bg-zinc-900 border-zinc-800 text-amber-500 group-hover:border-amber-500/50'
+                    ? 'bg-zinc-900/80 border-zinc-800 text-amber-500 group-hover:border-amber-500/50'
                     : 'bg-amber-50 border-amber-200 text-amber-600'
                 }`}>
                   <Ambulance className="w-6 h-6" />
@@ -290,19 +290,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
               {/* Module Specs Grid */}
               <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono">
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[CORRIDOR]</span>
                   <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Priority GPS Routing</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[TELEMETRY]</span>
                   <span className="text-cyan-500 font-semibold">Real-Time Vitals Stream</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[BAY_BYPASS]</span>
                   <span className="text-emerald-500 font-semibold">Zero-Wait Gate Admission</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[VEHICLE_ID]</span>
                   <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>ACLS / BLS Verified</span>
                 </div>
@@ -350,14 +350,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
         {(!currentUser || currentUser.role === 'hospital') && (
           <div
             onClick={() => handleSelectRole('hospital')}
-            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-xl cursor-pointer overflow-hidden border ${
+            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden macos-glass ${
               isDark
-                ? 'bg-[#090d16] border-zinc-800 hover:border-emerald-500/80 text-zinc-100 hover:shadow-emerald-950/20'
-                : 'bg-white border-slate-200 hover:border-emerald-500 hover:shadow-2xl text-slate-900'
+                ? 'macos-glass-dark hover:border-emerald-500/70 hover:shadow-emerald-500/20'
+                : 'macos-glass-light hover:border-emerald-400 hover:shadow-emerald-500/10'
             }`}
           >
             {/* Ambient Corner Accents */}
-            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-50'}`}></div>
+            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-500/5'}`}></div>
             <div className={`absolute top-3 right-3 text-[10px] font-mono select-none ${isDark ? 'text-zinc-600' : 'text-slate-400'}`}>
               [ 03 // HOSPITAL ]
             </div>
@@ -367,7 +367,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
               <div className="flex items-center justify-between">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-all border ${
                   isDark
-                    ? 'bg-zinc-900 border-zinc-800 text-emerald-400 group-hover:border-emerald-500/50'
+                    ? 'bg-zinc-900/80 border-zinc-800 text-emerald-400 group-hover:border-emerald-500/50'
                     : 'bg-emerald-50 border-emerald-200 text-emerald-600'
                 }`}>
                   <Building2 className="w-6 h-6" />
@@ -395,19 +395,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
               {/* Module Specs Grid */}
               <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono">
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[BED_MESH]</span>
                   <span className="text-emerald-500 font-semibold">Live ICU / ER Capacity</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[DOCTOR_GRID]</span>
                   <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>On-Duty Specialist Roster</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[EQUIPMENT]</span>
                   <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Life-Support Machinery</span>
                 </div>
-                <div className={`flex items-center justify-between p-2 rounded-xl border ${isDark ? 'bg-black/50 border-zinc-800/60 text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
                   <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[PRE_ALERT]</span>
                   <span className="text-cyan-500 font-semibold">Incoming Telemetry Feed</span>
                 </div>
@@ -451,8 +451,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
       </div>
 
       {/* 4. SYSTEM SPECIFICATIONS & NATIONAL GRID TELEMETRY */}
-      <div className={`rounded-3xl p-6 sm:p-8 mx-4 shadow-xl space-y-6 border ${
-        isDark ? 'bg-[#090d16] border-zinc-800/80 text-zinc-100' : 'bg-white border-slate-200 text-slate-900'
+      <div className={`rounded-3xl p-6 sm:p-8 mx-4 space-y-6 macos-glass ${
+        isDark ? 'macos-glass-dark' : 'macos-glass-light'
       }`}>
         <div className={`flex flex-col md:flex-row items-center justify-between gap-4 pb-5 border-b ${
           isDark ? 'border-zinc-800/80' : 'border-slate-200'
@@ -493,7 +493,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
         {/* 4 Metric Telemetry Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs font-mono">
-          <div className={`p-4 rounded-2xl border space-y-1.5 ${isDark ? 'bg-black/60 border-zinc-800/70' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-4 rounded-2xl border space-y-1.5 macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
             <div className="flex items-center space-x-1.5 text-red-500 text-[11px] font-bold">
               <Zap className="w-3.5 h-3.5" />
               <span>ATOMIC BED MESH</span>
@@ -502,7 +502,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
             <p className={`text-[10px] ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Deterministic cloud resource reservation</p>
           </div>
 
-          <div className={`p-4 rounded-2xl border space-y-1.5 ${isDark ? 'bg-black/60 border-zinc-800/70' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-4 rounded-2xl border space-y-1.5 macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
             <div className="flex items-center space-x-1.5 text-emerald-500 text-[11px] font-bold">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>LIVE TRAUMA BEDS</span>
@@ -511,16 +511,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
             <p className={`text-[10px] ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Aggregated across all registered centers</p>
           </div>
 
-          <div className={`p-4 rounded-2xl border space-y-1.5 ${isDark ? 'bg-black/60 border-zinc-800/70' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-4 rounded-2xl border space-y-1.5 macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
             <div className="flex items-center space-x-1.5 text-cyan-500 text-[11px] font-bold">
               <Mic className="w-3.5 h-3.5" />
               <span>SARVAM INDIC AI</span>
             </div>
-            <div className={`font-black text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>7 Indian Langs</div>
+            <div className={`font-black text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>Hindi & English</div>
             <p className={`text-[10px] ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Sub-second emergency speech-to-triage</p>
           </div>
 
-          <div className={`p-4 rounded-2xl border space-y-1.5 ${isDark ? 'bg-black/60 border-zinc-800/70' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-4 rounded-2xl border space-y-1.5 macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
             <div className="flex items-center space-x-1.5 text-purple-500 text-[11px] font-bold">
               <FileCheck className="w-3.5 h-3.5" />
               <span>ZERO-WAIT RECEPTION</span>
