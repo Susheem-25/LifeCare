@@ -70,6 +70,68 @@ export const LIFECARE_KNOWLEDGE_BASE = {
 };
 
 /**
+ * Intelligent language detector:
+ * Automatically detects whether text is in Hindi (Devanagari script or Romanized Hinglish)
+ * or in English.
+ */
+export function detectLanguage(text: string): 'hi' | 'en' | null {
+  if (!text || !text.trim()) return null;
+
+  // 1. Devanagari Unicode check (\u0900 - \u097F)
+  if (/[\u0900-\u097F]/.test(text)) {
+    return 'hi';
+  }
+
+  // 2. Romanized Hindi / Hinglish keywords check
+  const hindiWords = new Set([
+    'kaise', 'kya', 'kyu', 'kyun', 'kaha', 'kahan', 'kab', 'kisko', 'kisne', 'kaun',
+    'batao', 'bataiye', 'bataye', 'bata', 'karo', 'kare', 'karein', 'karna',
+    'hoga', 'hogi', 'honge', 'hota', 'hoti', 'hote', 'chahiye', 'madad',
+    'sahayata', 'aspataal', 'hospital', 'bed', 'doctor', 'meri', 'mera', 'mere',
+    'hamara', 'humara', 'aapka', 'shukriya', 'dhanyawad', 'namaste', 'pranam',
+    'hai', 'hain', 'tha', 'thi', 'the', 'nahi', 'nahin', 'kripya', 'dekho',
+    'suno', 'samjhao', 'chahiye', 'bhejo', 'aao', 'jaldi', 'turant',
+    'rog', 'ilaj', 'dawa', 'dawakhana', 'shuru', 'khatam', 'kitna', 'kitne',
+    'degree', 'degrees', 'kaise', 'karen', 'batao'
+  ]);
+
+  const cleanText = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
+  const tokens = cleanText.split(/\s+/).filter(Boolean);
+  let hindiMatches = 0;
+  for (const token of tokens) {
+    if (hindiWords.has(token)) {
+      hindiMatches++;
+    }
+  }
+
+  // If 2 or more Hinglish keywords or >=25% of tokens match
+  if (hindiMatches >= 2 || (tokens.length > 0 && hindiMatches / tokens.length >= 0.25)) {
+    return 'hi';
+  }
+
+  // 3. English keywords check
+  const englishWords = new Set([
+    'what', 'how', 'why', 'when', 'where', 'who', 'which', 'can', 'is', 'are',
+    'the', 'does', 'explain', 'show', 'tell', 'help', 'emergency', 'hospital',
+    'doctor', 'locking', 'bypass', 'reception', 'degree', 'driver', 'ambulance',
+    'work', 'atomic', 'protocol', 'system', 'features', 'degrees'
+  ]);
+
+  let englishMatches = 0;
+  for (const token of tokens) {
+    if (englishWords.has(token)) {
+      englishMatches++;
+    }
+  }
+
+  if (englishMatches >= 1 && hindiMatches === 0) {
+    return 'en';
+  }
+
+  return null;
+}
+
+/**
  * Intelligent RAG responder that synthesizes answers from the knowledge base,
  * augmented with Sarvam AI LLM if the API key is active.
  */
@@ -80,11 +142,21 @@ export async function queryLifeCareKnowledgeBase(
   const query = userQuery.trim();
   const lower = query.toLowerCase();
 
+  // Auto-detect query language (switches to Hindi if user spoke/typed Hindi)
+  const detected = detectLanguage(query);
+  const activeLang: 'en' | 'hi' = detected || preferredLanguage;
+
   // 1. Attempt live Sarvam AI Indic LLM with full LifeCare system prompt
   const apiKey = getSarvamApiKey();
   if (apiKey) {
     try {
+      const langInstruction = activeLang === 'hi'
+        ? 'The user asked in Hindi or Hinglish. You MUST reply in fluent, respectful, grammatically correct Hindi (Devanagari script).'
+        : 'The user asked in English. You MUST reply in authoritative, professional, clear English.';
+
       const systemPrompt = `You are Niro — the official LifeCare Gen AI Copilot with complete, authoritative A to Z knowledge of LifeCare: Zero-Wait Emergency Healthcare Network.
+      
+      Language Directive: ${langInstruction}
       
       Here is the complete project knowledge:
       ${JSON.stringify(LIFECARE_KNOWLEDGE_BASE, null, 2)}
@@ -93,7 +165,6 @@ export async function queryLifeCareKnowledgeBase(
       - Introduce yourself as Niro when appropriate.
       - Answer clearly, authoritatively, and professionally.
       - Use clean structured markdown formatting with bold points, numbered/bulleted lists, or metric highlights.
-      - If asked in Hindi or Hinglish, answer in fluent, respectful Hindi/Hinglish.
       - Emphasize real metrics (<10ms atomic lock, 0-second reception bypass, ESI 1-5 triage, ABDM v3, Sarvam AI voice integration).
       - Always be helpful, concise, and clinically sound.`;
 
@@ -128,7 +199,7 @@ export async function queryLifeCareKnowledgeBase(
   }
 
   // 2. High-Precision Local Knowledge Base Fallback Engine
-  return generateLocalKnowledgeAnswer(lower, preferredLanguage);
+  return generateLocalKnowledgeAnswer(lower, activeLang);
 }
 
 function generateLocalKnowledgeAnswer(query: string, lang: 'en' | 'hi'): string {

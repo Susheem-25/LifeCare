@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import {
   queryLifeCareKnowledgeBase,
+  detectLanguage,
   SUGGESTED_QUICK_QUESTIONS,
   ChatMessage
 } from '../../services/lifeCareKnowledgeService';
@@ -180,6 +181,13 @@ Tap any question below or ask me anything in **English** or **हिन्दी
     const text = (textToSend || inputText).trim();
     if (!text || isLoading) return;
 
+    // Auto-detect language directly from text (Devanagari, Hindi, or English)
+    const detected = detectLanguage(text);
+    const activeLang: 'en' | 'hi' = detected || preferredLang;
+    if (detected && detected !== preferredLang) {
+      setPreferredLang(detected);
+    }
+
     const userMessage: ChatMessage = {
       id: getUniqueId('user'),
       sender: 'user',
@@ -192,7 +200,7 @@ Tap any question below or ask me anything in **English** or **हिन्दी
     setIsLoading(true);
 
     try {
-      const aiReplyText = await queryLifeCareKnowledgeBase(text, preferredLang);
+      const aiReplyText = await queryLifeCareKnowledgeBase(text, activeLang);
       const aiMessage: ChatMessage = {
         id: getUniqueId('ai'),
         sender: 'ai',
@@ -204,7 +212,9 @@ Tap any question below or ask me anything in **English** or **हिन्दी
       const fallbackMsg: ChatMessage = {
         id: getUniqueId('ai-err'),
         sender: 'ai',
-        text: 'I encountered a temporary connection issue. LifeCare operates on <10ms atomic locking, ABDM v3 zero-wait admission, and Sarvam AI voice triage. Please ask again!',
+        text: activeLang === 'hi'
+          ? 'अस्थायी कनेक्शन समस्या आई है। LifeCare <10ms एटॉमिक लॉकिंग, ABDM v3 ज़ीरो-वेट रिसेप्शन और Sarvam AI वॉइस ट्रायज पर काम करता है। कृपया पुनः पूछें।'
+          : 'I encountered a temporary connection issue. LifeCare operates on <10ms atomic locking, ABDM v3 zero-wait admission, and Sarvam AI voice triage. Please ask again!',
         timestamp: getNowTimeStr()
       };
       setMessages((prev) => [...prev, fallbackMsg]);
@@ -220,6 +230,9 @@ Tap any question below or ask me anything in **English** or **हिन्दी
       return;
     }
 
+    // Auto-detect language of the specific text so it always plays in authentic native voice
+    const msgLang = detectLanguage(text) || preferredLang;
+
     // Strip markdown formatting for cleaner speech synthesis
     const cleanSpeech = text
       .replace(/[#*`_~[\]()]/g, '')
@@ -230,7 +243,7 @@ Tap any question below or ask me anything in **English** or **हिन्दी
     setIsSpeakingId(msgId);
     try {
       await speakTextWithSarvam(cleanSpeech, {
-        langCode: preferredLang === 'hi' ? 'hi-IN' : 'en-IN',
+        langCode: msgLang === 'hi' ? 'hi-IN' : 'en-IN',
         speaker: 'priya',
         onStart: () => setIsSpeakingId(msgId),
         onEnd: () => setIsSpeakingId(null),
@@ -259,6 +272,11 @@ Tap any question below or ask me anything in **English** or **हिन्दी
       langCode: preferredLang === 'hi' ? 'hi-IN' : 'en-IN',
       onTranscript: (spokenText: string) => {
         setInputText(spokenText);
+        // Automatically switch language directly if Hindi speech is spoken or English is spoken
+        const detected = detectLanguage(spokenText);
+        if (detected && detected !== preferredLang) {
+          setPreferredLang(detected);
+        }
       },
       onListeningChange: (listening: boolean) => {
         setIsListeningMic(listening);
@@ -565,7 +583,15 @@ Tap any question below or ask me anything in **English** or **हिन्दी
                 ref={inputRef}
                 type="text"
                 value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setInputText(val);
+                  // Automatically switch language directly if Hindi Devanagari or English is typed/pasted
+                  const detected = detectLanguage(val);
+                  if (detected && detected !== preferredLang) {
+                    setPreferredLang(detected);
+                  }
+                }}
                 placeholder={
                   preferredLang === 'hi'
                     ? 'Niro से LifeCare के बारे में कुछ भी पूछें...'
