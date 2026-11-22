@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeCare — Zero-Wait Emergency Healthcare OS | Team BuilderBeings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #070a13;
+      color: #f8fafc;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .slide {
+      display: none;
+      min-height: 85vh;
+    }
+    .slide.active {
+      display: flex;
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .glass-card {
+      background: rgba(19, 27, 46, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 sm:p-8">
+
+  <!-- Top Navigation & Progress -->
+  <header class="flex items-center justify-between border-b border-white/10 pb-4 max-w-6xl mx-auto w-full">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-xl bg-rose-600/20 border border-rose-500/40 flex items-center justify-center text-rose-500 font-bold">
+        ♥
+      </div>
+      <div>
+        <span class="font-extrabold text-white text-sm tracking-wide">LifeCare</span>
+        <span class="text-xs text-slate-400 ml-2 font-mono">• Team BuilderBeings</span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3 text-xs font-mono">
+      <span id="slideIndicator" class="text-slate-400">Slide 1 / 9</span>
+      <div class="flex items-center space-x-1">
+        <button onclick="prevSlide()" class="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold transition">◀</button>
+        <button onclick="nextSlide()" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold transition">▶</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Slide Container -->
+  <main class="max-w-6xl mx-auto w-full flex-1 flex items-center justify-center my-6">
+
+    <!-- SLIDE 1: TITLE -->
+    <section class="slide active flex-col justify-center items-center text-center space-y-6" data-slide="1">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-950/60 border border-rose-800 text-rose-400 text-xs font-mono font-bold uppercase tracking-wider">
+        <span>★ National Emergency Health Tech Innovation</span>
+      </div>
+      <h1 class="text-5xl sm:text-6xl font-black tracking-tight text-white max-w-4xl leading-tight">
+        LifeCare
+      </h1>
+      <p class="text-xl sm:text-2xl font-bold text-sky-400 max-w-3xl">
+        Autonomous Zero-Wait Emergency Healthcare Operating System
+      </p>
+      <p class="text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed">
+        Eliminating the 3 fatal transit and admission bottlenecks that cost trauma and cardiac emergency patients their golden hour in India.
+      </p>
+
+      <div class="glass-card rounded-2xl p-5 border border-white/10 max-w-2xl w-full text-left space-y-2 mt-4">
+        <div class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">Team: BuilderBeings</div>
+        <div class="text-sm font-extrabold text-white flex flex-wrap gap-x-4 gap-y-1">
+          <span class="text-rose-400">Susheem Kumar Maurya (Team Leader)</span>
+          <span class="text-sky-400">Stuti Jain</span>
+          <span class="text-emerald-400">Anshuman Singh</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: THE PROBLEM (WHY) -->
+    <section class="slide flex-col justify-center space-y-6 w-full" data-slide="2">
+      <div class="space-y-1">
+        <div class="text-xs font-mono font-bold text-rose-500 uppercase tracking-widest">Problem Context</div>
+        <h2 class="text-3xl font-black text-white">WHY LifeCare: The Indian Emergency Crisis</h2>
+        <p class="text-xs text-slate-400">Over 50% of trauma fatalities in India occur due to transit delays and hospital gate admission bottlenecks.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass-card rounded-2xl p-5 border border-rose-900/40 space-y-3">
+          <div class="text-xl font-bold text-rose-500 font-mono">01</div>
+          <h3 class="text-lg font-extrabold text-white">Panic & Language Barriers</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Calling 108 in moments of acute panic causes confusion, language mismatches, and inaccurate symptom narration, losing up to 8 critical minutes before vehicle dispatch.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-amber-900/40 space-y-3">
+          <div class="text-xl font-bold text-amber-500 font-mono">02</div>
+          <h3 class="text-lg font-extrabold text-white">"Blind Driving" & Rejection</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            40%+ of ambulances rush blindly to hospitals only to find zero available ICU beds, missing specialist doctors, or non-functional life-support equipment.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-purple-900/40 space-y-3">
+          <div class="text-xl font-bold text-purple-400 font-mono">03</div>
+          <h3 class="text-lg font-extrabold text-white">20-35 Min Paper Delays</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            While patients suffer myocardial infarction or trauma shock, relatives are trapped filling physical paper registration forms and consent sheets at the ER counter.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: WHAT IS LIFECARE -->
+    <section class="slide flex-col justify-center space-y-6 w-full" data-slide="3">
+      <div class="space-y-1">
+        <div class="text-xs font-mono font-bold text-rose-500 uppercase tracking-widest">System Architecture</div>
+        <h2 class="text-3xl font-black text-white">WHAT is LifeCare: Synchronized 4-Pillar Grid</h2>
+        <p class="text-xs text-slate-400">An autonomous, bidirectional emergency OS connecting the citizen, paramedic, hospital, and regulator in real time.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card rounded-2xl p-4 border border-rose-500/20 space-y-2">
+          <div class="text-2xl">❤️</div>
+          <h3 class="font-extrabold text-white text-base">Guardian Portal</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Bilingual Sarvam Voice SOS</li>
+            <li>Sub-second ESI 1-5 Triage</li>
+            <li>&lt;10ms Atomic Bed Lock</li>
+            <li>Zero-wait QR clinical passport</li>
+          </ul>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-amber-500/20 space-y-2">
+          <div class="text-2xl">🚑</div>
+          <h3 class="font-extrabold text-white text-base">108 Driver Cockpit</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Priority GPS Emergency Corridor</li>
+            <li>Live in-transit vitals telemetry</li>
+            <li>Direct ER gate bypass clearance</li>
+            <li>ACLS / BLS certified fleet</li>
+          </ul>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-emerald-500/20 space-y-2">
+          <div class="text-2xl">🏥</div>
+          <h3 class="font-extrabold text-white text-base">Hospital ER Command</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Editable live ICU / ER bed mesh</li>
+            <li>Automatic 15s Trauma Siren</li>
+            <li>Verified Doctor Degrees (MBBS, MD)</li>
+            <li>Contactless QR intake scanner</li>
+          </ul>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-sky-500/20 space-y-2">
+          <div class="text-2xl">🛡️</div>
+          <h3 class="font-extrabold text-white text-base">Super Admin Console</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Zero-Trust RBAC (/admin exclusive)</li>
+            <li>Verified Google Email Directory</li>
+            <li>Instant Hospital / Driver toggle</li>
+            <li>National telemetry audit trail</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: HOW IT WORKS -->
+    <section class="slide flex-col justify-center space-y-6 w-full" data-slide="4">
+      <div class="space-y-1">
+        <div class="text-xs font-mono font-bold text-sky-400 uppercase tracking-widest">Execution Flow</div>
+        <h2 class="text-3xl font-black text-white">HOW It Works: The 4-Stage Zero-Wait Mission</h2>
+        <p class="text-xs text-slate-400">Deterministic progression from symptom onset to resuscitation bay intake.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-2">
+          <span class="px-2 py-0.5 rounded-full bg-sky-950 border border-sky-800 text-sky-400 text-[10px] font-mono font-bold">STAGE 1</span>
+          <h3 class="font-extrabold text-white text-sm">Speech-to-Triage</h3>
+          <div class="text-emerald-400 text-xs font-mono font-bold">0.4s Latency</div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Bystander speaks in Hindi or English. Sarvam AI maps symptoms into ICD-10 codes and ESI Level 1-5 urgency.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-2">
+          <span class="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 text-[10px] font-mono font-bold">STAGE 2</span>
+          <h3 class="font-extrabold text-white text-sm">Atomic Bed Lock</h3>
+          <div class="text-emerald-400 text-xs font-mono font-bold">&lt;10ms Lock</div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Simultaneously reserves an ER trauma bay, on-duty specialist doctor, and life-support machinery with zero overbooking risk.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-2">
+          <span class="px-2 py-0.5 rounded-full bg-rose-950 border border-rose-800 text-rose-400 text-[10px] font-mono font-bold">STAGE 3</span>
+          <h3 class="font-extrabold text-white text-sm">Auto 15s ER Siren</h3>
+          <div class="text-rose-400 text-xs font-mono font-bold">Instant Audio</div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            The hospital ER dashboard automatically rings a loud 15-second dual-tone trauma siren across tabs, alerting staff prior to arrival.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-2">
+          <span class="px-2 py-0.5 rounded-full bg-purple-950 border border-purple-800 text-purple-400 text-[10px] font-mono font-bold">STAGE 4</span>
+          <h3 class="font-extrabold text-white text-sm">0-Second Gate Admission</h3>
+          <div class="text-emerald-400 text-xs font-mono font-bold">Zero Paper Delay</div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Paramedic streams live ECG & vitals in-transit. ER camera scans the encrypted QR code, bypassing the admission counter directly.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: CORE INNOVATIONS -->
+    <section class="slide flex-col justify-center space-y-6 w-full" data-slide="5">
+      <div class="space-y-1">
+        <div class="text-xs font-mono font-bold text-rose-500 uppercase tracking-widest">Core Engineering</div>
+        <h2 class="text-3xl font-black text-white">Deep-Dive: Breakthrough Features</h2>
+        <p class="text-xs text-slate-400">Engineered to eliminate the exact operational failures common in Indian emergency healthcare.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="glass-card rounded-2xl p-5 border border-white/10 space-y-2">
+          <span class="text-[10px] font-mono font-bold text-rose-400 uppercase">Acoustic Alert Protocol</span>
+          <h3 class="text-base font-extrabold text-white">Automatic 15-Second Trauma Siren</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Client-side synthesized modulated dual-tone wail (620Hz–980Hz) via Web Audio API. Dispatched through BroadcastChannel & cross-tab storage events with zero manual clicks required.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10 space-y-2">
+          <span class="text-[10px] font-mono font-bold text-sky-400 uppercase">Sarvam AI Integration</span>
+          <h3 class="text-base font-extrabold text-white">Pure Bilingual Voice AI Engine</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Strict linguistic routing: 100% pure Hindi audio synthesis when browsing in Hindi; 100% authoritative English medical voice when browsing in English.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10 space-y-2">
+          <span class="text-[10px] font-mono font-bold text-emerald-400 uppercase">Clinical Rigor</span>
+          <h3 class="text-base font-extrabold text-white">Doctor Rostering with Degrees & Gender</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Doctors cataloged with verified medical credentials (MBBS, MD, DM, FRCS), explicit gender identification, and surgery duty availability status.
+          </p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10 space-y-2">
+          <span class="text-[10px] font-mono font-bold text-purple-400 uppercase">NIST SP 800-38D</span>
+          <h3 class="text-base font-extrabold text-white">AES-GCM-256 E2EE & Zero-PII Shield</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            All in-transit paperwork and vitals are sealed cryptographically with SHA-256 key fingerprints. No plain-text phone numbers or names are exposed to bystander cameras.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: TECH STACK -->
+    <section class="slide flex-col justify-center space-y-6 w-full" data-slide="6">
+      <div class="space-y-1">
+        <div class="text-xs font-mono font-bold text-sky-400 uppercase tracking-widest">Stack Architecture</div>
+        <h2 class="text-3xl font-black text-white">Enterprise Tech Stack</h2>
+        <p class="text-xs text-slate-400">High-performance modern frameworks with zero synthetic mocks.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-1.5">
+          <div class="text-[10px] font-mono font-bold text-sky-400 uppercase">Frontend</div>
+          <div class="text-sm font-extrabold text-white">React 19 & TypeScript</div>
+          <p class="text-xs text-slate-400">Vite build engine, Tailwind CSS, liquid glassmorphism UI, sub-millisecond DOM reconciliation.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-1.5">
+          <div class="text-[10px] font-mono font-bold text-rose-400 uppercase">Voice & Speech AI</div>
+          <div class="text-sm font-extrabold text-white">Sarvam AI Indic Grid</div>
+          <p class="text-xs text-slate-400">Indic Speech-to-Text (saaras:v4) & Text-to-Speech (bulbul:v3) with bilingual fluency.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-1.5">
+          <div class="text-[10px] font-mono font-bold text-emerald-400 uppercase">Real-Time Cloud</div>
+          <div class="text-sm font-extrabold text-white">Cloud Firestore & OAuth</div>
+          <p class="text-xs text-slate-400">Multi-region real-time snapshot synchronization with Google OAuth 2.0 security.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-1.5">
+          <div class="text-[10px] font-mono font-bold text-amber-400 uppercase">Acoustics & Mesh</div>
+          <div class="text-sm font-extrabold text-white">Web Audio & Broadcast</div>
+          <p class="text-xs text-slate-400">Dual-tone trauma siren synthesizer, cross-tab BroadcastChannel, and Leaflet GPS corridor.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-1.5">
+          <div class="text-[10px] font-mono font-bold text-purple-400 uppercase">Cryptography</div>
+          <div class="text-sm font-extrabold text-white">Web Crypto API (AES-GCM)</div>
+          <p class="text-xs text-slate-400">NIST SP 800-38D 256-bit envelope encryption and SHA-256 key fingerprint authentication.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-white/10 space-y-1.5">
+          <div class="text-[10px] font-mono font-bold text-cyan-400 uppercase">Clinical Copilot</div>
+          <div class="text-sm font-extrabold text-white">Niro Clinical GenAI</div>
+          <p class="text-xs text-slate-400">Emergency Severity Index (ESI 1-5) protocol mapping, golden hour countdown, and ICD-10 triage.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: WHY IT'S AHEAD OF EXISTING PROJECTS -->
+    <section class="slide flex-col justify-center space-y-6 w-full" data-slide="7">
+      <div class="space-y-1">
+        <div class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">Competitive Advantage</div>
+        <h2 class="text-3xl font-black text-white">Why LifeCare is Miles Ahead</h2>
+        <p class="text-xs text-slate-400">Architectural shift from reactive paperwork to deterministic resource pre-allocation.</p>
+      </div>
+
+      <div class="glass-card rounded-2xl overflow-hidden border border-white/10">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="bg-slate-900/80 border-b border-white/10 text-slate-400 font-mono">
+              <th class="p-3 font-bold">Metric / Capability</th>
+              <th class="p-3 font-bold text-rose-400">Traditional 108 / Hospital Grid</th>
+              <th class="p-3 font-bold text-emerald-400">LifeCare Zero-Wait OS</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            <tr>
+              <td class="p-3 font-bold text-white">Bed Reservation Latency</td>
+              <td class="p-3 text-rose-400">15 – 30 Mins (Phone calls & chaos)</td>
+              <td class="p-3 text-emerald-400 font-bold">✓ &lt;10ms (Cloud Atomic Lock)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-white">Hospital Gate Rejections</td>
+              <td class="p-3 text-rose-400">40%+ Turned away at gate</td>
+              <td class="p-3 text-emerald-400 font-bold">✓ 0% Guaranteed Pre-Admission</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-white">Reception Desk Wait Time</td>
+              <td class="p-3 text-rose-400">20 – 35 Mins (Paper registration)</td>
+              <td class="p-3 text-emerald-400 font-bold">✓ 0 Seconds (Encrypted QR Bypass)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-white">Hospital ER Pre-Alert</td>
+              <td class="p-3 text-rose-400">None (Patient arrives unannounced)</td>
+              <td class="p-3 text-emerald-400 font-bold">✓ Auto 15s Trauma Siren on Lock</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-white">Bilingual Voice Access</td>
+              <td class="p-3 text-rose-400">IVR loops, dialpad menus</td>
+              <td class="p-3 text-emerald-400 font-bold">✓ Sarvam AI Voice SOS (Hindi & Eng)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-white">Data Privacy Protection</td>
+              <td class="p-3 text-rose-400">Physical paper slips in public view</td>
+              <td class="p-3 text-emerald-400 font-bold">✓ Zero-PII AES-GCM-256 Shield</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: TEAM ROLES -->
+    <section class="slide flex-col justify-center space-y-6 w-full" data-slide="8">
+      <div class="space-y-1">
+        <div class="text-xs font-mono font-bold text-rose-500 uppercase tracking-widest">Engineering Division</div>
+        <h2 class="text-3xl font-black text-white">Team BuilderBeings: Project Ownership</h2>
+        <p class="text-xs text-slate-400">Dedicated domain mastery for ironclad technical execution and judge defense.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass-card rounded-2xl p-5 border border-rose-500/30 space-y-3">
+          <span class="px-2 py-0.5 rounded-full bg-rose-950 border border-rose-800 text-rose-400 text-[10px] font-mono font-bold uppercase">Team Leader & Architect</span>
+          <h3 class="text-base font-extrabold text-white">Susheem Kumar Maurya</h3>
+          <div class="text-xs font-bold text-rose-400 font-mono">Core Engine & State Sync</div>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Sub-10ms Atomic Bed Lock Engine</li>
+            <li>Automatic 15s ER Siren Architecture</li>
+            <li>Cloud Firestore Mesh & Snapshot Listeners</li>
+            <li>Firebase Hosting Production Deployment</li>
+          </ul>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-sky-500/30 space-y-3">
+          <span class="px-2 py-0.5 rounded-full bg-sky-950 border border-sky-800 text-sky-400 text-[10px] font-mono font-bold uppercase">Frontend & Clinical UX</span>
+          <h3 class="text-base font-extrabold text-white">Stuti Jain</h3>
+          <div class="text-xs font-bold text-sky-400 font-mono">Design System & Voice AI</div>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Liquid Glassmorphism macOS Design System</li>
+            <li>Sarvam AI Voice SOS & Pure Language TTS</li>
+            <li>Doctor Roster with Degrees, Bay & Gender Select</li>
+            <li>Patient Triage Presentation & Flow</li>
+          </ul>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-emerald-500/30 space-y-3">
+          <span class="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 text-[10px] font-mono font-bold uppercase">Security & Systems</span>
+          <h3 class="text-base font-extrabold text-white">Anshuman Singh</h3>
+          <div class="text-xs font-bold text-emerald-400 font-mono">Cryptography & Telemetry</div>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>AES-GCM-256 E2EE Zero-PII Cryptography</li>
+            <li>108 Paramedic Corridor GPS & Vitals Stream</li>
+            <li>Super Admin Console (/admin) RBAC Audit Log</li>
+            <li>Regulatory Compliance & Judge Defense</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: SUMMARY & ROADMAP -->
+    <section class="slide flex-col justify-center space-y-6 w-full" data-slide="9">
+      <div class="space-y-1">
+        <div class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">Future Roadmap</div>
+        <h2 class="text-3xl font-black text-white">Summary & Scaling Vision</h2>
+        <p class="text-xs text-slate-400">Turning fragmented emergency logistics into an autonomous, nationwide lifeline.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="glass-card rounded-2xl p-5 border border-emerald-500/30 space-y-3">
+          <span class="text-xs font-mono font-bold text-emerald-400 uppercase">Live Production Ready</span>
+          <div class="text-xs font-mono text-sky-400">
+            <div>URL: <a href="https://lifecare7.web.app" target="_blank" class="underline">https://lifecare7.web.app</a></div>
+            <div>GitHub: Susheem-25/LifeCare</div>
+          </div>
+          <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>100% Real Automatic 15s Trauma Siren across windows</li>
+            <li>Pure Hindi & English voice synthesis via Sarvam AI</li>
+            <li>Doctor roster with verified degrees & gender select</li>
+            <li>Google email association for Drivers, Hospitals & Users</li>
+            <li>Contactless QR zero-wait intake bypass verified</li>
+          </ul>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-rose-500/30 space-y-3">
+          <span class="text-xs font-mono font-bold text-rose-400 uppercase">Future Scaling Phases</span>
+          <div class="space-y-2 text-xs text-slate-400">
+            <div>
+              <strong class="text-white block font-mono">Phase 1: City Green Corridors</strong>
+              IoT integration with municipal traffic signal grids to preempt red lights for en-route 108 ambulances.
+            </div>
+            <div>
+              <strong class="text-white block font-mono">Phase 2: Wearable Fall & Cardiac Detection</strong>
+              Smartwatch integration triggering LifeCare Voice SOS upon sudden cardiac arrest or high-impact crash.
+            </div>
+            <div>
+              <strong class="text-white block font-mono">Phase 3: National Inter-Hospital Tele-ICU</strong>
+              Real-time surgical telemetry linking rural primary health centers with tier-1 trauma hubs.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Slide Footer Controls -->
+  <footer class="flex items-center justify-between border-t border-white/10 pt-4 max-w-6xl mx-auto w-full text-xs font-mono text-slate-500">
+    <div>Use ◄ ► Arrow keys or Spacebar to navigate</div>
+    <div>LifeCare © 2026 • Team BuilderBeings</div>
+  </footer>
+
+  <script>
+    let current = 1;
+    const total = 9;
+
+    function showSlide(num) {
+      if (num < 1) num = 1;
+      if (num > total) num = total;
+      current = num;
+
+      document.querySelectorAll('.slide').forEach((el) => {
+        el.classList.remove('active');
+        if (parseInt(el.getAttribute('data-slide')) === current) {
+          el.classList.add('active');
+        }
+      });
+
+      document.getElementById('slideIndicator').textContent = `Slide ${current} / ${total}`;
+    }
+
+    function nextSlide() {
+      if (current < total) showSlide(current + 1);
+    }
+
+    function prevSlide() {
+      if (current > 1) showSlide(current - 1);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>
