@@ -8,6 +8,7 @@ import {
   toggleDriverSuspendInFirestore,
   deleteBookingFromFirestore,
   toggleBookingSuspendInFirestore,
+  checkIsAdminInFirestore,
 } from '../../services/firebase';
 import {
   ShieldAlert,
@@ -89,17 +90,38 @@ export const AdminConsole: React.FC = () => {
     return Array.from(map.values());
   }, [allBookings]);
 
-  // Check super admin clearance
-  const isAdmin = currentUser && isAuthorizedAdminEmail(currentUser.email);
+  // Check super admin clearance: either in config whitelist or in Firestore `admins` collection
+  const isStaticAdmin = Boolean(currentUser?.email && isAuthorizedAdminEmail(currentUser.email));
+  const [isFirestoreAdmin, setIsFirestoreAdmin] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    if (currentUser?.email && !isStaticAdmin) {
+      checkIsAdminInFirestore(currentUser.email).then((isDbAdmin) => {
+        if (isMounted && isDbAdmin) {
+          setIsFirestoreAdmin(true);
+        }
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser?.email, isStaticAdmin]);
+
+  const isAdmin = isStaticAdmin || isFirestoreAdmin;
 
   const handleAdminGoogleLogin = async () => {
     setAuthError('');
     setIsAuthenticating(true);
     try {
       const user = await loginWithGoogle('hospital');
-      if (!isAuthorizedAdminEmail(user.email)) {
+      const isEmailAuthorized = isAuthorizedAdminEmail(user.email);
+      const isDbAdmin = await checkIsAdminInFirestore(user.email);
+
+      if (!isEmailAuthorized && !isDbAdmin) {
         setAuthError(`Access Denied: Account "${user.email}" does not have Super Admin privileges. Please use an authorized administrator account.`);
       } else {
+        setIsFirestoreAdmin(true);
         showNotice(`Super Admin Clearance Granted: ${user.email}`);
       }
     } catch (err: unknown) {

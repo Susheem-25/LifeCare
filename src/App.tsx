@@ -31,12 +31,16 @@ const MainAppContent: React.FC = () => {
   } = useEmergency();
 
   const [isAdminRoute, setIsAdminRoute] = useState<boolean>(() => {
-    return window.location.pathname === '/admin' || window.location.hash === '#/admin';
+    const p = window.location.pathname.toLowerCase();
+    const h = window.location.hash.toLowerCase();
+    return p === '/admin' || p.startsWith('/admin') || h === '#/admin' || h.startsWith('#/admin');
   });
 
   useEffect(() => {
     const handleRouteChange = () => {
-      setIsAdminRoute(window.location.pathname === '/admin' || window.location.hash === '#/admin');
+      const p = window.location.pathname.toLowerCase();
+      const h = window.location.hash.toLowerCase();
+      setIsAdminRoute(p === '/admin' || p.startsWith('/admin') || h === '#/admin' || h.startsWith('#/admin'));
     };
     window.addEventListener('popstate', handleRouteChange);
     window.addEventListener('hashchange', handleRouteChange);

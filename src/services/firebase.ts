@@ -523,4 +523,28 @@ export async function fetchHospitalProfileByOwner(uid: string): Promise<Hospital
   return null;
 }
 
+/**
+ * Check whether an email is registered as an Admin in Firestore `admins` collection.
+ * Matches document ID (e.g., `admins/susheem27s25.52@gmail.com`)
+ */
+export async function checkIsAdminInFirestore(email?: string | null): Promise<boolean> {
+  if (!email || !db || !isRealFirebaseConfigured()) return false;
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const adminDocRef = doc(db, 'admins', cleanEmail);
+    const snap = await getDoc(adminDocRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data && (data.isSuspended === true || data.active === false)) {
+        return false;
+      }
+      return true;
+    }
+  } catch (err) {
+    console.warn('[Firestore] Admin check notice:', err);
+  }
+  return false;
+}
+
+
 
