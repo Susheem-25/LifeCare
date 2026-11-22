@@ -17,7 +17,7 @@
 1. [The Crisis: India's Golden Hour Bottlenecks](#-the-crisis-indias-golden-hour-bottlenecks)
 2. [The LifeCare Solution](#-the-lifecare-solution)
 3. [The 4 Operational Cockpits](#-the-4-operational-cockpits)
-4. [Gen AI Copilot & Sarvam AI Integration](#-gen-ai-copilot--sarvam-ai-integration)
+4. [Niro: Gen AI Clinical Copilot & Sarvam AI Integration](#-niro-gen-ai-clinical-copilot--sarvam-ai-integration)
 5. [Core Architectural Innovations (USPs)](#-core-architectural-innovations-usps)
 6. [Tech Stack Matrix](#-tech-stack-matrix)
 7. [Security & Zero-Trust Governance](#-security--zero-trust-governance)
@@ -90,9 +90,9 @@ LifeCare features four specialized, role-based cockpits secured by Google OAuth 
 
 ---
 
-## 🤖 Gen AI Copilot & Sarvam AI Integration
+## 🤖 Niro: Gen AI Clinical Copilot & Sarvam AI Integration
 
-LifeCare embeds an **A to Z Project Gen AI Copilot** floating globally across all views:
+LifeCare embeds **Niro**, an **A to Z Project Gen AI Copilot** floating globally across all views:
 
 - **Full Project Knowledge Base:** Deep conversational intelligence covering system architecture, clinical protocols, atomic locking mechanics, ABDM integration, and doctor degree qualifications.
 - **Conversational LLM:** Queries Sarvam AI's chat completion API (`https://api.sarvam.ai/v1/chat/completions`) with an offline-first RAG fallback guaranteeing 100% evaluation uptime.

@@ -84,14 +84,15 @@ export async function queryLifeCareKnowledgeBase(
   const apiKey = getSarvamApiKey();
   if (apiKey) {
     try {
-      const systemPrompt = `You are the Official LifeCare Gen AI Copilot — an expert AI assistant with complete, authoritative A to Z knowledge of LifeCare: Zero-Wait Emergency Healthcare Operating System.
+      const systemPrompt = `You are Niro — the official LifeCare Gen AI Copilot with complete, authoritative A to Z knowledge of LifeCare: Zero-Wait Emergency Healthcare Network.
       
       Here is the complete project knowledge:
       ${JSON.stringify(LIFECARE_KNOWLEDGE_BASE, null, 2)}
       
       Instructions:
+      - Introduce yourself as Niro when appropriate.
       - Answer clearly, authoritatively, and professionally.
-      - Use markdown formatting with bold points, bullet lists, or tables where appropriate.
+      - Use clean structured markdown formatting with bold points, numbered/bulleted lists, or metric highlights.
       - If asked in Hindi or Hinglish, answer in fluent, respectful Hindi/Hinglish.
       - Emphasize real metrics (<10ms atomic lock, 0-second reception bypass, ESI 1-5 triage, ABDM v3, Sarvam AI voice integration).
       - Always be helpful, concise, and clinically sound.`;
@@ -259,7 +260,7 @@ The **Super Admin Console** provides national-level governance over the emergenc
 
   // Default A to Z Overview Answer
   if (isHindi) {
-    return `**LifeCare: ज़ीरो-वेट इमरजेंसी हेल्थकेयर नेटवर्क**
+    return `### 🌟 नमस्ते! मैं Niro हूँ — LifeCare का Gen AI कोपायलट
 
 LifeCare भारत के आपातकालीन स्वास्थ्य तंत्र को 4 प्रमुख स्तंभों से क्रांतिकारी बनाता है:
 
@@ -271,9 +272,9 @@ LifeCare भारत के आपातकालीन स्वास्थ�
 आप मुझसे LifeCare के किसी भी फीचर, तकनीकी आर्किटेक्चर या मेडिकल प्रोटोकॉल के बारे में पूछ सकते हैं!`;
   }
 
-  return `### 🌟 Welcome to LifeCare — Zero-Wait Emergency Healthcare Network
+  return `### 🌟 Hello! I am Niro — Your LifeCare Gen AI Copilot
 
-LifeCare is built to eliminate the fatal delays of the **Golden Hour** through four synchronized digital cockpits:
+LifeCare eliminates the fatal delays of the **Golden Hour** through four synchronized digital cockpits:
 
 1. **Citizen Guardian Portal:** Bilingual Voice SOS (Hindi / English via Sarvam AI), instant ESI 1–5 triage, and sub-10ms atomic ICU bed reservation.
 2. **108 Paramedic Cockpit:** Turn-by-turn emergency GPS corridor routing, live in-transit vitals telemetry, and direct ER bay bypass.

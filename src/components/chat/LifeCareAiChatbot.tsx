@@ -11,7 +11,8 @@ import {
   Check,
   RefreshCw,
   Bot,
-  User
+  User,
+  Radio
 } from 'lucide-react';
 import {
   queryLifeCareKnowledgeBase,
@@ -32,6 +33,104 @@ const getNowTimeStr = (): string => {
   return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 };
 
+/**
+ * Parses inline bold (**text**) and inline backticks (`code`)
+ */
+const renderInlineSpans = (text: string): React.ReactNode[] => {
+  const parts: React.ReactNode[] = [];
+  const regex = /(\*\*.*?\*\*|`.*?`)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+    const token = match[0];
+    if (token.startsWith('**') && token.endsWith('**')) {
+      parts.push(
+        <strong key={match.index} className="font-bold text-slate-900 dark:text-white">
+          {token.slice(2, -2)}
+        </strong>
+      );
+    } else if (token.startsWith('`') && token.endsWith('`')) {
+      parts.push(
+        <code
+          key={match.index}
+          className="px-1.5 py-0.5 mx-0.5 rounded font-mono text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+        >
+          {token.slice(1, -1)}
+        </code>
+      );
+    }
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts;
+};
+
+/**
+ * Renders structured markdown (headings, numbered lists, bullet lists, bold text)
+ */
+const renderFormattedText = (rawText: string): React.ReactNode => {
+  const lines = rawText.split('\n');
+  return (
+    <div className="space-y-1.5 text-xs leading-relaxed">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={idx} className="h-1" />;
+        }
+
+        // Heading 3 or bold heading (### ...)
+        if (trimmed.startsWith('### ')) {
+          return (
+            <div key={idx} className="font-extrabold text-[13px] text-red-600 dark:text-red-400 pt-1 pb-0.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-3.5 bg-red-500 rounded-full inline-block"></span>
+              <span>{renderInlineSpans(trimmed.replace(/^###\s*/, ''))}</span>
+            </div>
+          );
+        }
+
+        // Numbered list: "1. ", "2. "
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+        if (numMatch) {
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-0.5 my-1">
+              <span className="flex items-center justify-center w-4 h-4 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 font-mono font-bold text-[10px] shrink-0 mt-0.5 border border-red-500/20">
+                {numMatch[1]}
+              </span>
+              <div className="flex-1">{renderInlineSpans(numMatch[2])}</div>
+            </div>
+          );
+        }
+
+        // Bullet list: "- ", "• ", "* "
+        if (trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ')) {
+          const bulletContent = trimmed.replace(/^[-•*]\s*/, '');
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-0.5 my-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5"></span>
+              <div className="flex-1">{renderInlineSpans(bulletContent)}</div>
+            </div>
+          );
+        }
+
+        // Normal paragraph
+        return (
+          <p key={idx} className="my-0.5">
+            {renderInlineSpans(trimmed)}
+          </p>
+        );
+      })}
+    </div>
+  );
+};
+
 export const LifeCareAiChatbot: React.FC = () => {
   const { theme } = useEmergency();
   const isDark = theme === 'dark';
@@ -42,9 +141,19 @@ export const LifeCareAiChatbot: React.FC = () => {
     {
       id: 'welcome-1',
       sender: 'ai',
-      text: `Hello! I am the **LifeCare Gen AI Copilot** with complete **A to Z knowledge** of our Zero-Wait Emergency Healthcare Network.\n\nYou can ask me anything about our **<10ms atomic bed mesh**, **Sarvam AI bilingual voice triage**, **0-second reception bypass (ABDM/ABHA)**, **108 driver telemetry**, or **doctor degrees & rostering**!`,
+      text: `### 🌟 Welcome! I am Niro
+I am **Niro**, your LifeCare Gen AI Clinical Copilot with complete **A to Z knowledge** of our Zero-Wait Emergency Healthcare Network.
+
+**How I can assist you:**
+- **<10ms Atomic Resource Lock:** Deterministic reservation of ER bay, specialist doctor, and equipment simultaneously.
+- **0-Second ER Reception Bypass:** Contactless ABDM v3, ABHA health records, and PM-JAY verification.
+- **108 Paramedic GPS Corridor:** Turn-by-turn emergency routing and continuous live vitals streaming.
+- **Specialist Doctor Rostering:** Verified medical qualifications (MBBS, MD, DM, FRCS) and bay allocation.
+- **Super Admin Governance (/admin):** Zero-trust audit logging and centralized directory control.
+
+Tap any question below or ask me anything in **English** or **हिन्दी**!`,
       timestamp: 'Just now',
-      suggestedFollowUps: SUGGESTED_QUICK_QUESTIONS.slice(0, 3)
+      suggestedFollowUps: SUGGESTED_QUICK_QUESTIONS.slice(0, 4)
     }
   ]);
   const [inputText, setInputText] = useState('');
@@ -115,7 +224,7 @@ export const LifeCareAiChatbot: React.FC = () => {
     const cleanSpeech = text
       .replace(/[#*`_~[\]()]/g, '')
       .replace(/###/g, '')
-      .replace(/- /g, '')
+      .replace(/[-•*]\s*/g, '')
       .slice(0, 450);
 
     setIsSpeakingId(msgId);
@@ -162,30 +271,32 @@ export const LifeCareAiChatbot: React.FC = () => {
 
   return (
     <>
-      {/* Floating Trigger Button */}
+      {/* Floating Trigger Button: Solid, High-Contrast Niro Widget */}
       {!isOpen && (
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer border group macos-glass ${
+          className={`fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer border group ${
             isDark
-              ? 'macos-glass-dark border-red-500/50 hover:border-red-400 text-white shadow-red-950/40'
-              : 'macos-glass-light border-red-400 hover:border-red-500 text-slate-900 shadow-slate-400/30'
+              ? 'bg-[#0f1424] border-red-500/60 hover:border-red-400 text-white shadow-black/80 ring-1 ring-white/10'
+              : 'bg-white border-red-300 hover:border-red-500 text-slate-900 shadow-slate-900/15 ring-1 ring-slate-900/5'
           }`}
-          title="Open LifeCare Gen AI Knowledge Copilot"
+          title="Open Niro • LifeCare Gen AI Copilot"
         >
-          <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 text-white shadow-md">
+          <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 text-white shadow-md">
             <Sparkles className="w-4 h-4 text-white animate-pulse" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-white animate-ping"></span>
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white dark:border-zinc-900 animate-ping"></span>
           </div>
 
           <div className="flex flex-col text-left">
-            <span className="text-xs font-black tracking-tight flex items-center gap-1.5">
-              <span>LifeCare Gen AI</span>
-              <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-red-600 text-white uppercase">
-                A-Z Copilot
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-black tracking-tight text-slate-900 dark:text-white">
+                Niro
               </span>
-            </span>
+              <span className="text-[9px] font-mono font-extrabold px-1.5 py-0.2 rounded-full bg-red-600 text-white uppercase tracking-wider">
+                AI Copilot
+              </span>
+            </div>
             <span className={`text-[10px] font-medium ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
               Sarvam AI Powered • Ask Anything
             </span>
@@ -193,252 +304,289 @@ export const LifeCareAiChatbot: React.FC = () => {
         </button>
       )}
 
-      {/* Main Glass Copilot Drawer / Modal */}
+      {/* Main Copilot Modal: Solid, High-Opacity Opaque Card (Zero Background Bleed-Through) */}
       {isOpen && (
-        <div className="fixed bottom-5 right-3 sm:right-6 z-50 w-[95vw] sm:w-[440px] h-[600px] max-h-[85vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden border macos-glass animate-fadeIn transition-colors duration-300">
-          <div className={`flex flex-col h-full ${isDark ? 'macos-glass-dark text-zinc-100' : 'macos-glass-light text-slate-900'}`}>
-            {/* Header */}
-            <div className={`p-4 border-b flex items-center justify-between shrink-0 ${isDark ? 'border-zinc-800/80 bg-zinc-950/60' : 'border-slate-200/80 bg-white/70'}`}>
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 text-white flex items-center justify-center shadow-md shrink-0">
-                  <Bot className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className={`text-sm font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      LifeCare Gen AI Copilot
-                    </h3>
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
-                      LIVE
-                    </span>
-                  </div>
-                  <p className={`text-[11px] font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    Sarvam AI & Full Project Knowledge
-                  </p>
-                </div>
+        <div className={`fixed bottom-4 sm:bottom-6 right-2 sm:right-6 z-50 w-[96vw] sm:w-[470px] h-[640px] max-h-[88vh] flex flex-col rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.65)] overflow-hidden border transition-colors duration-200 ${
+          isDark
+            ? 'bg-[#0c101d] border-zinc-800 text-zinc-100 ring-1 ring-white/10'
+            : 'bg-white border-slate-200 text-slate-900 ring-1 ring-slate-900/5'
+        }`}>
+          {/* Header */}
+          <div className={`p-4 border-b flex items-center justify-between shrink-0 ${
+            isDark ? 'border-zinc-800 bg-[#0e1424]' : 'border-slate-200 bg-slate-50/90'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 text-white flex items-center justify-center shadow-md shrink-0">
+                <Bot className="w-5 h-5 text-white" />
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0e1424]"></span>
               </div>
-
-              <div className="flex items-center gap-1.5">
-                {/* Language Switcher */}
-                <button
-                  type="button"
-                  onClick={() => setPreferredLang(preferredLang === 'en' ? 'hi' : 'en')}
-                  className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-xl border transition cursor-pointer ${
-                    isDark
-                      ? 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:text-white'
-                      : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
-                  }`}
-                  title="Toggle Language: English / हिन्दी"
-                >
-                  {preferredLang === 'en' ? 'EN' : 'हिन्दी'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    stopSarvamSpeech();
-                    setIsSpeakingId(null);
-                    setIsOpen(false);
-                  }}
-                  className={`p-1.5 rounded-xl transition cursor-pointer ${
-                    isDark ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-900'
-                  }`}
-                  title="Close AI Copilot"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className={`text-sm font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    Niro
+                  </h3>
+                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                    Gen AI Copilot
+                  </span>
+                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                    ONLINE
+                  </span>
+                </div>
+                <p className={`text-[11px] font-mono flex items-center gap-1.5 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
+                  <span>Sarvam Indic AI</span>
+                  <span>•</span>
+                  <span>A-to-Z Project Knowledge</span>
+                </p>
               </div>
             </div>
 
-            {/* Quick Suggestions Chips */}
-            <div className={`px-3 py-2 border-b overflow-x-auto flex items-center gap-1.5 scrollbar-none text-[11px] font-mono shrink-0 ${
-              isDark ? 'border-zinc-800/80 bg-black/40' : 'border-slate-200/80 bg-slate-50/50'
-            }`}>
-              <span className={`text-[10px] uppercase font-bold shrink-0 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
-                Ask:
-              </span>
-              {SUGGESTED_QUICK_QUESTIONS.map((q, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  disabled={isLoading}
-                  onClick={() => handleSendMessage(q)}
-                  className={`whitespace-nowrap px-2.5 py-1 rounded-full border transition cursor-pointer ${
-                    isDark
-                      ? 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border-zinc-700/80 hover:border-red-500'
-                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-red-400 shadow-2xs'
-                  }`}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
+            <div className="flex items-center gap-1.5">
+              {/* Language Switcher */}
+              <button
+                type="button"
+                onClick={() => setPreferredLang(preferredLang === 'en' ? 'hi' : 'en')}
+                className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-xl border transition cursor-pointer ${
+                  isDark
+                    ? 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:text-white hover:border-red-500'
+                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-red-400'
+                }`}
+                title="Toggle Language: English / हिन्दी"
+              >
+                {preferredLang === 'en' ? 'EN' : 'हिन्दी'}
+              </button>
 
-            {/* Messages Scroll Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((msg) => {
-                const isUser = msg.sender === 'user';
-                return (
-                  <div
-                    key={msg.id}
-                    className={`flex gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}`}
-                  >
+              <button
+                type="button"
+                onClick={() => {
+                  stopSarvamSpeech();
+                  setIsSpeakingId(null);
+                  setIsOpen(false);
+                }}
+                className={`p-1.5 rounded-xl transition cursor-pointer ${
+                  isDark ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white' : 'hover:bg-slate-200 text-slate-500 hover:text-slate-900'
+                }`}
+                title="Close Niro"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Suggestions Chips Strip */}
+          <div className={`px-3 py-2 border-b overflow-x-auto flex items-center gap-1.5 text-[11px] font-mono shrink-0 ${
+            isDark ? 'border-zinc-800 bg-[#090d18]' : 'border-slate-200 bg-slate-100/70'
+          }`}>
+            <span className={`text-[10px] uppercase font-bold shrink-0 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
+              Ask Niro:
+            </span>
+            {SUGGESTED_QUICK_QUESTIONS.map((q, idx) => (
+              <button
+                key={idx}
+                type="button"
+                disabled={isLoading}
+                onClick={() => handleSendMessage(q)}
+                className={`whitespace-nowrap px-2.5 py-1 rounded-full border transition cursor-pointer text-[10px] font-bold ${
+                  isDark
+                    ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-700 hover:border-red-500'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 hover:border-red-400 shadow-2xs'
+                }`}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* Messages Scroll Area: Completely Opaque Solid Canvas */}
+          <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${
+            isDark ? 'bg-[#080c16]' : 'bg-slate-50'
+          }`}>
+            {messages.map((msg) => {
+              const isUser = msg.sender === 'user';
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}`}
+                >
+                  {!isUser && (
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-red-600 to-rose-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                      <Bot className="w-4 h-4" />
+                    </div>
+                  )}
+
+                  <div className={`max-w-[88%] rounded-2xl p-4 space-y-3 text-xs leading-relaxed ${
+                    isUser
+                      ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-br-none shadow-md shadow-red-600/20'
+                      : isDark
+                      ? 'bg-[#111728] border border-zinc-800 text-zinc-200 rounded-bl-none shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm'
+                  }`}>
+                    {/* Header Label inside bubble */}
                     {!isUser && (
-                      <div className="w-7 h-7 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-                        <Bot className="w-4 h-4" />
+                      <div className="flex items-center justify-between pb-1.5 border-b border-red-500/10">
+                        <span className="text-[11px] font-bold font-mono text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                          <Sparkles className="w-3 h-3 text-red-500" />
+                          <span>Niro</span>
+                        </span>
+                        <span className="text-[10px] font-mono opacity-60">
+                          {msg.timestamp}
+                        </span>
                       </div>
                     )}
 
-                    <div className={`max-w-[85%] rounded-2xl p-3.5 space-y-2 text-xs leading-relaxed ${
-                      isUser
-                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-br-none shadow-md shadow-red-600/20'
-                        : isDark
-                        ? 'bg-zinc-900/90 border border-zinc-800 text-zinc-200 rounded-bl-none shadow-md'
-                        : 'bg-white border border-slate-200/90 text-slate-800 rounded-bl-none shadow-sm'
-                    }`}>
-                      {/* Formatted Message Content */}
-                      <div className="whitespace-pre-line font-sans">
-                        {msg.text.split('\n').map((line, lIdx) => {
-                          if (line.startsWith('### ') || line.startsWith('**') && line.endsWith('**')) {
-                            return (
-                              <div key={lIdx} className="font-black text-sm my-1 text-red-500">
-                                {line.replace(/###/g, '').replace(/\*\*/g, '')}
-                              </div>
-                            );
-                          }
-                          if (line.startsWith('- ') || line.startsWith('• ')) {
-                            return (
-                              <div key={lIdx} className="flex items-start gap-1.5 pl-1 my-0.5">
-                                <span className="text-red-500 font-bold shrink-0">•</span>
-                                <span>{line.replace(/^[-•]\s*/, '')}</span>
-                              </div>
-                            );
-                          }
-                          return <p key={lIdx} className="my-0.5">{line}</p>;
-                        })}
-                      </div>
-
-                      {/* AI Response Tools: Spoken audio and copy */}
-                      {!isUser && (
-                        <div className={`pt-2 border-t flex items-center justify-between text-[10px] font-mono ${
-                          isDark ? 'border-zinc-800 text-zinc-500' : 'border-slate-100 text-slate-400'
-                        }`}>
-                          <span>{msg.timestamp}</span>
-
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleSpeak(msg.id, msg.text)}
-                              className={`p-1 rounded-md transition flex items-center gap-1 cursor-pointer ${
-                                isSpeakingId === msg.id
-                                  ? 'bg-red-600 text-white font-bold'
-                                  : isDark
-                                  ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white'
-                                  : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
-                              }`}
-                              title={isSpeakingId === msg.id ? 'Stop Speaking' : 'Listen with Sarvam AI Voice'}
-                            >
-                              {isSpeakingId === msg.id ? (
-                                <>
-                                  <VolumeX className="w-3.5 h-3.5 animate-pulse text-white" />
-                                  <span>Stop</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Volume2 className="w-3.5 h-3.5 text-red-500" />
-                                  <span>Listen (Sarvam TTS)</span>
-                                </>
-                              )}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleCopy(msg.id, msg.text)}
-                              className={`p-1 rounded-md transition cursor-pointer ${
-                                copiedId === msg.id
-                                  ? 'text-emerald-500 font-bold'
-                                  : isDark
-                                  ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white'
-                                  : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
-                              }`}
-                              title="Copy Answer"
-                            >
-                              {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                        </div>
+                    {/* Rich Formatted Message Content */}
+                    <div className="font-sans">
+                      {isUser ? (
+                        <p className="font-medium">{msg.text}</p>
+                      ) : (
+                        renderFormattedText(msg.text)
                       )}
                     </div>
 
-                    {isUser && (
-                      <div className="w-7 h-7 rounded-xl bg-zinc-700 text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <User className="w-4 h-4" />
+                    {/* Action Bar for Niro Replies: Prominent READ ALOUD & Copy on EVERY reply */}
+                    {!isUser && (
+                      <div className={`pt-2.5 border-t flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono ${
+                        isDark ? 'border-zinc-800/80 text-zinc-400' : 'border-slate-100 text-slate-500'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          {/* Mandatory Read Aloud Button on EVERY reply */}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSpeak(msg.id, msg.text)}
+                            className={`px-2.5 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer font-bold ${
+                              isSpeakingId === msg.id
+                                ? 'bg-red-600 hover:bg-red-700 text-white border-red-500 shadow-md shadow-red-600/30'
+                                : isDark
+                                ? 'bg-zinc-900 hover:bg-zinc-800 text-red-400 hover:text-white border-zinc-700 hover:border-red-500'
+                                : 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200 hover:border-red-300'
+                            }`}
+                            title={isSpeakingId === msg.id ? 'Stop Speaking' : 'Read Aloud with Sarvam Indic TTS Voice'}
+                          >
+                            {isSpeakingId === msg.id ? (
+                              <>
+                                <VolumeX className="w-3.5 h-3.5 text-white animate-pulse" />
+                                <span>Stop Audio</span>
+                                <span className="flex items-center gap-0.5 ml-1">
+                                  <span className="w-1 h-2 bg-white animate-pulse"></span>
+                                  <span className="w-1 h-3.5 bg-white animate-pulse delay-75"></span>
+                                  <span className="w-1 h-2 bg-white animate-pulse delay-150"></span>
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <Volume2 className="w-3.5 h-3.5 text-red-500" />
+                                <span>Read Aloud</span>
+                              </>
+                            )}
+                          </button>
+
+                          {/* Copy Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(msg.id, msg.text)}
+                            className={`px-2 py-1.5 rounded-lg border transition cursor-pointer flex items-center gap-1 ${
+                              copiedId === msg.id
+                                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 font-bold'
+                                : isDark
+                                ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800'
+                                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200'
+                            }`}
+                            title="Copy Answer"
+                          >
+                            {copiedId === msg.id ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-500" />
+                                <span>Copied</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        {/* Speaking Status indicator */}
+                        {isSpeakingId === msg.id && (
+                          <span className="inline-flex items-center gap-1 text-[10px] text-red-500 font-bold font-mono animate-pulse">
+                            <Radio className="w-3 h-3" />
+                            <span>Speaking (Sarvam TTS)...</span>
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
-                );
-              })}
 
-              {isLoading && (
-                <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 p-2">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-red-500" />
-                  <span>Sarvam Indic Gen AI is analyzing LifeCare knowledge...</span>
+                  {isUser && (
+                    <div className="w-8 h-8 rounded-xl bg-zinc-700 text-white flex items-center justify-center shrink-0 mt-0.5">
+                      <User className="w-4 h-4" />
+                    </div>
+                  )}
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+              );
+            })}
 
-            {/* Input Bar */}
-            <div className={`p-3 border-t shrink-0 ${isDark ? 'border-zinc-800/80 bg-zinc-950/70' : 'border-slate-200/80 bg-white/80'}`}>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSendMessage();
-                }}
-                className="flex items-center gap-2"
+            {isLoading && (
+              <div className="flex items-center gap-2.5 text-xs font-mono text-zinc-400 p-3 bg-red-500/5 rounded-2xl border border-red-500/10">
+                <RefreshCw className="w-4 h-4 animate-spin text-red-500" />
+                <span>Niro is analyzing LifeCare knowledge with Sarvam AI...</span>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Bar: Solid Opaque Footer */}
+          <div className={`p-3 border-t shrink-0 ${
+            isDark ? 'border-zinc-800 bg-[#0e1424]' : 'border-slate-200 bg-white'
+          }`}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex items-center gap-2"
+            >
+              <button
+                type="button"
+                onClick={handleMicToggle}
+                className={`p-2.5 rounded-xl border transition cursor-pointer shrink-0 ${
+                  isListeningMic
+                    ? 'bg-red-600 text-white border-red-500 animate-pulse'
+                    : isDark
+                    ? 'bg-zinc-900 text-zinc-300 hover:text-white border-zinc-700'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-300'
+                }`}
+                title={isListeningMic ? 'Stop Recording' : 'Speak Question to Niro (Hindi / English)'}
               >
-                <button
-                  type="button"
-                  onClick={handleMicToggle}
-                  className={`p-2.5 rounded-xl border transition cursor-pointer shrink-0 ${
-                    isListeningMic
-                      ? 'bg-red-600 text-white border-red-500 animate-pulse'
-                      : isDark
-                      ? 'bg-zinc-900 text-zinc-300 hover:text-white border-zinc-700'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-300'
-                  }`}
-                  title={isListeningMic ? 'Stop Recording' : 'Speak Question (Hindi / English)'}
-                >
-                  <Mic className="w-4 h-4" />
-                </button>
+                <Mic className="w-4 h-4" />
+              </button>
 
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder={
-                    preferredLang === 'hi'
-                      ? 'LifeCare के बारे में कुछ भी पूछें...'
-                      : 'Ask about atomic lock, ABDM, doctors, 108...'
-                  }
-                  className={`flex-1 px-3.5 py-2.5 rounded-xl text-xs font-medium border outline-none transition ${
-                    isDark
-                      ? 'bg-black/60 text-white border-zinc-800 focus:border-red-500'
-                      : 'bg-white text-slate-900 border-slate-300 focus:border-red-500'
-                  }`}
-                />
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder={
+                  preferredLang === 'hi'
+                    ? 'Niro से LifeCare के बारे में कुछ भी पूछें...'
+                    : 'Ask Niro about atomic lock, ABDM, doctors, 108...'
+                }
+                className={`flex-1 px-3.5 py-2.5 rounded-xl text-xs font-medium border outline-none transition ${
+                  isDark
+                    ? 'bg-[#080c16] text-white border-zinc-800 focus:border-red-500'
+                    : 'bg-slate-50 text-slate-900 border-slate-300 focus:border-red-500'
+                }`}
+              />
 
-                <button
-                  type="submit"
-                  disabled={!inputText.trim() || isLoading}
-                  className="bg-red-600 hover:bg-red-500 disabled:opacity-40 text-white p-2.5 rounded-xl transition shadow-md shadow-red-600/20 cursor-pointer shrink-0"
-                  title="Send Question"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-            </div>
+              <button
+                type="submit"
+                disabled={!inputText.trim() || isLoading}
+                className="bg-red-600 hover:bg-red-500 disabled:opacity-40 text-white p-2.5 rounded-xl transition shadow-md shadow-red-600/20 cursor-pointer shrink-0"
+                title="Send Question to Niro"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
           </div>
         </div>
       )}
