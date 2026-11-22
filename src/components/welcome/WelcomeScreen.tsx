@@ -77,92 +77,20 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
   return (
     <div className={`w-full space-y-8 py-4 sm:py-6 animate-fadeIn transition-colors duration-300 ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>
-      {/* HERO OS IDENTITY WITH CONTINUOUS DARK GLOWING RED PULSE TRAVERSING LEFT-TO-RIGHT */}
-      <div className="text-center space-y-3 max-w-5xl mx-auto px-4 pt-1">
+      {/* HERO OS IDENTITY */}
+      <div className="text-center space-y-4 max-w-4xl mx-auto px-4 pt-2">
         <div className={`inline-flex items-center space-x-2 px-3.5 py-1 rounded-full text-[11px] font-mono font-bold tracking-widest uppercase border ${
           isDark
-            ? 'bg-red-950/60 border-red-900/80 text-red-400'
-            : 'bg-red-50 border-red-200 text-red-800'
+            ? 'bg-red-950/60 border-red-800/70 text-red-400'
+            : 'bg-red-50 border-red-200 text-red-700'
         }`}>
-          <Activity className="w-3.5 h-3.5 text-red-600 animate-pulse" />
+          <Activity className="w-3.5 h-3.5 text-red-500 animate-pulse" />
           <span>AUTONOMOUS EMERGENCY HEALTHCARE NETWORK</span>
         </div>
 
-        {/* Dynamic Continuous Cardiac Stage: Dark Glowing Red Pulses Moving Left-to-Right with LifeCare in Between */}
-        <div className="relative w-full max-w-4xl mx-auto px-2 py-1 flex items-center justify-center overflow-visible select-none">
-          <svg
-            className="w-full h-36 sm:h-48 md:h-56 overflow-visible"
-            viewBox="0 0 1000 240"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              {/* Dark Glowing Red Optical Filter */}
-              <filter id="dark-red-glow" x="-30%" y="-30%" width="160%" height="160%">
-                <feGaussianBlur stdDeviation="3.8" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-
-              {/* Intense Dark Glowing Red Pulse Gradient */}
-              <linearGradient id="dark-red-pulse-beam" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#450a0a" stopOpacity="0.1" />
-                <stop offset="20%" stopColor="#7f1d1d" stopOpacity="0.85" />
-                <stop offset="45%" stopColor="#b91c1c" stopOpacity="1" />
-                <stop offset="55%" stopColor="#dc2626" stopOpacity="1" />
-                <stop offset="80%" stopColor="#991b1b" stopOpacity="0.85" />
-                <stop offset="100%" stopColor="#450a0a" stopOpacity="0.1" />
-              </linearGradient>
-            </defs>
-
-            {/* Baseline Dark Red ECG Trace Line */}
-            <path
-              d="M 0 120 H 120 L 135 120 L 145 105 L 155 135 L 165 45 L 180 195 L 195 120 L 210 120 L 225 100 L 240 120 H 340 L 355 120 L 365 108 L 375 120 L 388 55 L 402 185 L 415 120 L 430 120 H 570 L 585 120 L 598 55 L 612 185 L 625 120 L 635 108 L 645 120 H 740 L 755 120 L 765 105 L 775 135 L 785 45 L 800 195 L 815 120 L 830 120 L 845 100 L 860 120 H 1000"
-              stroke={isDark ? "rgba(127, 29, 29, 0.35)" : "rgba(153, 27, 27, 0.22)"}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-
-            {/* Simultaneous Active Pulse Beam 1 (Traversing Left to Right in Dark Glowing Red) */}
-            <path
-              d="M 0 120 H 120 L 135 120 L 145 105 L 155 135 L 165 45 L 180 195 L 195 120 L 210 120 L 225 100 L 240 120 H 340 L 355 120 L 365 108 L 375 120 L 388 55 L 402 185 L 415 120 L 430 120 H 570 L 585 120 L 598 55 L 612 185 L 625 120 L 635 108 L 645 120 H 740 L 755 120 L 765 105 L 775 135 L 785 45 L 800 195 L 815 120 L 830 120 L 845 100 L 860 120 H 1000"
-              stroke="url(#dark-red-pulse-beam)"
-              strokeWidth="3.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="hero-pulse-runner"
-              filter="url(#dark-red-glow)"
-            />
-
-            {/* Simultaneous Active Pulse Beam 2 (Offset Stream for Continuous Flow) */}
-            <path
-              d="M 0 120 H 120 L 135 120 L 145 105 L 155 135 L 165 45 L 180 195 L 195 120 L 210 120 L 225 100 L 240 120 H 340 L 355 120 L 365 108 L 375 120 L 388 55 L 402 185 L 415 120 L 430 120 H 570 L 585 120 L 598 55 L 612 185 L 625 120 L 635 108 L 645 120 H 740 L 755 120 L 765 105 L 775 135 L 785 45 L 800 195 L 815 120 L 830 120 L 845 100 L 860 120 H 1000"
-              stroke="url(#dark-red-pulse-beam)"
-              strokeWidth="3.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="hero-pulse-runner-offset"
-              filter="url(#dark-red-glow)"
-            />
-          </svg>
-
-          {/* LifeCare in Between */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-            <h1 className={`text-3xl sm:text-5xl md:text-6xl font-black tracking-tight font-mono ${isDark ? 'text-white' : 'text-slate-900'} drop-shadow-md`}>
-              Life<span className="text-transparent bg-clip-text bg-gradient-to-r from-red-700 via-red-600 to-rose-700">Care</span>
-            </h1>
-            <div className="flex items-center gap-1.5 mt-1 sm:mt-1.5">
-              <span className={`text-[10px] sm:text-xs font-mono font-extrabold px-3 py-0.5 rounded-full border tracking-wider uppercase shadow-xs ${
-                isDark ? 'bg-red-950/80 border-red-900/90 text-red-300' : 'bg-red-50 border-red-200 text-red-800'
-              }`}>
-                Caring for Lives
-              </span>
-            </div>
-          </div>
-        </div>
+        <h1 className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          Life<span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-500 to-red-600">Care</span>
+        </h1>
 
         <p className={`text-base sm:text-xl font-medium max-w-2xl mx-auto ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
           Caring for Lives. Every Second Saved Is a Life Preserved.
@@ -204,7 +132,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
       )}
 
       {/* 3. THREE OPERATIONAL COCKPIT TERMINALS */}
-      <div className={currentUser ? "max-w-xl mx-auto px-4" : "grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7 px-4"}>
+      <div className={currentUser ? "max-w-xl mx-auto px-4" : "grid grid-cols-1 md:grid-cols-3 gap-6 px-4"}>
         
         {/* ========================================================
             TERMINAL 01: CITIZEN GUARDIAN
@@ -212,29 +140,30 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
         {(!currentUser || currentUser.role === 'guardian') && (
           <div
             onClick={() => handleSelectRole('guardian')}
-            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden border backdrop-blur-xl ${
+            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden macos-glass ${
               isDark
-                ? 'bg-gradient-to-b from-red-950/25 via-[#0b101e]/95 to-[#060913] border-red-500/25 hover:border-red-500/60 shadow-[0_15px_40px_-10px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_50px_-10px_rgba(239,68,68,0.25)]'
-                : 'bg-gradient-to-b from-red-50/50 via-white to-slate-50/80 border-red-200/90 hover:border-red-400 shadow-[0_12px_36px_-10px_rgba(220,38,38,0.12)] hover:shadow-[0_22px_50px_-10px_rgba(239,68,68,0.22)]'
+                ? 'macos-glass-dark hover:border-red-500/70 hover:shadow-red-500/20'
+                : 'macos-glass-light hover:border-red-400 hover:shadow-red-500/10'
             }`}
           >
-            {/* Top Accent Gradient Border Strip */}
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 opacity-90 group-hover:h-1.5 transition-all"></div>
-            
-            {/* Ambient Corner Glow */}
-            <div className={`absolute top-0 right-0 w-40 h-40 rounded-bl-full pointer-events-none group-hover:scale-125 transition-transform duration-500 ${isDark ? 'bg-red-500/10 blur-2xl' : 'bg-red-500/8 blur-xl'}`}></div>
-            <div className={`absolute top-3.5 right-3.5 text-[10px] font-mono font-bold tracking-wider select-none px-2 py-0.5 rounded-full ${isDark ? 'text-red-400/80 bg-red-950/50 border border-red-900/50' : 'text-red-600/80 bg-red-50 border border-red-200/70'}`}>
+            {/* Ambient Corner Accents */}
+            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-red-600/10' : 'bg-red-500/5'}`}></div>
+            <div className={`absolute top-3 right-3 text-[10px] font-mono select-none ${isDark ? 'text-zinc-600' : 'text-slate-400'}`}>
               [ 01 // CITIZEN ]
             </div>
 
             <div className="space-y-5 relative z-10">
               {/* Terminal Badge & Status */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 bg-gradient-to-tr from-red-600 to-rose-500 text-white shadow-red-600/30">
-                  <HeartPulse className="w-6 h-6 text-white" />
+              <div className="flex items-center justify-between">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-all border ${
+                  isDark
+                    ? 'bg-zinc-900/80 border-zinc-800 text-red-500 group-hover:border-red-500/50'
+                    : 'bg-red-50 border-red-200 text-red-600'
+                }`}>
+                  <HeartPulse className="w-6 h-6" />
                 </div>
-                <div className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-extrabold tracking-wide border shadow-2xs ${
-                  isDark ? 'bg-red-950/70 border-red-800/80 text-red-300' : 'bg-red-50 border-red-200 text-red-700'
+                <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold border ${
+                  isDark ? 'bg-red-950/60 border-red-800/60 text-red-400' : 'bg-red-50 border-red-200 text-red-700'
                 }`}>
                   <Radio className="w-3 h-3 animate-pulse text-red-500" />
                   <span>RAPID TRIAGE</span>
@@ -243,20 +172,40 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
               {/* Title & Description */}
               <div>
-                <span className={`text-[10px] font-mono font-bold uppercase tracking-widest block mb-1 ${isDark ? 'text-red-400/90' : 'text-red-600/90'}`}>
+                <span className={`text-[10px] font-mono uppercase tracking-widest block mb-1 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                   TERMINAL_01 // PUBLIC ADMISSION
                 </span>
                 <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Guardian Portal
                 </h2>
-                <p className={`text-xs mt-2 leading-relaxed font-medium ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
                   Emergency triage for family members & bystanders. Instant ABHA history uplink, Sarvam AI voice diagnosis, and nearest bed lock.
                 </p>
+              </div>
+
+              {/* Module Specs Grid */}
+              <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono">
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[AI_TRIAGE]</span>
+                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Sarvam Voice (Hindi / Eng)</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[BED_LOCK]</span>
+                  <span className="text-emerald-500 font-semibold">&lt;10ms Atomic Lock</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[ABHA_SYNC]</span>
+                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Instant Health ID</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[ROUTE]</span>
+                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Priority ER Corridor</span>
+                </div>
               </div>
             </div>
 
             {/* Terminal Action Button */}
-            <div className={`relative z-10 mt-6 pt-4 border-t space-y-2.5 ${isDark ? 'border-zinc-800/80' : 'border-slate-200/80'}`}>
+            <div className={`relative z-10 mt-6 pt-4 border-t space-y-2.5 ${isDark ? 'border-zinc-800/80' : 'border-slate-100'}`}>
               <button
                 type="button"
                 disabled={authenticatingRole !== null}
@@ -264,12 +213,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                   e.stopPropagation();
                   handleSelectRole('guardian');
                 }}
-                className="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white py-3.5 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition-all shadow-lg shadow-red-600/30 hover:shadow-red-600/45 cursor-pointer disabled:opacity-60"
+                className="w-full bg-red-600 hover:bg-red-500 text-white py-3 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition shadow-lg shadow-red-600/25 cursor-pointer disabled:opacity-60"
               >
                 {authenticatingRole === 'guardian' ? (
                   <Loader2 className="w-4 h-4 animate-spin text-white" />
                 ) : currentUser ? (
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 ) : (
                   <GoogleIcon className="w-4 h-4" />
                 )}
@@ -282,12 +231,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                 </span>
               </button>
 
-              <div className={`flex items-center justify-between text-[10px] font-mono px-1 font-semibold ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+              <div className={`flex items-center justify-between text-[10px] font-mono px-1 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                 <span>AUTH: GOOGLE OAUTH 2.0</span>
-                <span className="text-emerald-500 font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>ENCRYPTED</span>
-                </span>
+                <span className="text-emerald-500 font-bold">ENCRYPTED</span>
               </div>
             </div>
           </div>
@@ -299,29 +245,30 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
         {(!currentUser || currentUser.role === 'driver') && (
           <div
             onClick={() => handleSelectRole('driver')}
-            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden border backdrop-blur-xl ${
+            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden macos-glass ${
               isDark
-                ? 'bg-gradient-to-b from-amber-950/25 via-[#0b101e]/95 to-[#060913] border-amber-500/25 hover:border-amber-500/60 shadow-[0_15px_40px_-10px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_50px_-10px_rgba(245,158,11,0.25)]'
-                : 'bg-gradient-to-b from-amber-50/50 via-white to-slate-50/80 border-amber-200/90 hover:border-amber-400 shadow-[0_12px_36px_-10px_rgba(217,119,6,0.12)] hover:shadow-[0_22px_50px_-10px_rgba(245,158,11,0.22)]'
+                ? 'macos-glass-dark hover:border-amber-500/70 hover:shadow-amber-500/20'
+                : 'macos-glass-light hover:border-amber-400 hover:shadow-amber-500/10'
             }`}
           >
-            {/* Top Accent Gradient Border Strip */}
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-400 opacity-90 group-hover:h-1.5 transition-all"></div>
-
-            {/* Ambient Corner Glow */}
-            <div className={`absolute top-0 right-0 w-40 h-40 rounded-bl-full pointer-events-none group-hover:scale-125 transition-transform duration-500 ${isDark ? 'bg-amber-500/10 blur-2xl' : 'bg-amber-500/8 blur-xl'}`}></div>
-            <div className={`absolute top-3.5 right-3.5 text-[10px] font-mono font-bold tracking-wider select-none px-2 py-0.5 rounded-full ${isDark ? 'text-amber-400/80 bg-amber-950/50 border border-amber-900/50' : 'text-amber-600/80 bg-amber-50 border border-amber-200/70'}`}>
+            {/* Ambient Corner Accents */}
+            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-amber-600/10' : 'bg-amber-500/5'}`}></div>
+            <div className={`absolute top-3 right-3 text-[10px] font-mono select-none ${isDark ? 'text-zinc-600' : 'text-slate-400'}`}>
               [ 02 // AMBULANCE ]
             </div>
 
             <div className="space-y-5 relative z-10">
               {/* Terminal Badge & Status */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 text-white shadow-amber-500/30">
-                  <Ambulance className="w-6 h-6 text-white" />
+              <div className="flex items-center justify-between">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-all border ${
+                  isDark
+                    ? 'bg-zinc-900/80 border-zinc-800 text-amber-500 group-hover:border-amber-500/50'
+                    : 'bg-amber-50 border-amber-200 text-amber-600'
+                }`}>
+                  <Ambulance className="w-6 h-6" />
                 </div>
-                <div className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-extrabold tracking-wide border shadow-2xs ${
-                  isDark ? 'bg-amber-950/70 border-amber-800/80 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'
+                <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold border ${
+                  isDark ? 'bg-amber-950/60 border-amber-800/60 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-700'
                 }`}>
                   <Radio className="w-3 h-3 animate-pulse text-amber-500" />
                   <span>FLEET TELEMETRY</span>
@@ -330,20 +277,40 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
               {/* Title & Description */}
               <div>
-                <span className={`text-[10px] font-mono font-bold uppercase tracking-widest block mb-1 ${isDark ? 'text-amber-400/90' : 'text-amber-600/90'}`}>
+                <span className={`text-[10px] font-mono uppercase tracking-widest block mb-1 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                   TERMINAL_02 // PARAMEDIC MOBILE ICU
                 </span>
                 <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   108 Driver Cockpit
                 </h2>
-                <p className={`text-xs mt-2 leading-relaxed font-medium ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
                   Paramedic tactical navigation console. Turn-by-turn emergency routing, in-transit vital signs telemetry, and direct ER bay bypass.
                 </p>
+              </div>
+
+              {/* Module Specs Grid */}
+              <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono">
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[CORRIDOR]</span>
+                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Priority GPS Routing</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[TELEMETRY]</span>
+                  <span className="text-cyan-500 font-semibold">Real-Time Vitals Stream</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[BAY_BYPASS]</span>
+                  <span className="text-emerald-500 font-semibold">Zero-Wait Gate Admission</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[VEHICLE_ID]</span>
+                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>ACLS / BLS Verified</span>
+                </div>
               </div>
             </div>
 
             {/* Terminal Action Button */}
-            <div className={`relative z-10 mt-6 pt-4 border-t space-y-2.5 ${isDark ? 'border-zinc-800/80' : 'border-slate-200/80'}`}>
+            <div className={`relative z-10 mt-6 pt-4 border-t space-y-2.5 ${isDark ? 'border-zinc-800/80' : 'border-slate-100'}`}>
               <button
                 type="button"
                 disabled={authenticatingRole !== null}
@@ -351,12 +318,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                   e.stopPropagation();
                   handleSelectRole('driver');
                 }}
-                className="w-full bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 hover:from-amber-500 hover:to-orange-400 text-white py-3.5 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition-all shadow-lg shadow-amber-600/30 hover:shadow-amber-600/45 cursor-pointer disabled:opacity-60"
+                className="w-full bg-amber-600 hover:bg-amber-500 text-black py-3 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition shadow-lg shadow-amber-600/25 cursor-pointer disabled:opacity-60"
               >
                 {authenticatingRole === 'driver' ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <Loader2 className="w-4 h-4 animate-spin text-black" />
                 ) : currentUser ? (
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 ) : (
                   <GoogleIcon className="w-4 h-4" />
                 )}
@@ -369,12 +336,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                 </span>
               </button>
 
-              <div className={`flex items-center justify-between text-[10px] font-mono px-1 font-semibold ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+              <div className={`flex items-center justify-between text-[10px] font-mono px-1 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                 <span>AUTH: GOOGLE OAUTH 2.0</span>
-                <span className="text-emerald-500 font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>FLEET VERIFIED</span>
-                </span>
+                <span className="text-emerald-500 font-bold">FLEET VERIFIED</span>
               </div>
             </div>
           </div>
@@ -386,29 +350,30 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
         {(!currentUser || currentUser.role === 'hospital') && (
           <div
             onClick={() => handleSelectRole('hospital')}
-            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden border backdrop-blur-xl ${
+            className={`group relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 cursor-pointer overflow-hidden macos-glass ${
               isDark
-                ? 'bg-gradient-to-b from-emerald-950/25 via-[#0b101e]/95 to-[#060913] border-emerald-500/25 hover:border-emerald-500/60 shadow-[0_15px_40px_-10px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_50px_-10px_rgba(16,185,129,0.25)]'
-                : 'bg-gradient-to-b from-emerald-50/50 via-white to-slate-50/80 border-emerald-200/90 hover:border-emerald-400 shadow-[0_12px_36px_-10px_rgba(5,150,105,0.12)] hover:shadow-[0_22px_50px_-10px_rgba(16,185,129,0.22)]'
+                ? 'macos-glass-dark hover:border-emerald-500/70 hover:shadow-emerald-500/20'
+                : 'macos-glass-light hover:border-emerald-400 hover:shadow-emerald-500/10'
             }`}
           >
-            {/* Top Accent Gradient Border Strip */}
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 opacity-90 group-hover:h-1.5 transition-all"></div>
-
-            {/* Ambient Corner Glow */}
-            <div className={`absolute top-0 right-0 w-40 h-40 rounded-bl-full pointer-events-none group-hover:scale-125 transition-transform duration-500 ${isDark ? 'bg-emerald-500/10 blur-2xl' : 'bg-emerald-500/8 blur-xl'}`}></div>
-            <div className={`absolute top-3.5 right-3.5 text-[10px] font-mono font-bold tracking-wider select-none px-2 py-0.5 rounded-full ${isDark ? 'text-emerald-400/80 bg-emerald-950/50 border border-emerald-900/50' : 'text-emerald-700/80 bg-emerald-50 border border-emerald-200/70'}`}>
+            {/* Ambient Corner Accents */}
+            <div className={`absolute top-0 right-0 w-36 h-36 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-500/5'}`}></div>
+            <div className={`absolute top-3 right-3 text-[10px] font-mono select-none ${isDark ? 'text-zinc-600' : 'text-slate-400'}`}>
               [ 03 // HOSPITAL ]
             </div>
 
             <div className="space-y-5 relative z-10">
               {/* Terminal Badge & Status */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-500 text-white shadow-emerald-600/30">
-                  <Building2 className="w-6 h-6 text-white" />
+              <div className="flex items-center justify-between">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-all border ${
+                  isDark
+                    ? 'bg-zinc-900/80 border-zinc-800 text-emerald-400 group-hover:border-emerald-500/50'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                }`}>
+                  <Building2 className="w-6 h-6" />
                 </div>
-                <div className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-extrabold tracking-wide border shadow-2xs ${
-                  isDark ? 'bg-emerald-950/70 border-emerald-800/80 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold border ${
+                  isDark ? 'bg-emerald-950/60 border-emerald-800/60 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 }`}>
                   <Radio className="w-3 h-3 animate-pulse text-emerald-500" />
                   <span>COMMAND HEADQUARTERS</span>
@@ -417,20 +382,40 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
               {/* Title & Description */}
               <div>
-                <span className={`text-[10px] font-mono font-bold uppercase tracking-widest block mb-1 ${isDark ? 'text-emerald-400/90' : 'text-emerald-600/90'}`}>
+                <span className={`text-[10px] font-mono uppercase tracking-widest block mb-1 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                   TERMINAL_03 // TRAUMA CENTER
                 </span>
                 <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Hospital ER Command
                 </h2>
-                <p className={`text-xs mt-2 leading-relaxed font-medium ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
                   Emergency department command center. Real-time ICU/ventilator capacity, on-duty specialist doctor rosters, and pre-arrival telemetry.
                 </p>
+              </div>
+
+              {/* Module Specs Grid */}
+              <div className="space-y-2 pt-3 border-t border-zinc-800/80 text-[11px] font-mono">
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[BED_MESH]</span>
+                  <span className="text-emerald-500 font-semibold">Live ICU / ER Capacity</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[DOCTOR_GRID]</span>
+                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>On-Duty Specialist Roster</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[EQUIPMENT]</span>
+                  <span className={`font-semibold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Life-Support Machinery</span>
+                </div>
+                <div className={`flex items-center justify-between p-2 rounded-xl border macos-glass-inner ${isDark ? 'macos-glass-inner-dark' : 'macos-glass-inner-light'}`}>
+                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>[PRE_ALERT]</span>
+                  <span className="text-cyan-500 font-semibold">Incoming Telemetry Feed</span>
+                </div>
               </div>
             </div>
 
             {/* Terminal Action Button */}
-            <div className={`relative z-10 mt-6 pt-4 border-t space-y-2.5 ${isDark ? 'border-zinc-800/80' : 'border-slate-200/80'}`}>
+            <div className={`relative z-10 mt-6 pt-4 border-t space-y-2.5 ${isDark ? 'border-zinc-800/80' : 'border-slate-100'}`}>
               <button
                 type="button"
                 disabled={authenticatingRole !== null}
@@ -438,12 +423,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                   e.stopPropagation();
                   handleSelectRole('hospital');
                 }}
-                className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white py-3.5 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition-all shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/45 cursor-pointer disabled:opacity-60"
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-2xl font-bold text-xs font-mono flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-600/25 cursor-pointer disabled:opacity-60"
               >
                 {authenticatingRole === 'hospital' ? (
                   <Loader2 className="w-4 h-4 animate-spin text-white" />
                 ) : currentUser ? (
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 ) : (
                   <GoogleIcon className="w-4 h-4" />
                 )}
@@ -456,12 +441,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                 </span>
               </button>
 
-              <div className={`flex items-center justify-between text-[10px] font-mono px-1 font-semibold ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+              <div className={`flex items-center justify-between text-[10px] font-mono px-1 ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
                 <span>AUTH: GOOGLE OAUTH 2.0</span>
-                <span className="text-emerald-500 font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>TRAUMA VALIDATED</span>
-                </span>
+                <span className="text-emerald-500 font-bold">TRAUMA VALIDATED</span>
               </div>
             </div>
           </div>
