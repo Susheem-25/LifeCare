@@ -77,102 +77,86 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
 
   return (
     <div className={`w-full space-y-8 py-4 sm:py-6 animate-fadeIn transition-colors duration-300 ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>
-      {/* HERO OS IDENTITY WITH SIMULTANEOUS CARDIAC PULSE & GLOWING HEART MOULDING */}
+      {/* HERO OS IDENTITY WITH CONTINUOUS DARK GLOWING RED PULSE TRAVERSING LEFT-TO-RIGHT */}
       <div className="text-center space-y-3 max-w-5xl mx-auto px-4 pt-1">
         <div className={`inline-flex items-center space-x-2 px-3.5 py-1 rounded-full text-[11px] font-mono font-bold tracking-widest uppercase border ${
           isDark
-            ? 'bg-red-950/60 border-red-800/70 text-red-400'
-            : 'bg-red-50 border-red-200 text-red-700'
+            ? 'bg-red-950/60 border-red-900/80 text-red-400'
+            : 'bg-red-50 border-red-200 text-red-800'
         }`}>
-          <Activity className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+          <Activity className="w-3.5 h-3.5 text-red-600 animate-pulse" />
           <span>AUTONOMOUS EMERGENCY HEALTHCARE NETWORK</span>
         </div>
 
-        {/* Dynamic Continuous Cardiac Stage: Left Pulse -> Glowing Heart Mould with LifeCare -> Right Pulse */}
+        {/* Dynamic Continuous Cardiac Stage: Dark Glowing Red Pulses Moving Left-to-Right with LifeCare in Between */}
         <div className="relative w-full max-w-4xl mx-auto px-2 py-1 flex items-center justify-center overflow-visible select-none">
           <svg
-            className="w-full h-40 sm:h-52 md:h-60 overflow-visible"
+            className="w-full h-36 sm:h-48 md:h-56 overflow-visible"
             viewBox="0 0 1000 240"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <defs>
-              {/* Soft Cardiac Glow Filter */}
-              <filter id="cardiac-glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="4.5" result="blur" />
+              {/* Dark Glowing Red Optical Filter */}
+              <filter id="dark-red-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3.8" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
 
-              {/* Luminous Cardiac Spectrum */}
-              <linearGradient id="cardiac-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ef4444" stopOpacity="0.3" />
-                <stop offset="35%" stopColor="#ef4444" stopOpacity="1" />
-                <stop offset="50%" stopColor="#f43f5e" stopOpacity="1" />
-                <stop offset="65%" stopColor="#ef4444" stopOpacity="1" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0.4" />
-              </linearGradient>
-
-              {/* High-Intensity Electrical Pulse Beam */}
-              <linearGradient id="beam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ef4444" stopOpacity="0.1" />
-                <stop offset="50%" stopColor="#ffffff" stopOpacity="1" />
-                <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.9" />
+              {/* Intense Dark Glowing Red Pulse Gradient */}
+              <linearGradient id="dark-red-pulse-beam" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#450a0a" stopOpacity="0.1" />
+                <stop offset="20%" stopColor="#7f1d1d" stopOpacity="0.85" />
+                <stop offset="45%" stopColor="#b91c1c" stopOpacity="1" />
+                <stop offset="55%" stopColor="#dc2626" stopOpacity="1" />
+                <stop offset="80%" stopColor="#991b1b" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#450a0a" stopOpacity="0.1" />
               </linearGradient>
             </defs>
 
-            {/* Faint Background Vital Line */}
+            {/* Baseline Dark Red ECG Trace Line */}
             <path
-              d="M 0 120 H 130 L 145 120 L 155 105 L 165 135 L 175 45 L 190 190 L 205 120 L 220 120 L 235 100 L 250 120 H 320 C 320 60, 360 20, 420 20 C 460 20, 490 55, 500 70 C 510 55, 540 20, 580 20 C 640 20, 680 60, 680 120 C 680 170, 580 205, 500 225 C 420 205, 320 170, 320 120 M 680 120 H 750 L 765 120 L 775 105 L 785 135 L 795 45 L 810 190 L 825 120 L 840 120 L 855 100 L 870 120 H 1000"
-              stroke={isDark ? "rgba(239, 68, 68, 0.2)" : "rgba(239, 68, 68, 0.16)"}
+              d="M 0 120 H 120 L 135 120 L 145 105 L 155 135 L 165 45 L 180 195 L 195 120 L 210 120 L 225 100 L 240 120 H 340 L 355 120 L 365 108 L 375 120 L 388 55 L 402 185 L 415 120 L 430 120 H 570 L 585 120 L 598 55 L 612 185 L 625 120 L 635 108 L 645 120 H 740 L 755 120 L 765 105 L 775 135 L 785 45 L 800 195 L 815 120 L 830 120 L 845 100 L 860 120 H 1000"
+              stroke={isDark ? "rgba(127, 29, 29, 0.35)" : "rgba(153, 27, 27, 0.22)"}
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
 
-            {/* Glowing Heart Boundary Mould (Rhythmic Vital Systole/Diastole Breathing) */}
+            {/* Simultaneous Active Pulse Beam 1 (Traversing Left to Right in Dark Glowing Red) */}
             <path
-              d="M 320 120 C 320 60, 360 20, 420 20 C 460 20, 490 55, 500 70 C 510 55, 540 20, 580 20 C 640 20, 680 60, 680 120 C 680 170, 580 205, 500 225 C 420 205, 320 170, 320 120 Z"
-              stroke="url(#cardiac-gradient)"
-              strokeWidth="2.5"
-              fill={isDark ? "rgba(239, 68, 68, 0.04)" : "rgba(239, 68, 68, 0.025)"}
-              className="hero-heart-contour"
-              filter="url(#cardiac-glow)"
-            />
-
-            {/* Simultaneous Active Pulse Beam 1 (Moving Left to Right through Heart) */}
-            <path
-              d="M 0 120 H 130 L 145 120 L 155 105 L 165 135 L 175 45 L 190 190 L 205 120 L 220 120 L 235 100 L 250 120 H 320 C 320 60, 360 20, 420 20 C 460 20, 490 55, 500 70 C 510 55, 540 20, 580 20 C 640 20, 680 60, 680 120 C 680 170, 580 205, 500 225 C 420 205, 320 170, 320 120 M 680 120 H 750 L 765 120 L 775 105 L 785 135 L 795 45 L 810 190 L 825 120 L 840 120 L 855 100 L 870 120 H 1000"
-              stroke="url(#beam-gradient)"
-              strokeWidth="3.2"
+              d="M 0 120 H 120 L 135 120 L 145 105 L 155 135 L 165 45 L 180 195 L 195 120 L 210 120 L 225 100 L 240 120 H 340 L 355 120 L 365 108 L 375 120 L 388 55 L 402 185 L 415 120 L 430 120 H 570 L 585 120 L 598 55 L 612 185 L 625 120 L 635 108 L 645 120 H 740 L 755 120 L 765 105 L 775 135 L 785 45 L 800 195 L 815 120 L 830 120 L 845 100 L 860 120 H 1000"
+              stroke="url(#dark-red-pulse-beam)"
+              strokeWidth="3.4"
               strokeLinecap="round"
               strokeLinejoin="round"
               className="hero-pulse-runner"
-              filter="url(#cardiac-glow)"
+              filter="url(#dark-red-glow)"
             />
 
             {/* Simultaneous Active Pulse Beam 2 (Offset Stream for Continuous Flow) */}
             <path
-              d="M 0 120 H 130 L 145 120 L 155 105 L 165 135 L 175 45 L 190 190 L 205 120 L 220 120 L 235 100 L 250 120 H 320 C 320 60, 360 20, 420 20 C 460 20, 490 55, 500 70 C 510 55, 540 20, 580 20 C 640 20, 680 60, 680 120 C 680 170, 580 205, 500 225 C 420 205, 320 170, 320 120 M 680 120 H 750 L 765 120 L 775 105 L 785 135 L 795 45 L 810 190 L 825 120 L 840 120 L 855 100 L 870 120 H 1000"
-              stroke="url(#beam-gradient)"
-              strokeWidth="3.2"
+              d="M 0 120 H 120 L 135 120 L 145 105 L 155 135 L 165 45 L 180 195 L 195 120 L 210 120 L 225 100 L 240 120 H 340 L 355 120 L 365 108 L 375 120 L 388 55 L 402 185 L 415 120 L 430 120 H 570 L 585 120 L 598 55 L 612 185 L 625 120 L 635 108 L 645 120 H 740 L 755 120 L 765 105 L 775 135 L 785 45 L 800 195 L 815 120 L 830 120 L 845 100 L 860 120 H 1000"
+              stroke="url(#dark-red-pulse-beam)"
+              strokeWidth="3.4"
               strokeLinecap="round"
               strokeLinejoin="round"
               className="hero-pulse-runner-offset"
-              filter="url(#cardiac-glow)"
+              filter="url(#dark-red-glow)"
             />
           </svg>
 
-          {/* LifeCare in Between within the Glowing Heart Boundary */}
+          {/* LifeCare in Between */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
             <h1 className={`text-3xl sm:text-5xl md:text-6xl font-black tracking-tight font-mono ${isDark ? 'text-white' : 'text-slate-900'} drop-shadow-md`}>
-              Life<span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-500 to-red-600">Care</span>
+              Life<span className="text-transparent bg-clip-text bg-gradient-to-r from-red-700 via-red-600 to-rose-700">Care</span>
             </h1>
             <div className="flex items-center gap-1.5 mt-1 sm:mt-1.5">
               <span className={`text-[10px] sm:text-xs font-mono font-extrabold px-3 py-0.5 rounded-full border tracking-wider uppercase shadow-xs ${
-                isDark ? 'bg-red-950/70 border-red-800/80 text-red-300' : 'bg-red-50 border-red-200 text-red-700'
+                isDark ? 'bg-red-950/80 border-red-900/90 text-red-300' : 'bg-red-50 border-red-200 text-red-800'
               }`}>
                 Caring for Lives
               </span>
@@ -269,57 +253,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                   Emergency triage for family members & bystanders. Instant ABHA history uplink, Sarvam AI voice diagnosis, and nearest bed lock.
                 </p>
               </div>
-
-              {/* Module Specs Grid */}
-              <div className={`space-y-2 pt-3 border-t text-[11px] font-mono ${isDark ? 'border-zinc-800/80' : 'border-slate-200/80'}`}>
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-red-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-red-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                    <span>[AI_TRIAGE]</span>
-                  </span>
-                  <span className={`font-bold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Sarvam Voice (Hindi / Eng)</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-red-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-red-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    <span>[BED_LOCK]</span>
-                  </span>
-                  <span className="text-emerald-500 font-extrabold">&lt;10ms Atomic Lock</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-red-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-red-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    <span>[ABHA_SYNC]</span>
-                  </span>
-                  <span className={`font-bold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Instant Health ID</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-red-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-red-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                    <span>[ROUTE]</span>
-                  </span>
-                  <span className={`font-bold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Priority ER Corridor</span>
-                </div>
-              </div>
             </div>
 
             {/* Terminal Action Button */}
@@ -407,57 +340,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                   Paramedic tactical navigation console. Turn-by-turn emergency routing, in-transit vital signs telemetry, and direct ER bay bypass.
                 </p>
               </div>
-
-              {/* Module Specs Grid */}
-              <div className={`space-y-2 pt-3 border-t text-[11px] font-mono ${isDark ? 'border-zinc-800/80' : 'border-slate-200/80'}`}>
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-amber-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-amber-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    <span>[CORRIDOR]</span>
-                  </span>
-                  <span className={`font-bold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Priority GPS Routing</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-amber-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-amber-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
-                    <span>[TELEMETRY]</span>
-                  </span>
-                  <span className="text-cyan-500 font-extrabold">Real-Time Vitals Stream</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-amber-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-amber-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    <span>[BAY_BYPASS]</span>
-                  </span>
-                  <span className="text-emerald-500 font-extrabold">Zero-Wait Gate Admission</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-amber-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-amber-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-                    <span>[VEHICLE_ID]</span>
-                  </span>
-                  <span className={`font-bold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>ACLS / BLS Verified</span>
-                </div>
-              </div>
             </div>
 
             {/* Terminal Action Button */}
@@ -544,57 +426,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
                 <p className={`text-xs mt-2 leading-relaxed font-medium ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
                   Emergency department command center. Real-time ICU/ventilator capacity, on-duty specialist doctor rosters, and pre-arrival telemetry.
                 </p>
-              </div>
-
-              {/* Module Specs Grid */}
-              <div className={`space-y-2 pt-3 border-t text-[11px] font-mono ${isDark ? 'border-zinc-800/80' : 'border-slate-200/80'}`}>
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-emerald-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-emerald-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    <span>[BED_MESH]</span>
-                  </span>
-                  <span className="text-emerald-500 font-extrabold">Live ICU / ER Capacity</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-emerald-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-emerald-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
-                    <span>[DOCTOR_GRID]</span>
-                  </span>
-                  <span className={`font-bold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>On-Duty Specialist Roster</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-emerald-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-emerald-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
-                    <span>[EQUIPMENT]</span>
-                  </span>
-                  <span className={`font-bold ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>Life-Support Machinery</span>
-                </div>
-
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-zinc-900/60 border-zinc-800/80 hover:border-emerald-500/40'
-                    : 'bg-white/90 border-slate-200 hover:border-emerald-300 shadow-2xs'
-                }`}>
-                  <span className={`flex items-center gap-1.5 font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    <span>[PRE_ALERT]</span>
-                  </span>
-                  <span className="text-cyan-500 font-extrabold">Incoming Telemetry Feed</span>
-                </div>
               </div>
             </div>
 

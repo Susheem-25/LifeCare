@@ -221,26 +221,22 @@
 
 @keyframes strokeRunner {
   0% {
-    stroke-dashoffset: 800;
+    stroke-dashoffset: 1200;
   }
   100% {
     stroke-dashoffset: 0;
   }
 }
 
-.hero-heart-contour {
-  animation: heartPulseGlow 1.8s ease-in-out infinite;
-}
-
 .hero-pulse-runner {
-  stroke-dasharray: 120 680;
-  animation: strokeRunner 2.4s linear infinite;
+  stroke-dasharray: 140 1060;
+  animation: strokeRunner 2.5s linear infinite;
 }
 
 .hero-pulse-runner-offset {
-  stroke-dasharray: 120 680;
-  animation: strokeRunner 2.4s linear infinite;
-  animation-delay: -1.2s;
+  stroke-dasharray: 140 1060;
+  animation: strokeRunner 2.5s linear infinite;
+  animation-delay: -1.25s;
 }
 
 .ecg-line-left {

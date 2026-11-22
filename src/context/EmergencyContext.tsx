@@ -619,7 +619,19 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         allBookings: newBookings,
         hospitals: newHosp || hospitals,
         admissionNotice: newAdmission,
+        newReservationHospitalId: newActive?.hospitalId,
+        newReservationPatientName: newActive?.patientName,
+        newReservationCode: newActive?.bookingCode,
       });
+      if (newActive) {
+        channel.postMessage({
+          type: 'NEW_EMERGENCY_RESERVATION',
+          hospitalId: newActive.hospitalId,
+          patientName: newActive.patientName,
+          bookingCode: newActive.bookingCode,
+          timestamp: Date.now(),
+        });
+      }
       channel.close();
     } catch {
       // fallback

@@ -1,22 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useEmergency } from '../../context/EmergencyContext';
 import { sanitizeText } from '../../utils/security';
+import { soundEffects } from '../../utils/audio';
 import type { Doctor, Equipment, Hospital } from '../../types';
-import { 
-  Building2, 
-  Bed, 
-  Stethoscope, 
-  Activity, 
-  Clock, 
-  CheckCircle2, 
-  Plus, 
-  Minus, 
-  Trash2, 
-  LogOut, 
-  UserCheck, 
-  UserPlus, 
-  Cpu, 
-  Zap, 
+import {
+  Building2,
+  Bed,
+  Stethoscope,
+  Activity,
+  Clock,
+  CheckCircle2,
+  Plus,
+  Minus,
+  Trash2,
+  LogOut,
+  UserCheck,
+  UserPlus,
+  Cpu,
+  Zap,
   X,
   QrCode,
   Radio,
@@ -24,7 +25,9 @@ import {
   Loader2,
   ShieldCheck,
   Phone,
-  Pencil
+  Pencil,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { ReceptionQrScannerModal } from './ReceptionQrScannerModal';
 
@@ -50,11 +53,11 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
 );
 
 export const HospitalPortal: React.FC = () => {
-  const { 
-    loggedHospital, 
-    logoutHospital, 
-    allBookings, 
-    updateHospitalBeds, 
+  const {
+    loggedHospital,
+    logoutHospital,
+    allBookings,
+    updateHospitalBeds,
     updateDoctorStatus,
     updateDoctorDetails,
     addDoctor,
@@ -291,6 +294,98 @@ export const HospitalPortal: React.FC = () => {
   const dischargedPatients = hospitalBookings.filter(
     (b) => b.status === 'DISCHARGED'
   );
+
+  // 15-Second Emergency Siren for Incoming Patient Reservation
+  const [sirenActive, setSirenActive] = useState<boolean>(false);
+  const [sirenCountdown, setSirenCountdown] = useState<number>(15);
+  const [sirenPatientNotice, setSirenPatientNotice] = useState<string | null>(null);
+  const previousIncomingCodesRef = useRef<Set<string>>(new Set());
+  const isFirstMountRef = useRef<boolean>(true);
+
+  // Trigger 15-second trauma siren
+  const triggerSirenAlert = (patientLabel: string) => {
+    setSirenPatientNotice(patientLabel);
+    setSirenActive(true);
+    setSirenCountdown(15);
+    soundEffects.playEmergencySiren(15);
+  };
+
+  const silenceSiren = () => {
+    soundEffects.stopEmergencySiren();
+    setSirenActive(false);
+  };
+
+  // 15-second countdown timer
+  useEffect(() => {
+    let interval: number;
+    if (sirenActive) {
+      interval = window.setInterval(() => {
+        setSirenCountdown((prev) => {
+          if (prev <= 1) {
+            setSirenActive(false);
+            soundEffects.stopEmergencySiren();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [sirenActive]);
+
+  // Listen to incoming patient list changes to trigger 15-second siren on new reservations
+  useEffect(() => {
+    if (!loggedHospital) return;
+
+    const currentCodes = new Set(incomingPatients.map((p) => p.bookingCode));
+
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      previousIncomingCodesRef.current = currentCodes;
+      return;
+    }
+
+    const newArrivals = incomingPatients.filter(
+      (p) => !previousIncomingCodesRef.current.has(p.bookingCode)
+    );
+
+    if (newArrivals.length > 0) {
+      const latest = newArrivals[0];
+      triggerSirenAlert(`${latest.patientName || 'Incoming Patient'} (${latest.bookingCode})`);
+    }
+
+    previousIncomingCodesRef.current = currentCodes;
+  }, [incomingPatients, loggedHospital]);
+
+  // BroadcastChannel listener for zero-latency cross-tab notification
+  useEffect(() => {
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel('lifecare_sync_channel');
+      channel.onmessage = (event) => {
+        if (!loggedHospital) return;
+        if (
+          event.data?.type === 'NEW_EMERGENCY_RESERVATION' &&
+          event.data.hospitalId === loggedHospital.id
+        ) {
+          triggerSirenAlert(
+            `${event.data.patientName || 'Incoming Patient'} (${event.data.bookingCode || 'RESERVED'})`
+          );
+        }
+      };
+    } catch {
+      // fallback
+    }
+
+    return () => {
+      try {
+        channel?.close();
+      } catch {
+        // ignore
+      }
+      soundEffects.stopEmergencySiren();
+    };
+  }, [loggedHospital]);
 
   // Handle Add Doctor Submit
   const handleAddDoctorSubmit = (e: React.FormEvent) => {
@@ -834,6 +929,41 @@ export const HospitalPortal: React.FC = () => {
         </div>
       )}
 
+      {/* 15-SECOND EMERGENCY SIREN ALERT BANNER */}
+      {sirenActive && (
+        <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-5 py-4 rounded-3xl shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-pulse ring-4 ring-red-500/40">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0">
+              <Volume2 className="w-6 h-6 text-white animate-bounce" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-mono font-black text-sm uppercase tracking-wider">
+                  🚨 ER TRAUMA SIREN SOUNDING ({sirenCountdown}s)
+                </span>
+                <span className="text-[10px] font-mono font-black bg-white text-red-700 px-2.5 py-0.5 rounded-full uppercase shadow-xs">
+                  15-Sec Trauma Alert
+                </span>
+              </div>
+              <p className="text-xs text-red-100 font-medium mt-0.5">
+                Incoming emergency patient reservation: <strong>{sirenPatientNotice || 'In-Transit Paramedic ICU'}</strong>. Immediate ER bay preparation initiated.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0 self-end sm:self-center">
+            <button
+              type="button"
+              onClick={silenceSiren}
+              className="px-4 py-2 bg-white text-red-700 hover:bg-red-50 text-xs font-mono font-black rounded-xl shadow-md cursor-pointer transition active:scale-95 flex items-center space-x-1.5"
+            >
+              <VolumeX className="w-4 h-4" />
+              <span>Silence Siren</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hospital Command Header */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center space-x-3.5">
@@ -861,6 +991,16 @@ export const HospitalPortal: React.FC = () => {
         <div className="flex items-center space-x-2 w-full md:w-auto justify-end">
           <button
             type="button"
+            onClick={() => triggerSirenAlert('Drill Simulation (LC-DRILL)')}
+            className="inline-flex items-center space-x-1.5 text-xs text-red-700 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 px-3.5 py-2 rounded-xl transition cursor-pointer font-bold shadow-2xs"
+            title="Simulate 15-Second Emergency Siren Sound"
+          >
+            <Volume2 className="w-3.5 h-3.5" />
+            <span>ER Siren Test (15s)</span>
+          </button>
+
+          <button
+            type="button"
             onClick={logoutHospital}
             className="inline-flex items-center space-x-1.5 text-xs text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-3.5 py-2 rounded-xl transition cursor-pointer font-bold"
           >
@@ -875,11 +1015,10 @@ export const HospitalPortal: React.FC = () => {
         <button
           type="button"
           onClick={() => setHospitalTab('patients')}
-          className={`flex-1 min-w-[140px] py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center space-x-2 ${
-            hospitalTab === 'patients'
+          className={`flex-1 min-w-[140px] py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center space-x-2 ${hospitalTab === 'patients'
               ? 'bg-emerald-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <UserCheck className="w-4 h-4" />
           <span>Patient Page ({hospitalBookings.length})</span>
@@ -888,11 +1027,10 @@ export const HospitalPortal: React.FC = () => {
         <button
           type="button"
           onClick={() => setHospitalTab('beds')}
-          className={`flex-1 min-w-[130px] py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center space-x-2 ${
-            hospitalTab === 'beds'
+          className={`flex-1 min-w-[130px] py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center space-x-2 ${hospitalTab === 'beds'
               ? 'bg-emerald-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <Bed className="w-4 h-4" />
           <span>Editable Beds</span>
@@ -901,11 +1039,10 @@ export const HospitalPortal: React.FC = () => {
         <button
           type="button"
           onClick={() => setHospitalTab('doctors')}
-          className={`flex-1 min-w-[140px] py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center space-x-2 ${
-            hospitalTab === 'doctors'
+          className={`flex-1 min-w-[140px] py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center space-x-2 ${hospitalTab === 'doctors'
               ? 'bg-emerald-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <Stethoscope className="w-4 h-4" />
           <span>Doctors List ({loggedHospital.doctors.length})</span>
@@ -914,11 +1051,10 @@ export const HospitalPortal: React.FC = () => {
         <button
           type="button"
           onClick={() => setHospitalTab('facilities')}
-          className={`flex-1 min-w-[140px] py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center space-x-2 ${
-            hospitalTab === 'facilities'
+          className={`flex-1 min-w-[140px] py-2.5 rounded-xl font-bold transition cursor-pointer flex items-center justify-center space-x-2 ${hospitalTab === 'facilities'
               ? 'bg-emerald-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <Cpu className="w-4 h-4" />
           <span>Facilities & Machines</span>
@@ -954,47 +1090,44 @@ export const HospitalPortal: React.FC = () => {
                 </button>
 
                 <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl text-xs">
-                <button
-                  type="button"
-                  onClick={() => setPatientSubTab('incoming')}
-                  className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center space-x-1.5 ${
-                    patientSubTab === 'incoming'
-                      ? 'bg-red-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Incoming ({incomingPatients.length})</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setPatientSubTab('incoming')}
+                    className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center space-x-1.5 ${patientSubTab === 'incoming'
+                        ? 'bg-red-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Incoming ({incomingPatients.length})</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setPatientSubTab('admitted')}
-                  className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center space-x-1.5 ${
-                    patientSubTab === 'admitted'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <Activity className="w-3.5 h-3.5" />
-                  <span>Admitted ({admittedPatients.length})</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setPatientSubTab('admitted')}
+                    className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center space-x-1.5 ${patientSubTab === 'admitted'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                  >
+                    <Activity className="w-3.5 h-3.5" />
+                    <span>Admitted ({admittedPatients.length})</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setPatientSubTab('discharged')}
-                  className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center space-x-1.5 ${
-                    patientSubTab === 'discharged'
-                      ? 'bg-slate-700 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Discharged ({dischargedPatients.length})</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setPatientSubTab('discharged')}
+                    className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer flex items-center space-x-1.5 ${patientSubTab === 'discharged'
+                        ? 'bg-slate-700 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Discharged ({dischargedPatients.length})</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
             {/* Sub-Tab 1: INCOMING PATIENTS */}
             {patientSubTab === 'incoming' && (
@@ -1500,11 +1633,10 @@ export const HospitalPortal: React.FC = () => {
                           updateDoctorStatus(loggedHospital.id, doctor.id, 'AVAILABLE_AND_FREE');
                           showToast(`${doctor.name} set to Free.`);
                         }}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer border ${
-                          statusInfo.normalized === 'Free'
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer border ${statusInfo.normalized === 'Free'
                             ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                             : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                        }`}
+                          }`}
                       >
                         Free
                       </button>
@@ -1515,11 +1647,10 @@ export const HospitalPortal: React.FC = () => {
                           updateDoctorStatus(loggedHospital.id, doctor.id, 'IN_SURGERY');
                           showToast(`${doctor.name} set to Busy.`);
                         }}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer border ${
-                          statusInfo.normalized === 'Busy'
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer border ${statusInfo.normalized === 'Busy'
                             ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
                             : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                        }`}
+                          }`}
                       >
                         Busy
                       </button>
@@ -1530,11 +1661,10 @@ export const HospitalPortal: React.FC = () => {
                           updateDoctorStatus(loggedHospital.id, doctor.id, 'OFF_DUTY');
                           showToast(`${doctor.name} set to Absent.`);
                         }}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer border ${
-                          statusInfo.normalized === 'Absent'
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer border ${statusInfo.normalized === 'Absent'
                             ? 'bg-slate-700 text-white border-slate-700 shadow-xs'
                             : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                        }`}
+                          }`}
                       >
                         Absent
                       </button>
@@ -1612,11 +1742,10 @@ export const HospitalPortal: React.FC = () => {
                         updateEquipmentStatus(loggedHospital.id, mach.id, 'READY_AND_STERILIZED');
                         showToast(`${mach.name} set to Ready.`);
                       }}
-                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition cursor-pointer border ${
-                        mach.status === 'READY_AND_STERILIZED'
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition cursor-pointer border ${mach.status === 'READY_AND_STERILIZED'
                           ? 'bg-emerald-600 text-white border-emerald-600'
                           : 'bg-white text-slate-600 border-slate-200'
-                      }`}
+                        }`}
                     >
                       Ready
                     </button>
@@ -1626,11 +1755,10 @@ export const HospitalPortal: React.FC = () => {
                         updateEquipmentStatus(loggedHospital.id, mach.id, 'IN_USE');
                         showToast(`${mach.name} set to In Use.`);
                       }}
-                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition cursor-pointer border ${
-                        mach.status === 'IN_USE'
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition cursor-pointer border ${mach.status === 'IN_USE'
                           ? 'bg-amber-600 text-white border-amber-600'
                           : 'bg-white text-slate-600 border-slate-200'
-                      }`}
+                        }`}
                     >
                       In Use
                     </button>
@@ -1640,11 +1768,10 @@ export const HospitalPortal: React.FC = () => {
                         updateEquipmentStatus(loggedHospital.id, mach.id, 'MAINTENANCE');
                         showToast(`${mach.name} set to Maintenance.`);
                       }}
-                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition cursor-pointer border ${
-                        mach.status === 'MAINTENANCE'
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition cursor-pointer border ${mach.status === 'MAINTENANCE'
                           ? 'bg-slate-700 text-white border-slate-700'
                           : 'bg-white text-slate-600 border-slate-200'
-                      }`}
+                        }`}
                     >
                       Maint.
                     </button>

@@ -30,36 +30,8 @@ export const Navbar: React.FC = () => {
     <header className={`sticky top-0 z-50 w-full backdrop-blur-2xl border-b transition-colors duration-300 ${isDarkTheme ? 'bg-[#060913]/90 border-zinc-800/80 text-white shadow-2xl' : 'bg-white/95 border-slate-200/80 text-slate-900 shadow-xs'}`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="min-h-14 sm:min-h-16 py-1.5 sm:py-2 flex items-center justify-between gap-1.5 sm:gap-2">
-          {/* Brand & Home Navigation with Left-to-Right ECG Pulse Waves */}
+          {/* Brand & Home Navigation (Header pulse removed per user request) */}
           <div className="flex items-center space-x-1 sm:space-x-2">
-            {/* Left Pulse Beam Animation (Flowing Left to Right) */}
-            <div className="hidden xs:flex items-center select-none pointer-events-none opacity-85 sm:opacity-100 shrink-0" title="Vital Signs Heartbeat Telemetry">
-              <svg className="w-9 sm:w-14 h-5 sm:h-6 overflow-visible" viewBox="0 0 60 20" fill="none">
-                <path
-                  d="M0 10 H16 L20 4 L25 16 L29 2 L35 18 L39 10 H60"
-                  stroke={isDarkTheme ? "rgba(239, 68, 68, 0.28)" : "rgba(239, 68, 68, 0.22)"}
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M0 10 H16 L20 4 L25 16 L29 2 L35 18 L39 10 H60"
-                  stroke="url(#pulse-gradient-left)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="ecg-line-left"
-                />
-                <defs>
-                  <linearGradient id="pulse-gradient-left" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#ef4444" stopOpacity="0.1" />
-                    <stop offset="50%" stopColor="#ef4444" stopOpacity="1" />
-                    <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.4" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-
             {/* LifeCare in Between */}
             <div
               onClick={() => {
@@ -91,34 +63,6 @@ export const Navbar: React.FC = () => {
                   </span>
                 </div>
               </div>
-            </div>
-
-            {/* Right Pulse Beam Animation (Flowing Left to Right) */}
-            <div className="hidden md:flex items-center select-none pointer-events-none opacity-85 sm:opacity-100 shrink-0" title="Vital Signs Heartbeat Telemetry">
-              <svg className="w-10 sm:w-16 h-5 sm:h-6 overflow-visible" viewBox="0 0 65 20" fill="none">
-                <path
-                  d="M0 10 H18 L22 15 L26 3 L31 18 L36 2 L41 12 L45 10 H65"
-                  stroke={isDarkTheme ? "rgba(239, 68, 68, 0.28)" : "rgba(239, 68, 68, 0.22)"}
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M0 10 H18 L22 15 L26 3 L31 18 L36 2 L41 12 L45 10 H65"
-                  stroke="url(#pulse-gradient-right)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="ecg-line-right"
-                />
-                <defs>
-                  <linearGradient id="pulse-gradient-right" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.3" />
-                    <stop offset="50%" stopColor="#ef4444" stopOpacity="1" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.4" />
-                  </linearGradient>
-                </defs>
-              </svg>
             </div>
           </div>
 
@@ -167,8 +111,8 @@ export const Navbar: React.FC = () => {
               type="button"
               onClick={toggleTheme}
               className={`p-1.5 sm:p-2 rounded-xl border transition-all cursor-pointer shadow-2xs flex items-center justify-center shrink-0 ${isDarkTheme
-                  ? 'bg-zinc-900/90 hover:bg-zinc-800 text-amber-400 border-zinc-800 hover:border-zinc-700'
-                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                ? 'bg-zinc-900/90 hover:bg-zinc-800 text-amber-400 border-zinc-800 hover:border-zinc-700'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
                 }`}
               title={`Switch to ${isDarkTheme ? 'Light' : 'Dark'} Mode`}
               aria-label="Toggle Theme"
@@ -271,10 +215,10 @@ export const Navbar: React.FC = () => {
 
                 <div
                   className={`px-3 py-1.5 rounded-lg text-white font-bold flex items-center space-x-1.5 shadow-xs ${currentRole === 'guardian'
-                      ? 'bg-red-600'
-                      : currentRole === 'driver'
-                        ? 'bg-amber-600'
-                        : 'bg-emerald-600'
+                    ? 'bg-red-600'
+                    : currentRole === 'driver'
+                      ? 'bg-amber-600'
+                      : 'bg-emerald-600'
                     }`}
                 >
                   {currentRole === 'guardian' && <HeartPulse className="w-3.5 h-3.5 text-white" />}
