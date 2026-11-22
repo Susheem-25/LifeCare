@@ -29,7 +29,8 @@ import {
   RefreshCw,
   AlertTriangle,
   Sun,
-  Moon
+  Moon,
+  ArrowLeft
 } from 'lucide-react';
 import type { Hospital, DriverAccount, EmergencyBooking } from '../../types';
 
@@ -372,14 +373,17 @@ export const AdminConsole: React.FC = () => {
               <span>{isAuthenticating ? 'Opening Google Sign-In...' : 'Continue with Google'}</span>
             </button>
 
-            <a
-              href="/"
-              className={`w-full text-xs font-medium py-2 block text-center transition ${
+            <button
+              type="button"
+              onClick={() => {
+                window.location.replace('/');
+              }}
+              className={`w-full text-xs font-medium py-2 block text-center transition cursor-pointer ${
                 isDark ? 'text-zinc-400 hover:text-zinc-200' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               ← Return to Citizen Public Grid
-            </a>
+            </button>
           </div>
 
           <div className={`pt-4 border-t text-center ${isDark ? 'border-zinc-800/80 text-zinc-500' : 'border-slate-200 text-slate-400'}`}>
@@ -452,6 +456,22 @@ export const AdminConsole: React.FC = () => {
               <Moon className="w-3.5 h-3.5 text-slate-500" />
             )}
             <span className="hidden sm:inline">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              window.location.replace('/');
+            }}
+            className={`inline-flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-xl transition cursor-pointer border ${
+              isDark
+                ? 'text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border-zinc-800'
+                : 'text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
+            }`}
+            title="Return to Main LifeCare Website"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Exit Admin</span>
           </button>
 
           <button
