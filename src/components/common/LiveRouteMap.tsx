@@ -15,6 +15,7 @@ import {
   Zap
 } from 'lucide-react';
 import { getGoogleMapsNavigationUrl } from '../../services/sarvamAiService';
+import { reverseGeocodeCoordinates } from '../../services/locationService';
 
 interface LiveRouteMapProps {
   origin?: { lat: number; lng: number; address?: string };
@@ -31,14 +32,13 @@ interface LiveRouteMapProps {
   emergencyBrief?: string;
 }
 
-// Localized arterial street waypoints in Delhi NCR for real-time ambulance transit progression
-const TRANSIT_LANDMARKS = [
-  'B-44, Greater Kailash Part 1, South Delhi (Pickup Point)',
-  'Passing Chirag Dilli Flyover, Outer Ring Road Corridor',
-  'Lala Lajpat Rai Marg, Moolchand Underpass Intersection',
-  'Ring Road, South Extension Part 2 Flyover (Sirens Active)',
-  'Approaching Hospital Perimeter Gate',
-  'Hospital Emergency Trauma Bay (Arrived)'
+// Dynamic arterial transit progression generator
+const getTransitWaypoints = (originAddr: string, destName: string, bayName?: string) => [
+  `Patient Pickup Point: ${originAddr || 'Live Real-Time GPS'}`,
+  `Ambulance Dispatched & Green Emergency Corridor Active`,
+  `In-Transit toward ${destName} (Real-time Vitals & Telemetry Streaming)`,
+  `Approaching ${destName} Emergency Trauma Intake Gate`,
+  `Arrived at ${destName} — ${bayName || 'Trauma Bay #03'}`
 ];
 
 export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
@@ -55,13 +55,14 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
   initialDistanceKm = 4.2,
   speedKmh = 50,
   vehicleNumber = '108 Ambulance Unit',
-  isDriverView = false,
+  isDriverView: _isDriverView = false,
   isHospitalView = false,
   driverName = '108 Paramedic Lead',
   driverPhone = '108 National Grid',
   emergencyBrief = 'Active Emergency Dispatch',
 }) => {
   const [currentOrigin, setCurrentOrigin] = useState(origin);
+  const [ambulanceCoords, setAmbulanceCoords] = useState({ lat: origin.lat, lng: origin.lng });
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [gpsNotice, setGpsNotice] = useState<string>('');
@@ -70,11 +71,18 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
   const [liveSpeed, setLiveSpeed] = useState<number>(speedKmh);
   const [progressStep, setProgressStep] = useState<number>(0);
 
+  const transitWaypoints = getTransitWaypoints(
+    currentOrigin.address || origin.address || 'Real-time GPS',
+    destination.name || 'Hospital ER',
+    destination.bay
+  );
+
   // Synchronize state when origin prop changes without triggering cascading renders
   const [prevOrigin, setPrevOrigin] = useState(origin);
   if (prevOrigin.lat !== origin.lat || prevOrigin.lng !== origin.lng || prevOrigin.address !== origin.address) {
     setPrevOrigin(origin);
     setCurrentOrigin(origin);
+    setAmbulanceCoords({ lat: origin.lat, lng: origin.lng });
     setEtaMins(initialEtaMins);
     setDistanceKm(initialDistanceKm);
     setLiveSpeed(speedKmh);
@@ -85,19 +93,14 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
   useEffect(() => {
     const timer = setInterval(() => {
       setProgressStep((prev) => {
-        const next = (prev + 1) % TRANSIT_LANDMARKS.length;
-        const progressFraction = (next + 1) / TRANSIT_LANDMARKS.length;
+        const next = (prev + 1) % 5;
+        const progressFraction = (next + 1) / 5;
 
         // Interpolate live coordinates along the arterial route from origin to destination
         const lat = origin.lat + (destination.lat - origin.lat) * (progressFraction * 0.85);
         const lng = origin.lng + (destination.lng - origin.lng) * (progressFraction * 0.85);
 
-        const currentStreetAddress = TRANSIT_LANDMARKS[next] || origin.address || 'En Route to Hospital ER';
-        setCurrentOrigin({
-          lat,
-          lng,
-          address: currentStreetAddress,
-        });
+        setAmbulanceCoords({ lat, lng });
 
         // Countdown distance & ETA smoothly
         const remainingDist = Math.max(0.3, Math.round((initialDistanceKm * (1 - progressFraction * 0.85)) * 10) / 10);
@@ -114,15 +117,15 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
     }, 3500);
 
     return () => clearInterval(timer);
-  }, [origin.lat, origin.lng, origin.address, destination.lat, destination.lng, initialDistanceKm, initialEtaMins, speedKmh]);
+  }, [origin.lat, origin.lng, destination.lat, destination.lng, initialDistanceKm, initialEtaMins, speedKmh]);
 
-  // Primary Google Maps route navigation URL: strictly from AMBULANCE coordinates to HOSPITAL ER coordinates
+  // Primary Google Maps route navigation URL: strictly from REAL PATIENT ORIGIN to HOSPITAL ER
   const fullNavigationUrl = getGoogleMapsNavigationUrl(
     { lat: currentOrigin.lat, lng: currentOrigin.lng },
     { lat: destination.lat, lng: destination.lng }
   );
 
-  // Manual GPS detection for Driver Cockpit ONLY (never run automatically for hospital staff)
+  // Real-time device GPS detection & reverse geocoding with 1-click update
   const handleDetectLiveGps = () => {
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
       setGpsNotice('Geolocation is not supported by your browser.');
@@ -133,13 +136,21 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
     setGpsNotice('');
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const { latitude, longitude } = pos.coords;
+        let addr = `Live GPS Position (${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E)`;
+        try {
+          addr = await reverseGeocodeCoordinates(latitude, longitude);
+        } catch {
+          // fallback
+        }
+
         setCurrentOrigin({
           lat: latitude,
           lng: longitude,
-          address: `Driver Live Position (${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E)`,
+          address: addr,
         });
+        setAmbulanceCoords({ lat: latitude, lng: longitude });
 
         const R = 6371;
         const dLat = ((destination.lat - latitude) * Math.PI) / 180;
@@ -157,15 +168,15 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
         setDistanceKm(dist);
         setEtaMins(calcEta);
         setIsLocating(false);
-        setGpsNotice('Driver live GPS updated!');
-        setTimeout(() => setGpsNotice(''), 3500);
+        setGpsNotice(`Realtime GPS verified: ${addr}`);
+        setTimeout(() => setGpsNotice(''), 4500);
       },
       (err) => {
         setIsLocating(false);
-        setGpsNotice(`Could not retrieve device location (${err.message}). Route remaining on ambulance telemetry.`);
+        setGpsNotice(`Location access not granted (${err.message}). Showing registered route.`);
         setTimeout(() => setGpsNotice(''), 4000);
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -232,47 +243,41 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
 
       {/* Origin & Destination Route Box */}
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4">
-        {/* Field 1: Current Ambulance Real-Time Street Address (Origin) */}
+        {/* Field 1: Patient Real-Time Pickup Origin */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-slate-800 flex items-center space-x-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
               <span className="uppercase text-[11px] font-mono tracking-wider">
-                {isHospitalView ? 'Current Ambulance Address (In-Transit):' : 'Current Location (Origin):'}
+                {isHospitalView ? 'Patient Pickup Origin (Inbound Telemetry):' : 'Verified Pickup Origin (Real-Time GPS):'}
               </span>
             </span>
 
-            {/* In Driver view, allow manual device GPS sync; for Hospital view, show live telemetry badge */}
-            {isDriverView && !isHospitalView ? (
-              <button
-                type="button"
-                onClick={handleDetectLiveGps}
-                disabled={isLocating}
-                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center space-x-1 cursor-pointer disabled:opacity-50"
-              >
-                <LocateFixed className="w-3 h-3 text-blue-600" />
-                <span>{isLocating ? 'Detecting GPS...' : 'Use Device Live GPS'}</span>
-              </button>
-            ) : (
-              <span className="text-[10px] font-mono font-bold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded">
-                Live GPS Telemetry Active
-              </span>
-            )}
+            <button
+              type="button"
+              onClick={handleDetectLiveGps}
+              disabled={isLocating}
+              className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center space-x-1 cursor-pointer disabled:opacity-50"
+              title="Detect or refresh your real-time GPS location"
+            >
+              <LocateFixed className="w-3 h-3 text-blue-600" />
+              <span>{isLocating ? 'Detecting GPS...' : 'Refresh Live GPS'}</span>
+            </button>
           </div>
 
           <div className="bg-white border-2 border-red-200 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs shadow-2xs">
             <div className="flex items-center space-x-3 min-w-0">
               <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-                <Ambulance className="w-4 h-4 text-red-600 animate-pulse" />
+                <LocateFixed className="w-4 h-4 text-red-600 animate-pulse" />
               </div>
               <div className="truncate">
                 <div className="font-extrabold text-slate-900 truncate text-sm">
-                  {currentOrigin.address || 'In Transit toward Hospital ER'}
+                  {currentOrigin.address || origin.address || 'Real-Time Device GPS Location'}
                 </div>
                 <div className="text-[11px] font-mono text-slate-500 mt-0.5">
                   Live Coordinates: <strong className="text-slate-700">{currentOrigin.lat.toFixed(4)}° N, {currentOrigin.lng.toFixed(4)}° E</strong>
                   <span className="mx-1 text-slate-300">•</span>
-                  Telemetry Speed: <strong className="text-red-700">{liveSpeed} km/h</strong>
+                  Status: <strong className="text-emerald-700">Realtime GPS Active</strong>
                 </div>
                 {emergencyBrief && (
                   <div className="text-[10px] font-semibold text-rose-700 mt-0.5 truncate">
@@ -283,30 +288,30 @@ export const LiveRouteMap: React.FC<LiveRouteMapProps> = ({
             </div>
             <div className="text-right shrink-0">
               <span className="text-[10px] font-mono bg-red-600 text-white px-2 py-0.5 rounded-full font-bold block mb-1">
-                AMBULANCE
+                PICKUP POINT
               </span>
               <span className="text-[10px] font-mono text-slate-500 block font-bold">
-                {vehicleNumber}
+                {patientId || 'VERIFIED ORIGIN'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Route Transit Divider with Live Progress Bar */}
+        {/* Route Transit Divider with Live Progress Bar & Telemetry Status */}
         <div className="space-y-1.5 py-1">
           <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 px-1">
             <span className="flex items-center gap-1 font-bold text-slate-700">
-              <Ambulance className="w-3.5 h-3.5 text-red-600" />
-              <span>Arterial Transit Corridor: {liveSpeed} km/h</span>
+              <Ambulance className="w-3.5 h-3.5 text-red-600 animate-pulse" />
+              <span>{transitWaypoints[progressStep] || 'In-Transit along Priority Corridor'}</span>
             </span>
             <span className="text-emerald-700 font-bold">
-              Green Corridor Open &bull; Zero Congestion
+              GPS: {ambulanceCoords.lat.toFixed(4)}° N, {ambulanceCoords.lng.toFixed(4)}° E &bull; {liveSpeed} km/h
             </span>
           </div>
           <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
             <div 
               className="bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500 h-full rounded-full transition-all duration-700"
-              style={{ width: `${Math.min(96, Math.max(12, ((progressStep + 1) / TRANSIT_LANDMARKS.length) * 100))}%` }}
+              style={{ width: `${Math.min(96, Math.max(15, ((progressStep + 1) / transitWaypoints.length) * 100))}%` }}
             ></div>
           </div>
         </div>

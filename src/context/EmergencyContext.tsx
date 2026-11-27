@@ -21,6 +21,13 @@ import {
   fetchHospitalProfileByOwner
 } from '../services/firebase';
 import { generateSessionKey, encryptMedicalRecord } from '../services/cryptoService';
+import {
+  getDeviceRealtimeCoordinates,
+  reverseGeocodeCoordinates,
+  calculateHaversineDistanceKm,
+  calculateTransitTimeMins,
+  RealtimeLocation
+} from '../services/locationService';
 
 export type AppView = 'patient' | 'ambulance' | 'hospital';
 
@@ -57,7 +64,7 @@ interface EmergencyContextType {
   loginDriver: (driverId: string, pin: string) => boolean;
   logoutDriver: () => void;
   searchEmergency: (brief: string) => AITriageAnalysis;
-  bookHospitalBed: (hospitalId: string, patientName?: string, patientPhone?: string, abhaRecord?: ABHAMedicalRecord | null) => EmergencyBooking;
+  bookHospitalBed: (hospitalId: string, patientName?: string, patientPhone?: string, abhaRecord?: ABHAMedicalRecord | null, customPickupCoords?: { lat: number; lng: number; address: string }) => EmergencyBooking;
   loginAmbulanceDriver: (bookingCode: string) => boolean;
   linkAmbulanceToBooking: (bookingCode: string, driver?: DriverAccount) => EmergencyBooking | undefined;
   getBookingByCode: (code: string) => EmergencyBooking | undefined;
@@ -79,8 +86,10 @@ interface EmergencyContextType {
   setPatientStatus: (bookingCode: string, status: EmergencyBooking['status']) => void;
   admissionNotice: AdmissionNotification | null;
   dismissAdmissionNotice: () => void;
-  userLocation: { lat: number; lng: number; address: string; isLiveGps: boolean };
-  requestLiveLocation: () => void;
+  userLocation: RealtimeLocation;
+  isRequestingLocation: boolean;
+  locationPermissionDenied: boolean;
+  requestLiveLocation: (forcePrompt?: boolean) => Promise<RealtimeLocation | null>;
   resetEmergencyState: () => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
@@ -303,35 +312,22 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, []);
 
-  // Real-time live user GPS location (automatically requested on app start)
-  const [userLocation, setUserLocation] = useState<{
-    lat: number;
-    lng: number;
-    address: string;
-    isLiveGps: boolean;
-  }>({
+  // Real-time live user GPS location state
+  const [userLocation, setUserLocation] = useState<RealtimeLocation>({
     lat: 28.5420,
     lng: 77.2350,
-    address: 'Greater Kailash Part 1, New Delhi',
+    address: 'Location Access Not Granted Yet (Tap Allow Location)',
     isLiveGps: false,
   });
+  const [isRequestingLocation, setIsRequestingLocation] = useState<boolean>(false);
+  const [locationPermissionDenied, setLocationPermissionDenied] = useState<boolean>(false);
 
   // Automatically recalculate distances from live user coordinates to all hospitals
   const recalculateHospitalDistances = (lat: number, lng: number) => {
     setHospitals((prev) => {
       const updated = prev.map((h) => {
-        const R = 6371; // km
-        const dLat = ((h.latitude - lat) * Math.PI) / 180;
-        const dLng = ((h.longitude - lng) * Math.PI) / 180;
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos((lat * Math.PI) / 180) *
-            Math.cos((h.latitude * Math.PI) / 180) *
-            Math.sin(dLng / 2) *
-            Math.sin(dLng / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distanceKm = Math.max(0.5, Math.round(R * c * 1.35 * 10) / 10);
-        const transitTimeMins = Math.max(2, Math.round((distanceKm / 40) * 60));
+        const distanceKm = calculateHaversineDistanceKm(lat, lng, h.latitude, h.longitude);
+        const transitTimeMins = calculateTransitTimeMins(distanceKm, 45);
         return {
           ...h,
           distanceKm,
@@ -347,33 +343,83 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
   };
 
-  // Request browser/device location access immediately
-  const requestLiveLocation = () => {
-    if (typeof window !== 'undefined' && 'navigator' in window && 'geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setUserLocation({
-            lat: latitude,
-            lng: longitude,
-            address: `Current Live Location (${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E)`,
-            isLiveGps: true,
-          });
-          recalculateHospitalDistances(latitude, longitude);
-        },
-        (err) => {
-          console.warn('Geolocation access not granted or unavailable:', err.message);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-      );
+  // Request browser/device location access with user permission
+  const requestLiveLocation = async (forcePrompt = false): Promise<RealtimeLocation | null> => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      return null;
+    }
+    setIsRequestingLocation(true);
+    setLocationPermissionDenied(false);
+
+    try {
+      const pos = await getDeviceRealtimeCoordinates();
+      const { latitude, longitude } = pos.coords;
+      const addr = await reverseGeocodeCoordinates(latitude, longitude);
+
+      const loc: RealtimeLocation = {
+        lat: latitude,
+        lng: longitude,
+        address: addr,
+        isLiveGps: true,
+        accuracyMeters: pos.coords.accuracy,
+      };
+
+      setUserLocation(loc);
+      recalculateHospitalDistances(latitude, longitude);
+      setIsRequestingLocation(false);
+      return loc;
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      if (forcePrompt) {
+        console.warn('Geolocation permission not granted:', errMsg);
+      }
+      setIsRequestingLocation(false);
+      setLocationPermissionDenied(true);
+      return null;
     }
   };
 
-  // Automatically ask for location access as soon as application mounts
+  // Proactively check existing permission status or request location on mount
   useEffect(() => {
-    requestLiveLocation();
+    if (typeof window !== 'undefined' && 'navigator' in window && 'geolocation' in navigator) {
+      if ('permissions' in navigator) {
+        navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+          if (status.state === 'granted') {
+            requestLiveLocation(false);
+          } else if (status.state === 'denied') {
+            setLocationPermissionDenied(true);
+          }
+        }).catch(() => {
+          // fallback
+        });
+      }
+    }
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Continuous background position watcher when live GPS is active
+  useEffect(() => {
+    let watchId: number | null = null;
+    if (typeof window !== 'undefined' && 'navigator' in window && 'geolocation' in navigator && userLocation.isLiveGps) {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setUserLocation((prev) => ({
+            ...prev,
+            lat: latitude,
+            lng: longitude,
+            isLiveGps: true,
+            accuracyMeters: pos.coords.accuracy,
+          }));
+        },
+        () => {},
+        { enableHighAccuracy: true, maximumAge: 5000 }
+      );
+    }
+    return () => {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [userLocation.isLiveGps]);
 
   const navigateToTrack = (track: 'neo4j' | 'sarvam' | 'arduino' | 'general') => {
     if (track === 'neo4j') {
@@ -841,7 +887,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     hospitalId: string,
     patientName?: string,
     patientPhone?: string,
-    abhaRecord?: ABHAMedicalRecord | null
+    abhaRecord?: ABHAMedicalRecord | null,
+    customPickupCoords?: { lat: number; lng: number; address: string }
   ): EmergencyBooking => {
     const hosp = hospitals.find((h) => h.id === hospitalId) || hospitals[0];
     const triage = currentTriage || analyzeEmergencyBrief('Acute Chest Pain Emergency');
@@ -868,6 +915,12 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const phoneToUse = patientPhone || 'PROTECTED (ZERO PII)';
     const assignedDriver = availableDrivers.length > 0 ? availableDrivers[0] : null;
 
+    const pickupLocation = customPickupCoords || {
+      lat: userLocation.lat,
+      lng: userLocation.lng,
+      address: userLocation.address,
+    };
+
     const newBooking: EmergencyBooking = {
       patientUniqueId,
       bookingCode,
@@ -884,9 +937,9 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         lng: hosp.longitude,
       },
       patientPickupCoords: {
-        lat: userLocation.lat,
-        lng: userLocation.lng,
-        address: userLocation.address,
+        lat: pickupLocation.lat,
+        lng: pickupLocation.lng,
+        address: pickupLocation.address,
       },
       assignedDoctor: freeDoctor,
       reservedBay: 'Trauma Bay #03 (Cath Lab 2)',
@@ -1589,6 +1642,8 @@ export const EmergencyProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         admissionNotice,
         dismissAdmissionNotice,
         userLocation,
+        isRequestingLocation,
+        locationPermissionDenied,
         requestLiveLocation,
         resetEmergencyState,
         theme,

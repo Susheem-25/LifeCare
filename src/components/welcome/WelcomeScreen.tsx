@@ -41,7 +41,15 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) => {
-  const { hospitals, currentUser, loginWithGoogle, searchEmergency, theme } = useEmergency();
+  const {
+    hospitals,
+    currentUser,
+    loginWithGoogle,
+    searchEmergency,
+    theme,
+    userLocation,
+    requestLiveLocation
+  } = useEmergency();
   const [authenticatingRole, setAuthenticatingRole] = useState<AppRole | null>(null);
   const [authError, setAuthError] = useState<string>('');
 
@@ -66,8 +74,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
     };
   }, []);
 
-  // Directly bypasses guardian authentication and immediately shows results
+  // Directly bypasses guardian authentication and immediately shows results with realtime location
   const handleEmergencySearch = (query: string) => {
+    if (!userLocation.isLiveGps) {
+      requestLiveLocation(true);
+    }
     const clean = query.trim();
     if (!clean) {
       searchEmergency('Acute Emergency Triage');
@@ -257,6 +268,31 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole }) =>
             </button>
           </div>
         </form>
+
+        {/* Real-time Location Telemetry Strip */}
+        <div className="flex items-center justify-between px-2 text-[11px] font-mono">
+          <div className="flex items-center space-x-1.5 truncate">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${userLocation.isLiveGps ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+            <span className={`truncate ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+              {userLocation.isLiveGps ? (
+                <>Live GPS: <strong className={isDark ? 'text-emerald-400' : 'text-emerald-700'}>{userLocation.address}</strong></>
+              ) : (
+                <>Origin: <span className="italic">Live GPS not linked yet</span></>
+              )}
+            </span>
+          </div>
+          {!userLocation.isLiveGps && (
+            <button
+              type="button"
+              onClick={() => requestLiveLocation(true)}
+              className={`shrink-0 font-bold underline transition cursor-pointer text-[10px] uppercase ml-2 ${
+                isDark ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'
+              }`}
+            >
+              Enable Live GPS
+            </button>
+          )}
+        </div>
 
         {/* Live Audio Visualizer Banner (When Voice SOS is active) */}
         {isListening && (
